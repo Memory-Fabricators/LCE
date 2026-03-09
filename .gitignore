@@ -1,0 +1,4 @@
+/build
+/buck-out
+.cache/
+.DS_Store

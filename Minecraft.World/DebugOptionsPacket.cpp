@@ -1,0 +1,40 @@
+#include "DebugOptionsPacket.h"
+#include "InputOutputStream.h"
+#include "PacketListener.h"
+#include "net.minecraft.world.item.h"
+#include "stdafx.h"
+#include <iostream>
+
+DebugOptionsPacket::~DebugOptionsPacket()
+{
+}
+
+DebugOptionsPacket::DebugOptionsPacket()
+{
+    m_uiVal = 0L;
+}
+
+DebugOptionsPacket::DebugOptionsPacket(unsigned int uiVal)
+{
+    this->m_uiVal = uiVal;
+}
+
+void DebugOptionsPacket::handle(PacketListener *listener)
+{
+    listener->handleDebugOptions(shared_from_this());
+}
+
+void DebugOptionsPacket::read(DataInputStream *dis) // throws IOException
+{
+    m_uiVal = (unsigned int)dis->readInt();
+}
+
+void DebugOptionsPacket::write(DataOutputStream *dos) // throws IOException
+{
+    dos->writeInt((int)m_uiVal);
+}
+
+int DebugOptionsPacket::getEstimatedSize()
+{
+    return sizeof(int);
+}

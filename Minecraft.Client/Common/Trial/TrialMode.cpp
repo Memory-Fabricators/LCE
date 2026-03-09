@@ -1,0 +1,9 @@
+#include "TrialMode.h"
+#include "..\Tutorial\FullTutorial.h"
+#include "stdafx.h"
+
+TrialMode::TrialMode(int iPad, Minecraft *minecraft, ClientConnection *connection)
+    : FullTutorialMode(iPad, minecraft, connection)
+{
+    tutorial = new FullTutorial(iPad, true);
+}
