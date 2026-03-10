@@ -1,8 +1,10 @@
 #pragma once
-using namespace std;
 
+#include <print>
 #include "GenericStats.h"
+#include "LocalPlayer.h"
 #include "StatFormatter.h"
+#include <span>
 
 class DecimalFormat;
 
@@ -10,7 +12,7 @@ class Stat
 {
   public:
     const int id;
-    const wstring name;
+    const std::wstring name;
     bool awardLocallyOnly;
 
   private:
@@ -18,13 +20,13 @@ class Stat
     void _init();
 
   public:
-    Stat(int id, const wstring &name, StatFormatter *formatter);
-    Stat(int id, const wstring &name);
+    Stat(int id, const std::wstring &name, StatFormatter *formatter);
+    Stat(int id, const std::wstring &name);
     Stat *setAwardLocallyOnly();
 
     virtual Stat *postConstruct();
     virtual bool isAchievement();
-    wstring format(int value);
+    std::wstring format(int value);
 
   private:
     // static NumberFormat *numberFormat;
@@ -33,7 +35,7 @@ class Stat
     class DefaultFormat : public StatFormatter
     {
       public:
-        wstring format(int value);
+        std::wstring format(int value);
     } static *defaultFormatter;
 
   private:
@@ -43,22 +45,22 @@ class Stat
     class TimeFormatter : public StatFormatter
     {
       public:
-        wstring format(int value);
+        std::wstring format(int value);
     } static *timeFormatter;
 
     class DistanceFormatter : public StatFormatter
     {
       public:
-        wstring format(int cm);
+        std::wstring format(int cm);
     } static *distanceFormatter;
 
-    wstring toString();
+    std::wstring toString();
 
   public:
     // 4J-JEV, for Durango stats
-    virtual void handleParamBlob(shared_ptr<LocalPlayer> plr, byteArray param)
+    virtual void handleParamBlob(std::shared_ptr<LocalPlayer> plr, std::span<std::byte> param)
     {
-        app.DebugPrintf("'Stat.h', Unhandled AwardStat blob.\n");
+        std::println("'Stat.h', Unhandled AwardStat blob.");
         return;
     }
 };

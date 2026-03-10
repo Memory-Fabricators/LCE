@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "..\..\MultiPlayerGameMode.h"
 #include "Tutorial.h"

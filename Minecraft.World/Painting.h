@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "Entity.h"
 #include "HangingEntity.h"
@@ -75,7 +75,9 @@ class Painting : public HangingEntity
         const int uo, vo;
 
         // private:
-        Motive(wstring name, int w, int h, int uo, int vo) : name(name), w(w), h(h), uo(uo), vo(vo) {};
+        Motive(wstring name, int w, int h, int uo, int vo) : name(name), w(w), h(h), uo(uo), vo(vo)
+        {
+        }
     };
 
   public:

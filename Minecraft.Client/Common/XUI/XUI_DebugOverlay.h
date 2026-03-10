@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "../media/xuiscene_debugoverlay.h"
 
 #define DEBUG_OVERLAY_UPDATE_TIME_PERIOD 10000

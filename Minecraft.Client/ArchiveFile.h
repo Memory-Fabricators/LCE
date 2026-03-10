@@ -6,8 +6,6 @@
 #include "..\Minecraft.World\ArrayWithLength.h"
 #include "..\Minecraft.World\File.h"
 
-using namespace std;
-
 class ArchiveFile
 {
   protected:

@@ -1,6 +1,6 @@
 #pragma once
-using namespace std;
 
+#include "Common/App_enums.h"
 #include "LevelSource.h"
 #include "Mob.h"
 #include "WeighedRandom.h"
@@ -51,10 +51,10 @@ class Biome
     static const int BIOME_COUNT = 23; // 4J Stu added
 
   public:
-    wstring m_name;
+    std::wstring m_name;
     int color;
-    byte topMaterial;
-    byte material;
+    std::byte topMaterial;
+    std::byte material;
     int leafColor;
     float depth;
     float scale;
@@ -82,13 +82,13 @@ class Biome
     };
 
   protected:
-    vector<MobSpawnerData *> enemies;
-    vector<MobSpawnerData *> friendlies;
-    vector<MobSpawnerData *> waterFriendlies;
-    vector<MobSpawnerData *> friendlies_chicken;
-    vector<MobSpawnerData *> friendlies_wolf;
-    vector<MobSpawnerData *> friendlies_mushroomcow;
-    vector<MobSpawnerData *> ambientFriendlies;
+    std::vector<MobSpawnerData *> enemies;
+    std::vector<MobSpawnerData *> friendlies;
+    std::vector<MobSpawnerData *> waterFriendlies;
+    std::vector<MobSpawnerData *> friendlies_chicken;
+    std::vector<MobSpawnerData *> friendlies_wolf;
+    std::vector<MobSpawnerData *> friendlies_mushroomcow;
+    std::vector<MobSpawnerData *> ambientFriendlies;
 
     Biome(int id);
     ~Biome();
@@ -103,10 +103,10 @@ class Biome
     bool _hasRain;
 
     // 4J Added
-    eMinecraftColour m_grassColor;
-    eMinecraftColour m_foliageColor;
-    eMinecraftColour m_waterColor;
-    eMinecraftColour m_skyColor;
+    MinecraftColor m_grassColor;
+    MinecraftColor m_foliageColor;
+    MinecraftColor m_waterColor;
+    MinecraftColor m_skyColor;
 
     Biome *setNoRain();
 
@@ -124,17 +124,17 @@ class Biome
 
   protected:
     Biome *setSnowCovered();
-    Biome *setName(const wstring &name);
+    Biome *setName(const std::wstring &name);
     Biome *setLeafColor(int leafColor);
     Biome *setColor(int color);
 
     // 4J Added
-    Biome *setLeafFoliageWaterSkyColor(eMinecraftColour grassColor, eMinecraftColour foliageColor, eMinecraftColour waterColour, eMinecraftColour skyColour);
+    Biome *setLeafFoliageWaterSkyColor(MinecraftColor grassColor, MinecraftColor foliageColor, MinecraftColor waterColour, MinecraftColor skyColour);
 
   public:
     virtual int getSkyColor(float temp);
 
-    vector<MobSpawnerData *> *getMobs(MobCategory *category);
+    std::vector<MobSpawnerData *> *getMobs(MobCategory *category);
 
     virtual bool hasSnow();
     virtual bool hasRain();

@@ -1,14 +1,20 @@
 #pragma once
-using namespace std;
-
-#include "System.h"
 
 // The first 4 bytes is the location of the header (the header itself is at the end of the file)
 // Then 4 bytes for the size of the header
 // Then 2 bytes for the version number at which this save was first generated
 // Then 2 bytes for the version number that the save should now be at
 // ( the rest of the header is actually a footer )
+#include "Definitions.h"
+#include <chrono>
+#include <cstdint>
+#include <cstring>
+#include <vector>
 #define SAVE_FILE_HEADER_SIZE 12
+
+#define MAKE_FOURCC(ch0, ch1, ch2, ch3)                                               \
+    ((std::uint32_t)(std::uint8_t)(ch0) | ((std::uint32_t)(std::uint8_t)(ch1) << 8) | \
+     ((std::uint32_t)(std::uint8_t)(ch2) << 16) | ((std::uint32_t)(std::uint8_t)(ch3) << 24))
 
 enum ESaveVersions
 {
@@ -24,7 +30,7 @@ enum ESaveVersions
     // This is the version at which we introduced the End, and any saves older than this will have their End data deleted
     SAVE_FILE_VERSION_NEW_END = 4,
 
-    // This is the version at which we change the stronghold generation, and any saves older than this should should the original version
+    // This is the version at which we change the stronghold generation, and any saves older than this should have the original version
     SAVE_FILE_VERSION_MOVED_STRONGHOLD = 5,
 
     // This is the version at which we changed the playeruid format for PS3
@@ -67,7 +73,7 @@ enum ESavePlatform
     SAVE_FILE_PLATFORM_LOCAL = SAVE_FILE_PLATFORM_PS4
 #elif defined __PSVITA__
     SAVE_FILE_PLATFORM_LOCAL = SAVE_FILE_PLATFORM_PSVITA
-#elif defined _WINDOWS64
+#else
     SAVE_FILE_PLATFORM_LOCAL = SAVE_FILE_PLATFORM_WIN64
 #endif
 };
@@ -99,7 +105,7 @@ struct FileEntrySaveDataV2
         unsigned int regionIndex; // 4B
     };
 
-    __int64 lastModifiedTime; // 8B
+    std::int64_t lastModifiedTime; // 8B
 };
 
 typedef FileEntrySaveDataV2 FileEntrySaveData;
@@ -113,7 +119,7 @@ class FileEntry
 
     FileEntry()
     {
-        ZeroMemory(&data, sizeof(FileEntrySaveData));
+        memset(&data, 0, sizeof(FileEntrySaveData));
     }
 
     FileEntry(wchar_t name[64], unsigned int length, unsigned int startOffset)
@@ -143,7 +149,7 @@ class FileEntry
 
     void updateLastModifiedTime()
     {
-        data.lastModifiedTime = System::currentRealTimeMillis();
+        data.lastModifiedTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     }
 
     /*
@@ -163,7 +169,7 @@ class FileHeader
     friend class ConsoleSaveFileSplit;
 
   private:
-    vector<FileEntry *> fileTable;
+    std::vector<FileEntry *> fileTable;
     ESavePlatform m_savePlatform;
     ByteOrder m_saveEndian;
 #if defined(__PS3__) || defined(_XBOX)
@@ -185,14 +191,14 @@ class FileHeader
   protected:
     FileEntry *AddFile(const wstring &name, unsigned int length = 0);
     void RemoveFile(FileEntry *);
-    void WriteHeader(LPVOID saveMem);
-    void ReadHeader(LPVOID saveMem, ESavePlatform plat = SAVE_FILE_PLATFORM_LOCAL);
+    void WriteHeader(void *saveMem);
+    void ReadHeader(void *saveMem, ESavePlatform plat = SAVE_FILE_PLATFORM_LOCAL);
 
     unsigned int GetStartOfNextData();
 
     unsigned int GetFileSize();
 
-    void AdjustStartOffsets(FileEntry *file, DWORD nNumberOfBytesToWrite, bool subtract = false);
+    void AdjustStartOffsets(FileEntry *file, std::int64_t nNumberOfBytesToWrite, bool subtract = false);
 
     bool fileExists(const wstring &name);
 

@@ -16,7 +16,7 @@ class WitherBoss : public Monster, public RangedAttackMob, public BossMob
     eINSTANCEOF GetType()
     {
         return eTYPE_WITHERBOSS;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new WitherBoss(level);
@@ -112,13 +112,13 @@ class WitherBoss : public Monster, public RangedAttackMob, public BossMob
     virtual float getMaxHealth()
     {
         return Monster::getMaxHealth();
-    };
+    }
     virtual float getHealth()
     {
         return Monster::getHealth();
-    };
+    }
     virtual wstring getAName()
     {
         return app.GetString(IDS_WITHER);
-    };
+    }
 };

@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "C4JThread.h"
 #include "DataInputStream.h"

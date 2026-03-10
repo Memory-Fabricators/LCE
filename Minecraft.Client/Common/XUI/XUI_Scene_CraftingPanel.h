@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 #include "../media/xuiscene_craftingpanel_2x2.h"
 #include "..\..\..\Minecraft.World\Item.h"

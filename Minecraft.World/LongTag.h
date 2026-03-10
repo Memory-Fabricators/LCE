@@ -1,14 +1,15 @@
 #pragma once
 #include "Tag.h"
+#include <cstdint>
 
 class LongTag : public Tag
 {
   public:
-    __int64 data;
-    LongTag(const wstring &name) : Tag(name)
+    std::int64_t data;
+    LongTag(const std::wstring &name) : Tag(name)
     {
     }
-    LongTag(const wstring &name, __int64 data) : Tag(name)
+    LongTag(const std::wstring &name, std::int64_t data) : Tag(name)
     {
         this->data = data;
     }
@@ -22,15 +23,16 @@ class LongTag : public Tag
         data = dis->readLong();
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Long;
     }
-    wstring toString()
+
+    std::wstring toString()
     {
         static wchar_t buf[32];
         swprintf(buf, 32, L"%I64d", data);
-        return wstring(buf);
+        return std::wstring(buf);
     }
 
     Tag *copy()

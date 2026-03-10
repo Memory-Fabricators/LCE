@@ -1,6 +1,5 @@
 #pragma once
 #include "GuiComponent.h"
-using namespace std;
 class Font;
 class Screen;
 

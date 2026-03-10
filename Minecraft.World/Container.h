@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+#include <memory>
 
 class ItemInstance;
 class Player;
@@ -16,17 +16,17 @@ class Container
     }
 
     virtual unsigned int getContainerSize() = 0;
-    virtual shared_ptr<ItemInstance> getItem(unsigned int slot) = 0;
-    virtual shared_ptr<ItemInstance> removeItem(unsigned int slot, int count) = 0;
-    virtual shared_ptr<ItemInstance> removeItemNoUpdate(int slot) = 0;
-    virtual void setItem(unsigned int slot, shared_ptr<ItemInstance> item) = 0;
-    virtual wstring getName() = 0;
-    virtual wstring getCustomName() = 0; // 4J Stu added for sending over the network
+    virtual std::shared_ptr<ItemInstance> getItem(unsigned int slot) = 0;
+    virtual std::shared_ptr<ItemInstance> removeItem(unsigned int slot, int count) = 0;
+    virtual std::shared_ptr<ItemInstance> removeItemNoUpdate(int slot) = 0;
+    virtual void setItem(unsigned int slot, std::shared_ptr<ItemInstance> item) = 0;
+    virtual std::wstring getName() = 0;
+    virtual std::wstring getCustomName() = 0; // 4J Stu added for sending over the network
     virtual bool hasCustomName() = 0;
     virtual int getMaxStackSize() = 0;
     virtual void setChanged() = 0;
-    virtual bool stillValid(shared_ptr<Player> player) = 0;
+    virtual bool stillValid(std::shared_ptr<Player> player) = 0;
     virtual void startOpen() = 0;
     virtual void stopOpen() = 0;
-    virtual bool canPlaceItem(int slot, shared_ptr<ItemInstance> item) = 0;
+    virtual bool canPlaceItem(int slot, std::shared_ptr<ItemInstance> item) = 0;
 };

@@ -38,12 +38,9 @@ class ColourTable;
 class MultiPlayerGameMode;
 class PsPlusUpsellWrapper;
 
-#include "..\Minecraft.World\C4JThread.h"
-#include "..\Minecraft.World\DisconnectPacket.h"
-#include "..\Minecraft.World\File.h"
+#include "DisconnectPacket.h"
+#include "File.h"
 #include "ResourceLocation.h"
-
-using namespace std;
 
 class Minecraft
 {

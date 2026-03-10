@@ -1,6 +1,6 @@
 #include "BiomeSource.h"
-#include "..\Minecraft.Client\Minecraft.h"
-#include "..\Minecraft.Client\ProgressRenderer.h"
+#include "Minecraft.h"
+#include "ProgressRenderer.h"
 #include "System.h"
 #include "net.minecraft.world.level.biome.h"
 #include "net.minecraft.world.level.h"

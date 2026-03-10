@@ -8,7 +8,7 @@ class MinecartRideable : public Minecart
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_RIDEABLE;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartRideable(level);

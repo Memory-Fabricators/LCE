@@ -1,33 +1,23 @@
 #pragma once
-#include "System.h"
 #include "Tag.h"
+#include <vector>
 
 class ByteArrayTag : public Tag
 {
   public:
-    byteArray data;
-    bool m_ownData;
+    std::vector<std::byte> data;
 
-    ByteArrayTag(const wstring &name) : Tag(name)
+    ByteArrayTag(const std::wstring &name) : Tag(name), data({})
     {
-        m_ownData = false;
     }
-    ByteArrayTag(const wstring &name, byteArray data, bool ownData = false) : Tag(name)
+
+    ByteArrayTag(const std::wstring &name, std::vector<std::byte> data) : Tag(name), data(data)
     {
-        this->data = data;
-        m_ownData = ownData;
-    } // 4J - added ownData param
-    ~ByteArrayTag()
-    {
-        if (m_ownData)
-        {
-            delete[] data.data;
-        }
     }
 
     void write(DataOutput *dos)
     {
-        dos->writeInt(data.length);
+        dos->writeInt(data.size());
         dos->write(data);
     }
 
@@ -35,24 +25,24 @@ class ByteArrayTag : public Tag
     {
         int length = dis->readInt();
 
-        if (data.data)
+        if (data.data())
         {
-            delete[] data.data;
+            delete[] data.data();
         }
-        data = byteArray(length);
+        data = std::vector<std::byte>(length);
         dis->readFully(data);
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Byte_Array;
     }
 
-    wstring toString()
+    std::wstring toString()
     {
         static wchar_t buf[32];
-        swprintf(buf, 32, L"[%d bytes]", data.length);
-        return wstring(buf);
+        swprintf(buf, 32, L"[%d bytes]", data.size());
+        return std::wstring(buf);
     }
 
     bool equals(Tag *obj)
@@ -60,15 +50,15 @@ class ByteArrayTag : public Tag
         if (Tag::equals(obj))
         {
             ByteArrayTag *o = (ByteArrayTag *)obj;
-            return ((data.data == NULL && o->data.data == NULL) || (data.data != NULL && data.length == o->data.length && memcmp(data.data, o->data.data, data.length) == 0));
+            return ((data.data() == nullptr && o->data.data() == nullptr) || (data.data() != nullptr && data.size() == o->data.size() && memcmp(data.data(), o->data.data(), data.size()) == 0));
         }
         return false;
     }
 
     Tag *copy()
     {
-        byteArray cp = byteArray(data.length);
-        System::arraycopy(data, 0, &cp, 0, data.length);
-        return new ByteArrayTag(getName(), cp, true);
+        std::byte *cp = new std::byte[data.size()];
+        std::copy(data.begin(), data.end(), cp);
+        return new ByteArrayTag(getName(), std::vector<std::byte>(cp, cp + data.size()));
     }
 };

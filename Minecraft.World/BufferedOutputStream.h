@@ -8,8 +8,8 @@ class BufferedOutputStream : public OutputStream
     OutputStream *stream;
 
   protected:
-    byteArray buf;      // The internal buffer where data is stored.
-    unsigned int count; // The number of valid bytes in the buffer.
+    std::vector<std::byte> buf; // The internal buffer where data is stored.
+    unsigned int count;         // The number of valid bytes in the buffer.
 
   public:
     BufferedOutputStream(OutputStream *out, int size);
@@ -17,7 +17,7 @@ class BufferedOutputStream : public OutputStream
 
     virtual void flush();
     virtual void close();
-    virtual void write(byteArray b, unsigned int offset, unsigned int length);
-    virtual void write(byteArray b);
+    virtual void write(std::vector<std::byte> b, unsigned int offset, unsigned int length);
+    virtual void write(std::vector<std::byte> b);
     virtual void write(unsigned int b);
 };

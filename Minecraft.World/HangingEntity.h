@@ -18,7 +18,9 @@ class HangingEntity : public Entity
     // eINSTANCEOF eType;
 
   protected:
-    virtual void defineSynchedData() {};
+    virtual void defineSynchedData()
+    {
+    }
 
   public:
     int dir;

@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_multi_joinload.h"
 #include "XUI_CustomMessages.h"
 #include <vector>

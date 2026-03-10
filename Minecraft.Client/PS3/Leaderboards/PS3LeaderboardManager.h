@@ -5,8 +5,6 @@
 
 #include "PS3\Passphrase\ps3__np_conf.h"
 
-using namespace std;
-
 class PS3LeaderboardManager : public LeaderboardManager
 {
   protected:

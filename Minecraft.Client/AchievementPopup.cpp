@@ -1,12 +1,11 @@
 #include "AchievementPopup.h"
-#include "..\Minecraft.World\SharedConstants.h"
-#include "..\Minecraft.World\System.h"
-#include "..\Minecraft.World\net.minecraft.locale.h"
-#include "..\Minecraft.World\net.minecraft.stats.h"
 #include "Font.h"
 #include "ItemRenderer.h"
 #include "Lighting.h"
+#include "SharedConstants.h"
 #include "Textures.h"
+#include "net.minecraft.locale.h"
+#include "net.minecraft.stats.h"
 #include "stdafx.h"
 
 AchievementPopup::AchievementPopup(Minecraft *mc)

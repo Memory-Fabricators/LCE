@@ -3,7 +3,7 @@
 #include "..\Minecraft.World\net.minecraft.world.level.chunk.h"
 #include "..\Minecraft.World\net.minecraft.world.level.h"
 
-using namespace std;
+;
 class ServerChunkCache;
 
 // 4J - various alterations here to make this thread safe, and operate as a fixed sized cache

@@ -1,7 +1,5 @@
 #pragma once
 
-using namespace std;
-
 #include "Audio/Consoles_SoundEngine.h"
 
 #include "..\Common\Tutorial\TutorialEnum.h"
@@ -334,7 +332,9 @@ class CMinecraftApp
 #endif
     }
     // 4J-PB - to capture the social post screenshot
-    virtual void CaptureScreenshot(int iPad) {};
+    virtual void CaptureScreenshot(int iPad)
+    {
+    }
     // void			GetPreviewImage(int iPad,XSOCIAL_PREVIEWIMAGE *preview);
 
     void InitGameSettings();
@@ -675,7 +675,9 @@ class CMinecraftApp
     DisconnectPacket::eDisconnectReason m_disconnectReason;
 
   public:
-    virtual void RunFrame() {};
+    virtual void RunFrame()
+    {
+    }
 
     static const DWORD m_dwOfferID = 0x00000001;
 

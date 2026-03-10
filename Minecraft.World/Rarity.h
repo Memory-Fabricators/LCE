@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Common/App_enums.h"
+#include <string>
+
 class Rarity
 {
   public:
@@ -8,8 +11,8 @@ class Rarity
     static const Rarity *rare;
     static const Rarity *epic;
 
-    const eMinecraftColour color;
-    const wstring name;
+    const MinecraftColor color;
+    const std::wstring name;
 
-    Rarity(eMinecraftColour color, const wstring &name);
+    Rarity(MinecraftColor color, const std::wstring &name);
 };

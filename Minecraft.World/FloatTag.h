@@ -1,15 +1,16 @@
 #pragma once
-#include "InputOutputStream.h"
+#include "DataInput.h"
+#include "DataOutput.h"
 #include "Tag.h"
 
 class FloatTag : public Tag
 {
   public:
     float data;
-    FloatTag(const wstring &name) : Tag(name)
+    FloatTag(const std::wstring &name) : Tag(name)
     {
     }
-    FloatTag(const wstring &name, float data) : Tag(name)
+    FloatTag(const std::wstring &name, float data) : Tag(name)
     {
         this->data = data;
     }
@@ -23,15 +24,15 @@ class FloatTag : public Tag
         data = dis->readFloat();
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Float;
     }
-    wstring toString()
+    std::wstring toString()
     {
         static wchar_t buf[32];
         swprintf(buf, 32, L"%f", data);
-        return wstring(buf);
+        return std::wstring(buf);
     }
 
     Tag *copy()

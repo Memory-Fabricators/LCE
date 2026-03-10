@@ -1,5 +1,9 @@
 #pragma once
-#include "xmcore.h"
+#include "DataInputStream.h"
+#include "DataOutputStream.h"
+#include <cstdint>
+#include <span>
+#include <vector>
 
 // 4J added - Storage for block & sky light data. Lighting data is normally stored as 4-bits per tile, in a DataLayer class of 16384 bytes ( 128 x 16 x 16 x 0.5 )
 // This class provides more economical storage for such data by taking into consideration that it is quite common for large parts of the lighting data in a level to
@@ -39,7 +43,7 @@ class SparseLightStorage
 
   private:
     //	unsigned char	planeIndices[128];
-    __int64 dataAndCount; // Contains packed-together data pointer (lower 48-bits), and count of lines used (upper 16-bits)
+    std::int64_t dataAndCount; // Contains packed-together data pointer (lower 48-bits), and count of lines used (upper 16-bits)
 
     //	unsigned char	*data;
     //	unsigned int	allocatedPlaneCount;
@@ -55,19 +59,19 @@ class SparseLightStorage
     SparseLightStorage(SparseLightStorage *copyFrom); // ctor with deep copy
     ~SparseLightStorage();
 
-    void setData(byteArray dataIn, unsigned int inOffset);                                              // Set all lighting values from a data array of length 16384 (128 x 16 x 16 x 0.5).
-    void getData(byteArray retArray, unsigned int retOffset);                                           // Gets all lighting values into an array of length 16384.
-    int get(int x, int y, int z);                                                                       // Get an individual lighting value
-    void set(int x, int y, int z, int val);                                                             // Set an individual lighting value
-    void setAllBright();                                                                                // Set all lighting values to fully bright
-    int setDataRegion(byteArray dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset);    // Sets a region of lighting values with the data at offset position in the array dataIn - external ordering compatible with java DataLayer
-    int getDataRegion(byteArray dataInOut, int x0, int y0, int z0, int x1, int y1, int z1, int offset); // Updates the data at offset position dataInOut with a region of lighting information - external ordering compatible with java DataLayer
+    void setData(std::span<std::byte> dataIn, unsigned int inOffset);                                              // Set all lighting values from a data array of length 16384 (128 x 16 x 16 x 0.5).
+    void getData(std::span<std::byte> retArray, unsigned int retOffset);                                           // Gets all lighting values into an array of length 16384.
+    int get(int x, int y, int z);                                                                                  // Get an individual lighting value
+    void set(int x, int y, int z, int val);                                                                        // Set an individual lighting value
+    void setAllBright();                                                                                           // Set all lighting values to fully bright
+    int setDataRegion(std::span<std::byte> dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset);    // Sets a region of lighting values with the data at offset position in the array dataIn - external ordering compatible with java DataLayer
+    int getDataRegion(std::span<std::byte> dataInOut, int x0, int y0, int z0, int x1, int y1, int z1, int offset); // Updates the data at offset position dataInOut with a region of lighting information - external ordering compatible with java DataLayer
 
     static void staticCtor();
 
     void addNewPlane(int y);
     void getPlaneIndicesAndData(unsigned char **planeIndices, unsigned char **data);
-    void updateDataAndCount(__int64 newDataAndCount);
+    void updateDataAndCount(std::int64_t newDataAndCount);
     int compress();
 
     bool isCompressed();
@@ -75,7 +79,7 @@ class SparseLightStorage
 
     static void tick();
     static int deleteQueueIndex;
-    static XLockFreeStack<unsigned char> deleteQueue[3];
+    static std::vector<unsigned char> deleteQueue[3];
 
 #ifdef LIGHT_COMPRESSION_STATS
     int count;

@@ -8,7 +8,7 @@ class EnderCrystal : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_ENDER_CRYSTAL;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new EnderCrystal(level);

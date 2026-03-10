@@ -1,5 +1,8 @@
 #pragma once
-#include "xmcore.h"
+#include "DataInputStream.h"
+#include "DataOutputStream.h"
+#include <mutex>
+#include <vector>
 
 // This class is used for the compressed storage of tile data. Unlike the SparseLightingStorage class, data is split into 512 blocks of 4x4x4 tiles. Then within each block, the
 // data is compressed as described below, with a selection of bits per tile available, in a method similar to a palettised image.
@@ -64,8 +67,8 @@ class CompressedTileStorage
     static const unsigned int MM_PHYSICAL_4KB_BASE = 0xE0000000; // Start of where 4KB page sized physical allocations are made
   public:
     CompressedTileStorage();
-    CompressedTileStorage(CompressedTileStorage *copyFrom);           // ctor with deep copy
-    CompressedTileStorage(byteArray dataIn, unsigned int initOffset); // Construct with data in passed in array of length 32768 (128 x 16 x 16)
+    CompressedTileStorage(CompressedTileStorage *copyFrom);                        // ctor with deep copy
+    CompressedTileStorage(std::vector<std::byte> dataIn, unsigned int initOffset); // Construct with data in passed in array of length 32768 (128 x 16 x 16)
     CompressedTileStorage(bool isEmpty);
     ~CompressedTileStorage();
     bool isSameAs(CompressedTileStorage *other);
@@ -76,14 +79,14 @@ class CompressedTileStorage
     inline static void getBlock(int *block, int x, int y, int z);
 
   public:
-    void setData(byteArray dataIn, unsigned int inOffset);    // Set all tile values from a data array of length 32768 (128 x 16 x 16).
-    void getData(byteArray retArray, unsigned int retOffset); // Gets all tile values into an array of length 32768.
-    int get(int x, int y, int z);                             // Get an individual tile value
-    void set(int x, int y, int z, int val);                   // Set an individual tile value
+    void setData(std::vector<std::byte> dataIn, unsigned int inOffset);    // Set all tile values from a data array of length 32768 (128 x 16 x 16).
+    void getData(std::vector<std::byte> retArray, unsigned int retOffset); // Gets all tile values into an array of length 32768.
+    int get(int x, int y, int z);                                          // Get an individual tile value
+    void set(int x, int y, int z, int val);                                // Set an individual tile value
     typedef void (*tileUpdatedCallback)(int x, int y, int z, void *param, int yparam);
-    int setDataRegion(byteArray dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset, tileUpdatedCallback callback, void *param, int yparam); // Sets a region of tile values with the data at offset position in the array dataIn - external ordering compatible with java DataLayer
-    bool testSetDataRegion(byteArray dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset);                                                   // Tests whether setting data would actually change anything
-    int getDataRegion(byteArray dataInOut, int x0, int y0, int z0, int x1, int y1, int z1, int offset);                                                     // Updates the data at offset position dataInOut with a region of tile information - external ordering compatible with java DataLayer
+    int setDataRegion(std::vector<std::byte> dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset, tileUpdatedCallback callback, void *param, int yparam); // Sets a region of tile values with the data at offset position in the array dataIn - external ordering compatible with java DataLayer
+    bool testSetDataRegion(std::vector<std::byte> dataIn, int x0, int y0, int z0, int x1, int y1, int z1, int offset);                                                   // Tests whether setting data would actually change anything
+    int getDataRegion(std::vector<std::byte> dataInOut, int x0, int y0, int z0, int x1, int y1, int z1, int offset);                                                     // Updates the data at offset position dataInOut with a region of tile information - external ordering compatible with java DataLayer
 
     static void staticCtor();
 
@@ -97,11 +100,11 @@ class CompressedTileStorage
 
     static void tick();
     static int deleteQueueIndex;
-    static XLockFreeStack<unsigned char> deleteQueue[3];
+    static std::vector<unsigned char> deleteQueue[3];
 
     static unsigned char compressBuffer[32768 + 256];
 
-    static CRITICAL_SECTION cs_write;
+    static std::mutex cs_write;
 
     int getAllocatedSize(int *count0, int *count1, int *count2, int *count4, int *count8);
     int getHighestNonEmptyY();

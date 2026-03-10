@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdarg>
+#include <string>
+
 class Language
 {
   private:
@@ -8,8 +11,8 @@ class Language
   public:
     Language();
     static Language *getInstance();
-    wstring getElement(const wstring &elementId, ...);
-    wstring getElement(const wstring &elementId, va_list args);
-    wstring getElementName(const wstring &elementId);
-    wstring getElementDescription(const wstring &elementId);
+    std::wstring getElement(const std::wstring &elementId, ...);
+    std::wstring getElement(const std::wstring &elementId, va_list args);
+    std::wstring getElementName(const std::wstring &elementId);
+    std::wstring getElementDescription(const std::wstring &elementId);
 };

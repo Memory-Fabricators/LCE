@@ -7,7 +7,7 @@ class PrimedTnt : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_PRIMEDTNT;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new PrimedTnt(level);

@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 #include "XUI_Ctrl_ProgressCtrlBase.h"
 

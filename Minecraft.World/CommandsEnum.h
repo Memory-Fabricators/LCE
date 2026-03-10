@@ -1,6 +1,6 @@
 #pragma once
 
-enum EGameCommand
+enum class EGameCommand
 {
     eGameCommand_DefaultGameMode,
     eGameCommand_Effect,

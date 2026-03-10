@@ -1,6 +1,5 @@
 #pragma once
 #include "JavaIntHash.h"
-using namespace std;
 
 class LevelSource;
 

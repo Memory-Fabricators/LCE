@@ -14,7 +14,7 @@ class TilePos
     static bool eq_test(const TilePos &x, const TilePos &y);
 };
 
-typedef struct
+typedef struct TilePosKeyHash
 {
     int operator()(const TilePos &k) const
     {
@@ -23,7 +23,7 @@ typedef struct
 
 } TilePosKeyHash;
 
-typedef struct
+typedef struct TilePosKeyEq
 {
     bool operator()(const TilePos &x, const TilePos &y) const
     {

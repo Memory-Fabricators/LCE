@@ -1,8 +1,6 @@
 #pragma once
 #include "..\..\..\Minecraft.World\Random.h"
 
-using namespace std;
-
 class CXuiSceneEnchant;
 class BookModel;
 

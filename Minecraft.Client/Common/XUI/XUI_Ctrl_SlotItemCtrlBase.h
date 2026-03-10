@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 class Slot;
 class ItemInstance;
@@ -10,7 +9,9 @@ class SlotControlUserDataContainer
 {
   public:
     SlotControlUserDataContainer()
-        : slot(NULL), hProgressBar(NULL), m_iPad(-1), m_fAlpha(1.0f) {};
+        : slot(NULL), hProgressBar(NULL), m_iPad(-1), m_fAlpha(1.0f)
+    {
+    }
     Slot *slot;
     HXUIOBJ hProgressBar;
     float m_fAlpha;

@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "DefaultDispenseItemBehavior.h"
 #include "Item.h"

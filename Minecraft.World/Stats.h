@@ -1,7 +1,8 @@
 #pragma once
-using namespace std;
 
 #include "Stat.h"
+#include <unordered_map>
+#include <vector>
 
 class ItemStat;
 
@@ -16,17 +17,17 @@ class Stats
     static const int ADDITIONAL_STATS_OFFSET;
 
   protected:
-    static unordered_map<int, Stat *> *statsById;
+    static std::unordered_map<int, Stat *> *statsById;
 
   public:
-    static vector<Stat *> *all;
-    static vector<Stat *> *generalStats;
-    static vector<ItemStat *> *blocksMinedStats;
-    static vector<ItemStat *> *itemsCollectedStats;
-    static vector<ItemStat *> *itemsCraftedStats;
+    static std::vector<Stat *> *all;
+    static std::vector<Stat *> *generalStats;
+    static std::vector<ItemStat *> *blocksMinedStats;
+    static std::vector<ItemStat *> *itemsCollectedStats;
+    static std::vector<ItemStat *> *itemsCraftedStats;
 
 #if (defined _EXTENDED_ACHIEVEMENTS) && (!defined _DURANGO)
-    static vector<ItemStat *> *blocksPlacedStats;
+    static std::vector<ItemStat *> *blocksPlacedStats;
 #endif
 
     static Stat *walkOneM;
@@ -56,12 +57,12 @@ class Stats
     static Stat *timePlayed; // Game time, recored as ticks, with TICKS_PER_DAY ticks per day! Stored as large stat so it doesn't max out before reaching 100 days ( 2,400,000 ticks ).
 
     // static StatArray mobsKilled;
-    static StatArray blocksMined;
-    static StatArray itemsCollected;
-    static StatArray itemsCrafted;
+    static std::vector<Stat> blocksMined;
+    static std::vector<Stat> itemsCollected;
+    static std::vector<Stat> itemsCrafted;
 
 #if (defined _EXTENDED_ACHIEVEMENTS) && (!defined _DURANGO)
-    static StatArray blocksPlaced;
+    static std::vector<Stat> blocksPlaced;
 #endif
 
     // Added TU9
@@ -69,8 +70,8 @@ class Stats
     static Stat *completeTheEnd;   // The number of times this player has been present when the Enderdragon has died
 
 #if (defined _EXTENDED_ACHIEVEMENTS) && (!defined _DURANGO)
-    static StatArray biomesVisisted;
-    static StatArray rainbowCollection;
+    static std::vector<Stat> biomesVisisted;
+    static std::vector<Stat> rainbowCollection;
 #endif
 
     static void staticCtor();

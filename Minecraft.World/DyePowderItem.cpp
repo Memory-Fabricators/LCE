@@ -1,4 +1,4 @@
-using namespace std;
+;
 
 #include "DyePowderItem.h"
 #include "Material.h"

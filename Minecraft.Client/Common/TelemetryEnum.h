@@ -186,88 +186,85 @@ OptionalSubMenuID
 Used when a title has more heirarchy required. OptionalSubMenuID = 0 means
 undefined or unknown.
 */
-enum ETelemetry_HowToPlay_SubMenuId
+enum _HowToPlay_SubMenuId
 {
-    eTelemetryHowToPlay_Basics = 0,
-    eTelemetryHowToPlay_HUD,
-    eTelemetryHowToPlay_Inventory,
-    eTelemetryHowToPlay_Chest,
-    eTelemetryHowToPlay_LargeChest,
-    eTelemetryHowToPlay_InventoryCrafting,
-    eTelemetryHowToPlay_CraftTable,
-    eTelemetryHowToPlay_Furnace,
-    eTelemetryHowToPlay_Dispenser,
-    eTelemetryHowToPlay_NetherPortal,
+    HowToPlay_Basics = 0,
+    HowToPlay_HUD,
+    HowToPlay_Inventory,
+    HowToPlay_Chest,
+    HowToPlay_LargeChest,
+    HowToPlay_InventoryCrafting,
+    HowToPlay_CraftTable,
+    HowToPlay_Furnace,
+    HowToPlay_Dispenser,
+    HowToPlay_NetherPortal,
 };
 
 /*
 EnemyTypeID	What type of enemy or challenge was the player facing?
 To prevent data-loss by overflowing the buffer, we recommend enemy type.
 */
-enum ETelemetryChallenges
+enum class TelemetryChallenges
 {
-    eTelemetryChallenges_Unknown = 0,
+    Unknown = 0,
+    Tutorial_TrialStart,
+    Tutorial_Halfway,
+    Tutorial_Complete,
+    Tutorial_Inventory,
+    Tutorial_Crafting,
+    Tutorial_Furnace,
+    Tutorial_Fishing,
+    Tutorial_Minecart,
+    Tutorial_Boat,
+    Tutorial_Bed,
+    Tutorial_Redstone_And_Pistons,
+    Tutorial_Portal,
+    Tutorial_FoodBar,
+    Tutorial_CreativeMode,
+    Tutorial_BrewingMenu,
 
-    eTelemetryTutorial_TrialStart,
-    eTelemetryTutorial_Halfway,
-    eTelemetryTutorial_Complete,
+    InGame_Ride_Minecart,
+    InGame_Ride_Boat,
+    InGame_Ride_Pig,
+    InGame_UseBed,
 
-    eTelemetryTutorial_Inventory,
-    eTelemetryTutorial_Crafting,
-    eTelemetryTutorial_Furnace,
-    eTelemetryTutorial_Fishing,
-    eTelemetryTutorial_Minecart,
-    eTelemetryTutorial_Boat,
-    eTelemetryTutorial_Bed,
+    Tutorial_CreativeInventory, // Added TU5
 
-    eTelemetryTutorial_Redstone_And_Pistons,
-    eTelemetryTutorial_Portal,
-    eTelemetryTutorial_FoodBar,
-    eTelemetryTutorial_CreativeMode,
-    eTelemetryTutorial_BrewingMenu,
+    Tutorial_EnchantingMenu,
+    Tutorial_Brewing,
+    Tutorial_Enchanting,
+    Tutorial_Farming,
 
-    eTelemetryInGame_Ride_Minecart,
-    eTelemetryInGame_Ride_Boat,
-    eTelemetryInGame_Ride_Pig,
-    eTelemetryInGame_UseBed,
+    PlayerDeathSource_Fall,
+    PlayerDeathSource_Lava,
+    PlayerDeathSource_Fire,
+    PlayerDeathSource_Water,
+    PlayerDeathSource_Suffocate,
+    PlayerDeathSource_OutOfWorld,
+    PlayerDeathSource_Cactus,
 
-    eTelemetryTutorial_CreativeInventory, // Added TU5
+    PlayerDeathSource_Player_Weapon,
+    PlayerDeathSource_Player_Arrow,
 
-    eTelemetryTutorial_EnchantingMenu,
-    eTelemetryTutorial_Brewing,
-    eTelemetryTutorial_Enchanting,
-    eTelemetryTutorial_Farming,
+    PlayerDeathSource_Explosion_Tnt,
+    PlayerDeathSource_Explosion_Creeper,
 
-    eTelemetryPlayerDeathSource_Fall,
-    eTelemetryPlayerDeathSource_Lava,
-    eTelemetryPlayerDeathSource_Fire,
-    eTelemetryPlayerDeathSource_Water,
-    eTelemetryPlayerDeathSource_Suffocate,
-    eTelemetryPlayerDeathSource_OutOfWorld,
-    eTelemetryPlayerDeathSource_Cactus,
+    PlayerDeathSource_Wolf,
+    PlayerDeathSource_Zombie,
+    PlayerDeathSource_Skeleton,
+    PlayerDeathSource_Spider,
+    PlayerDeathSource_Slime,
+    PlayerDeathSource_Ghast,
+    PlayerDeathSource_ZombiePigman,
 
-    eTelemetryPlayerDeathSource_Player_Weapon,
-    eTelemetryPlayerDeathSource_Player_Arrow,
+    Tutorial_Breeding,
+    Tutorial_Golem,
 
-    eTelemetryPlayerDeathSource_Explosion_Tnt,
-    eTelemetryPlayerDeathSource_Explosion_Creeper,
-
-    eTelemetryPlayerDeathSource_Wolf,
-    eTelemetryPlayerDeathSource_Zombie,
-    eTelemetryPlayerDeathSource_Skeleton,
-    eTelemetryPlayerDeathSource_Spider,
-    eTelemetryPlayerDeathSource_Slime,
-    eTelemetryPlayerDeathSource_Ghast,
-    eTelemetryPlayerDeathSource_ZombiePigman,
-
-    eTelemetryTutorial_Breeding,
-    eTelemetryTutorial_Golem,
-
-    eTelemetryTutorial_Anvil, // Added TU14
-    eTelemetryTutorial_AnvilMenu,
-    eTelemetryTutorial_Trading,
-    eTelemetryTutorial_TradingMenu,
-    eTelemetryTutorial_Enderchest,
+    Tutorial_Anvil, // Added TU14
+    Tutorial_AnvilMenu,
+    Tutorial_Trading,
+    Tutorial_TradingMenu,
+    Tutorial_Enderchest,
 
     // Sent over network as a byte
 };

@@ -1,6 +1,5 @@
 #pragma once
 #include "TexturePack.h"
-using namespace std;
 
 class Minecraft;
 

@@ -5,7 +5,10 @@
 // would appear to be a bit expensive so matching the java one for now anyway. This code implements the supplemental
 // hashing that happens in java so we can match what their maps are doing with ints.
 
-typedef struct
+#include "Class.h"
+#include <cstdint>
+
+typedef struct IntKeyHash
 {
     int operator()(const int &k) const
     {
@@ -19,7 +22,7 @@ typedef struct
 
 } IntKeyHash;
 
-typedef struct
+typedef struct IntKeyEq
 {
     bool operator()(const int &x, const int &y) const
     {
@@ -29,7 +32,7 @@ typedef struct
 
 // This hash functor is taken from the IntHashMap java class used by the game, so that we can use a standard std hashmap with this hash rather
 // than implement the class itself
-typedef struct
+typedef struct IntKeyHash2
 {
     int operator()(const int &k) const
     {
@@ -41,7 +44,7 @@ typedef struct
 
 // This hash functor is taken from the LongHashMap java class used by the game, so that we can use a standard std hashmap with this hash rather
 // than implement the class itself
-typedef struct
+typedef struct LongKeyHash
 {
     int hash(const int &k) const
     {
@@ -50,21 +53,21 @@ typedef struct
         return (int)(h ^ (h >> 7) ^ (h >> 4));
     }
 
-    int operator()(const __int64 &k) const
+    int operator()(const std::int64_t &k) const
     {
-        return hash((int)(k ^ (((__uint64)k) >> 32)));
+        return hash((int)(k ^ (((std::uint64_t)k) >> 32)));
     }
 } LongKeyHash;
 
-typedef struct
+typedef struct LongKeyEq
 {
-    bool operator()(const __int64 &x, const __int64 &y) const
+    bool operator()(const std::int64_t &x, const std::int64_t &y) const
     {
         return x == y;
     }
 } LongKeyEq;
 
-typedef struct
+typedef struct eINSTANCEOFKeyHash
 {
     int operator()(const eINSTANCEOF &k) const
     {
@@ -74,7 +77,7 @@ typedef struct
     }
 } eINSTANCEOFKeyHash;
 
-typedef struct
+typedef struct eINSTANCEOFKeyEq
 {
     bool operator()(const eINSTANCEOF &x, const eINSTANCEOF &y) const
     {

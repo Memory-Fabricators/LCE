@@ -94,7 +94,6 @@ set(MINECRAFT_WORLD_SOURCES
   "ByteArrayInputStream.cpp"
   "ByteArrayOutputStream.cpp"
   "ByteBuffer.cpp"
-  "C4JThread.cpp"
   "CactusFeature.cpp"
   "CactusTile.cpp"
   "CakeTile.cpp"
@@ -797,5 +796,4 @@ set(MINECRAFT_WORLD_SOURCES
   "ZoomLayer.cpp"
   "compression.cpp"
   "stdafx.cpp"
-  "system.cpp"
 )

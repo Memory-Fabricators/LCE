@@ -1,7 +1,12 @@
 #pragma once
-#include "..\Minecraft.World\Pos.h"
-#include "..\Minecraft.World\SmoothFloat.h"
-#include "..\Minecraft.World\net.minecraft.world.entity.player.h"
+#include "Common/TelemetryEnum.h"
+#include "Player.h"
+#include "Pos.h"
+#include "SmoothFloat.h"
+#include "net.minecraft.world.entity.player.h"
+#include <cstdint>
+#include <span>
+
 class Level;
 class User;
 class CompoundTag;
@@ -12,8 +17,6 @@ class Container;
 class Input;
 class Stat;
 class Minecraft;
-
-using namespace std;
 
 // Time in seconds before the players presence is update to Idle
 #define PLAYER_IDLE_TIME 300
@@ -55,13 +58,13 @@ class LocalPlayer : public Player
     LocalPlayer(Minecraft *minecraft, Level *level, User *user, int dimension);
     virtual ~LocalPlayer();
 
-    int m_iScreenSection;       // assuming 4player splitscreen for now, or -1 for single player
-    __uint64 ullButtonsPressed; // Stores the button presses, since the inputmanager can be ticked faster than the minecraft
+    int m_iScreenSection;            // assuming 4player splitscreen for now, or -1 for single player
+    std::uint64_t ullButtonsPressed; // Stores the button presses, since the inputmanager can be ticked faster than the minecraft
     // player tick, and a button press and release combo can be missed in the minecraft::tick
 
-    __uint64 ullDpad_last;
-    __uint64 ullDpad_this;
-    __uint64 ullDpad_filtered;
+    std::uint64_t ullDpad_last;
+    std::uint64_t ullDpad_this;
+    std::uint64_t ullDpad_filtered;
 
     // 4J-PB - moved these in from the minecraft structure, since they are per player things for splitscreen
     // int ticks;
@@ -108,31 +111,31 @@ class LocalPlayer : public Player
     virtual void addAdditonalSaveData(CompoundTag *entityTag);
     virtual void readAdditionalSaveData(CompoundTag *entityTag);
     virtual void closeContainer();
-    virtual void openTextEdit(shared_ptr<TileEntity> sign);
-    virtual bool openContainer(shared_ptr<Container> container);                                     // 4J added bool return
-    virtual bool openHopper(shared_ptr<HopperTileEntity> container);                                 // 4J added bool return
-    virtual bool openHopper(shared_ptr<MinecartHopper> container);                                   // 4J added bool return
-    virtual bool openHorseInventory(shared_ptr<EntityHorse> horse, shared_ptr<Container> container); // 4J added bool return
-    virtual bool startCrafting(int x, int y, int z);                                                 // 4J added bool return
-    virtual bool openFireworks(int x, int y, int z);                                                 // 4J added
-    virtual bool startEnchanting(int x, int y, int z, const wstring &name);                          // 4J added bool return
+    virtual void openTextEdit(std::shared_ptr<TileEntity> sign);
+    virtual bool openContainer(std::shared_ptr<Container> container);                                          // 4J added bool return
+    virtual bool openHopper(std::shared_ptr<HopperTileEntity> container);                                      // 4J added bool return
+    virtual bool openHopper(std::shared_ptr<MinecartHopper> container);                                        // 4J added bool return
+    virtual bool openHorseInventory(std::shared_ptr<EntityHorse> horse, std::shared_ptr<Container> container); // 4J added bool return
+    virtual bool startCrafting(int x, int y, int z);                                                           // 4J added bool return
+    virtual bool openFireworks(int x, int y, int z);                                                           // 4J added
+    virtual bool startEnchanting(int x, int y, int z, const std::wstring &name);                               // 4J added bool return
     virtual bool startRepairing(int x, int y, int z);
-    virtual bool openFurnace(shared_ptr<FurnaceTileEntity> furnace);                // 4J added bool return
-    virtual bool openBrewingStand(shared_ptr<BrewingStandTileEntity> brewingStand); // 4J added bool return
-    virtual bool openBeacon(shared_ptr<BeaconTileEntity> beacon);                   // 4J added bool return
-    virtual bool openTrap(shared_ptr<DispenserTileEntity> trap);                    // 4J added bool return
-    virtual bool openTrading(shared_ptr<Merchant> traderTarget, const wstring &name);
-    virtual void crit(shared_ptr<Entity> e);
-    virtual void magicCrit(shared_ptr<Entity> e);
-    virtual void take(shared_ptr<Entity> e, int orgCount);
-    virtual void chat(const wstring &message);
+    virtual bool openFurnace(std::shared_ptr<FurnaceTileEntity> furnace);                // 4J added bool return
+    virtual bool openBrewingStand(std::shared_ptr<BrewingStandTileEntity> brewingStand); // 4J added bool return
+    virtual bool openBeacon(std::shared_ptr<BeaconTileEntity> beacon);                   // 4J added bool return
+    virtual bool openTrap(std::shared_ptr<DispenserTileEntity> trap);                    // 4J added bool return
+    virtual bool openTrading(std::shared_ptr<Merchant> traderTarget, const std::wstring &name);
+    virtual void crit(std::shared_ptr<Entity> e);
+    virtual void magicCrit(std::shared_ptr<Entity> e);
+    virtual void take(std::shared_ptr<Entity> e, int orgCount);
+    virtual void chat(const std::wstring &message);
     virtual bool isSneaking();
     // virtual bool isIdle();
-    virtual void hurtTo(float newHealth, ETelemetryChallenges damageSource);
+    virtual void hurtTo(float newHealth, TelemetryChallenges damageSource);
     virtual void respawn();
     virtual void animateRespawn();
     virtual void displayClientMessage(int messageId);
-    virtual void awardStat(Stat *stat, byteArray param);
+    virtual void awardStat(Stat *stat, std::span<std::byte> param);
     virtual int ThirdPersonView()
     {
         return m_iThirdPersonView;
@@ -203,10 +206,10 @@ class LocalPlayer : public Player
     int lastClickState;
 
     // 4J Stu - Added to allow callback to tutorial to stay within Minecraft.Client
-    virtual void onCrafted(shared_ptr<ItemInstance> item);
+    virtual void onCrafted(std::shared_ptr<ItemInstance> item);
 
-    virtual void setAndBroadcastCustomSkin(DWORD skinId);
-    virtual void setAndBroadcastCustomCape(DWORD capeId);
+    virtual void setAndBroadcastCustomSkin(std::uint32_t skinId);
+    virtual void setAndBroadcastCustomCape(std::uint32_t capeId);
 
   private:
     bool isSolidBlock(int x, int y, int z);
@@ -221,7 +224,7 @@ class LocalPlayer : public Player
 
     // virtual void sendMessage(ChatMessageComponent *message); // 4J: removed
     virtual Pos getCommandSenderWorldPosition();
-    virtual shared_ptr<ItemInstance> getCarriedItem();
+    virtual std::shared_ptr<ItemInstance> getCarriedItem();
     virtual void playSound(int soundId, float volume, float pitch);
     bool isRidingJumpable();
     float getJumpRidingScale();
@@ -243,9 +246,9 @@ class LocalPlayer : public Player
 
     float getAndResetChangeDimensionTimer();
 
-    virtual void handleCollectItem(shared_ptr<ItemInstance> item);
-    void SetPlayerAdditionalModelParts(vector<ModelPart *> pAdditionalModelParts);
+    virtual void handleCollectItem(std::shared_ptr<ItemInstance> item);
+    void SetPlayerAdditionalModelParts(std::vector<ModelPart *> pAdditionalModelParts);
 
   private:
-    vector<ModelPart *> m_pAdditionalModelParts;
+    std::vector<ModelPart *> m_pAdditionalModelParts;
 };

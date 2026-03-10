@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_anvil.h"
 #include "..\UI\IUIScene_AnvilMenu.h"
 #include "Common\XUI\XUI_Ctrl_4JEdit.h"

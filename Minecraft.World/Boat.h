@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "Entity.h"
 
@@ -14,7 +14,7 @@ class Boat : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_BOAT;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new Boat(level);

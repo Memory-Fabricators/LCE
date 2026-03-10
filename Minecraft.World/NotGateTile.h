@@ -1,6 +1,5 @@
 #pragma once
 #include "TorchTile.h"
-using namespace std;
 
 class Random;
 

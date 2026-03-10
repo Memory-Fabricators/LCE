@@ -1,6 +1,4 @@
 #pragma once
-using namespace std;
-
 #include "TutorialTask.h"
 
 class Stat;

@@ -1,6 +1,6 @@
 #pragma once
+#include <string>
 class Font;
-using namespace std;
 
 class GuiComponent
 {
@@ -15,7 +15,7 @@ class GuiComponent
 
   public:
     GuiComponent(); // 4J added
-    void drawCenteredString(Font *font, const wstring &str, int x, int y, int color);
-    void drawString(Font *font, const wstring &str, int x, int y, int color);
+    void drawCenteredString(Font *font, const std::wstring &str, int x, int y, int color);
+    void drawString(Font *font, const std::wstring &str, int x, int y, int color);
     void blit(int x, int y, int sx, int sy, int w, int h);
 };

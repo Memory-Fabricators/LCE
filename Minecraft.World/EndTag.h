@@ -11,8 +11,12 @@ class EndTag : public Tag
     {
     }
 
-    void load(DataInput *dis, int tagDepth) {};
-    void write(DataOutput *dos) {};
+    void load(DataInput *dis, int tagDepth)
+    {
+    }
+    void write(DataOutput *dos)
+    {
+    }
 
     byte getId()
     {

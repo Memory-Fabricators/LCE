@@ -10,26 +10,28 @@
 #include "ShortTag.h"
 #include "StringTag.h"
 #include "Tag.h"
+#include <cstddef>
 #include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 class CompoundTag : public Tag
 {
   private:
-    unordered_map<wstring, Tag *> tags;
+    std::unordered_map<std::wstring, Tag *> tags;
 
   public:
     CompoundTag() : Tag(L"")
     {
     }
-    CompoundTag(const wstring &name) : Tag(name)
+    CompoundTag(const std::wstring &name) : Tag(name)
     {
     }
 
     void write(DataOutput *dos)
     {
-        AUTO_VAR(itEnd, tags.end());
-        for (unordered_map<wstring, Tag *>::iterator it = tags.begin(); it != itEnd; it++)
+        auto itEnd = tags.end();
+        for (auto it = tags.begin(); it != itEnd; it++)
         {
             Tag::writeNamedTag(it->second, dos);
         }
@@ -42,7 +44,7 @@ class CompoundTag : public Tag
         {
 #ifndef _CONTENT_PACKAGE
             printf("Tried to read NBT tag with too high complexity, depth > %d", MAX_DEPTH);
-            __debugbreak();
+            __builtin_trap();
 #endif
             return;
         }
@@ -55,20 +57,20 @@ class CompoundTag : public Tag
         delete tag;
     }
 
-    vector<Tag *> *getAllTags() // 4J - was collection
+    std::vector<Tag *> *getAllTags() // 4J - was collection
     {
         // 4J - was return tags.values();
-        vector<Tag *> *ret = new vector<Tag *>;
+        std::vector<Tag *> *ret = new std::vector<Tag *>;
 
-        AUTO_VAR(itEnd, tags.end());
-        for (unordered_map<wstring, Tag *>::iterator it = tags.begin(); it != itEnd; it++)
+        auto itEnd = tags.end();
+        for (auto it = tags.begin(); it != itEnd; it++)
         {
             ret->push_back(it->second);
         }
         return ret;
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Compound;
     }
@@ -78,7 +80,7 @@ class CompoundTag : public Tag
         tags[name] = tag->setName(name);
     }
 
-    void putByte(const std::wstring &name, byte value)
+    void putByte(const std::wstring &name, std::byte value)
     {
         tags[name] = (new ByteTag(name, value));
     }
@@ -93,7 +95,7 @@ class CompoundTag : public Tag
         tags[name] = (new IntTag(name, value));
     }
 
-    void putLong(const std::wstring &name, __int64 value)
+    void putLong(const std::wstring &name, std::int64_t value)
     {
         tags[name] = (new LongTag(name, value));
     }
@@ -113,7 +115,7 @@ class CompoundTag : public Tag
         tags[name] = (new StringTag(name, value));
     }
 
-    void putByteArray(const std::wstring &name, std::vector<std::uint8_t> value)
+    void putByteArray(const std::wstring &name, std::vector<std::byte> value)
     {
         tags[name] = (new ByteArrayTag(name, value));
     }
@@ -125,17 +127,17 @@ class CompoundTag : public Tag
 
     void putCompound(const std::wstring &name, CompoundTag *value)
     {
-        tags[name] = value->setName(wstring(name));
+        tags[name] = value->setName(std::wstring(name));
     }
 
     void putBoolean(const std::wstring &name, bool val)
     {
-        putByte(name, val ? (byte)1 : 0);
+        putByte(name, static_cast<std::byte>(val ? 1 : 0));
     }
 
     Tag *get(const std::wstring &name)
     {
-        AUTO_VAR(it, tags.find(name));
+        auto it = tags.find(name);
         if (it != tags.end())
         {
             return it->second;
@@ -148,13 +150,13 @@ class CompoundTag : public Tag
         return tags.find(name) != tags.end();
     }
 
-    byte getByte(const std::wstring &name)
+    std::byte getByte(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
-            return (byte)0;
+            return static_cast<std::byte>(0);
         }
-        return ((ByteTag *)tags[name])->data;
+        return static_cast<std::byte>(static_cast<ByteTag *>(tags[name])->data);
     }
 
     short getShort(const std::wstring &name)
@@ -163,7 +165,7 @@ class CompoundTag : public Tag
         {
             return (short)0;
         }
-        return ((ShortTag *)tags[name])->data;
+        return static_cast<short>(static_cast<ShortTag *>(tags[name])->data);
     }
 
     int getInt(const std::wstring &name)
@@ -172,16 +174,16 @@ class CompoundTag : public Tag
         {
             return (int)0;
         }
-        return ((IntTag *)tags[name])->data;
+        return static_cast<int>(static_cast<IntTag *>(tags[name])->data);
     }
 
-    __int64 getLong(const std::wstring &name)
+    std::int64_t getLong(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
-            return (__int64)0;
+            return 0;
         }
-        return ((LongTag *)tags[name])->data;
+        return static_cast<std::int64_t>(static_cast<LongTag *>(tags[name])->data);
     }
 
     float getFloat(const std::wstring &name)
@@ -190,7 +192,7 @@ class CompoundTag : public Tag
         {
             return (float)0;
         }
-        return ((FloatTag *)tags[name])->data;
+        return static_cast<float>(static_cast<FloatTag *>(tags[name])->data);
     }
 
     double getDouble(const std::wstring &name)
@@ -199,37 +201,37 @@ class CompoundTag : public Tag
         {
             return (double)0;
         }
-        return ((DoubleTag *)tags[name])->data;
+        return static_cast<double>(static_cast<DoubleTag *>(tags[name])->data);
     }
 
-    wstring getString(const std::wstring &name)
+    std::wstring getString(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
-            return wstring(L"");
+            return std::wstring(L"");
         }
-        return ((StringTag *)tags[name])->data;
+        return static_cast<std::wstring>(static_cast<StringTag *>(tags[name])->data);
     }
 
-    byteArray getByteArray(const wstring &name)
+    std::vector<std::byte> getByteArray(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
-            return byteArray();
+            return std::vector<std::byte>();
         }
-        return ((ByteArrayTag *)tags[name])->data;
+        return static_cast<std::vector<std::byte>>(static_cast<ByteArrayTag *>(tags[name])->data);
     }
 
-    intArray getIntArray(const wstring &name)
+    std::vector<int> getIntArray(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
-            return intArray();
+            return std::vector<int>();
         }
-        return ((IntArrayTag *)tags[name])->data;
+        return static_cast<std::vector<int>>(static_cast<IntArrayTag *>(tags[name])->data);
     }
 
-    CompoundTag *getCompound(const wstring &name)
+    CompoundTag *getCompound(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
@@ -238,7 +240,7 @@ class CompoundTag : public Tag
         return (CompoundTag *)tags[name];
     }
 
-    ListTag<Tag> *getList(const wstring &name)
+    ListTag<Tag> *getList(const std::wstring &name)
     {
         if (tags.find(name) == tags.end())
         {
@@ -247,14 +249,14 @@ class CompoundTag : public Tag
         return (ListTag<Tag> *)tags[name];
     }
 
-    bool getBoolean(const wstring &string)
+    bool getBoolean(const std::wstring &string)
     {
-        return getByte(string) != 0;
+        return getByte(string) != static_cast<std::byte>(0);
     }
 
-    void remove(const wstring &name)
+    void remove(const std::wstring &name)
     {
-        AUTO_VAR(it, tags.find(name));
+        auto it = tags.find(name);
         if (it != tags.end())
         {
             tags.erase(it);
@@ -262,15 +264,15 @@ class CompoundTag : public Tag
         // tags.remove(name);
     }
 
-    wstring toString()
+    std::wstring toString()
     {
         static const int bufSize = 32;
         static wchar_t buf[bufSize];
         swprintf(buf, bufSize, L"%d entries", tags.size());
-        return wstring(buf);
+        return std::wstring(buf);
     }
 
-    void print(char *prefix, ostream out)
+    void print(char *prefix, std::ostream &out)
     {
         /*
         Tag::print(prefix, out);
@@ -297,8 +299,8 @@ class CompoundTag : public Tag
 
     virtual ~CompoundTag()
     {
-        AUTO_VAR(itEnd, tags.end());
-        for (AUTO_VAR(it, tags.begin()); it != itEnd; it++)
+        auto itEnd = tags.end();
+        for (auto it = tags.begin(); it != itEnd; it++)
         {
             delete it->second;
         }
@@ -308,8 +310,8 @@ class CompoundTag : public Tag
     {
         CompoundTag *tag = new CompoundTag(getName());
 
-        AUTO_VAR(itEnd, tags.end());
-        for (AUTO_VAR(it, tags.begin()); it != itEnd; it++)
+        auto itEnd = tags.end();
+        for (auto it = tags.begin(); it != itEnd; it++)
         {
             tag->put((wchar_t *)it->first.c_str(), it->second->copy());
         }
@@ -325,10 +327,10 @@ class CompoundTag : public Tag
             if (tags.size() == o->tags.size())
             {
                 bool equal = true;
-                AUTO_VAR(itEnd, tags.end());
-                for (AUTO_VAR(it, tags.begin()); it != itEnd; it++)
+                auto itEnd = tags.end();
+                for (auto it = tags.begin(); it != itEnd; it++)
                 {
-                    AUTO_VAR(itFind, o->tags.find(it->first));
+                    auto itFind = o->tags.find(it->first);
                     if (itFind == o->tags.end() || !it->second->equals(itFind->second))
                     {
                         equal = false;

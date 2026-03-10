@@ -2,9 +2,9 @@
 
 #include "Definitions.h"
 #include "Vec3.h"
+#include <string>
 
 class HitResult;
-using namespace std;
 
 class AABB
 {
@@ -18,7 +18,7 @@ class AABB
         ThreadStorage();
         ~ThreadStorage();
     };
-    static DWORD tlsIdx;
+    static thread_local int tlsIdx;
     static ThreadStorage *tlsDefault;
 
   public:
@@ -65,5 +65,5 @@ class AABB
     bool containsY(Vec3 *v);
     bool containsZ(Vec3 *v);
     void set(AABB *b);
-    wstring toString();
+    std::wstring toString();
 };

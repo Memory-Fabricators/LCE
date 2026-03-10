@@ -1,10 +1,15 @@
 #pragma once
-using namespace std;
+#include "Class.h"
 #include "Definitions.h"
 #include "DoubleTag.h"
 #include "FloatTag.h"
+#include "ItemInstance.h"
 #include "ListTag.h"
+#include "Tile.h"
 #include "Vec3.h"
+#include <cstddef>
+#include <memory>
+#include <string>
 
 class LivingEntity;
 class LightningBolt;
@@ -32,7 +37,7 @@ enum EEntityDamageType
     eEntityDamageType_Cactus,
 };
 
-class Entity : public enable_shared_from_this<Entity>
+class Entity : public std::enable_shared_from_this<Entity>
 {
     friend class Gui; // 4J Stu - Added to be able to access the shared flag functions and constants, without making them publicly available to everything
   public:
@@ -49,7 +54,7 @@ class Entity : public enable_shared_from_this<Entity>
     }
 
   public:
-    static const wstring RIDING_TAG;
+    static const std::wstring RIDING_TAG;
     static const short TOTAL_AIR_SUPPLY = 20 * 15;
 
   private:
@@ -61,8 +66,8 @@ class Entity : public enable_shared_from_this<Entity>
     double viewScale;
 
     bool blocksBuilding;
-    weak_ptr<Entity> rider; // Changed to weak to avoid circular dependency between rider/riding entity
-    shared_ptr<Entity> riding;
+    std::weak_ptr<Entity> rider; // Changed to weak to avoid circular dependency between rider/riding entity
+    std::shared_ptr<Entity> riding;
     bool forcedLoading;
 
     Level *level;
@@ -126,7 +131,7 @@ class Entity : public enable_shared_from_this<Entity>
     bool fireImmune;
 
     // values that need to be sent to clients in SMP
-    shared_ptr<SynchedEntityData> entityData;
+    std::shared_ptr<SynchedEntityData> entityData;
 
   private:
     // shared flags that are sent to clients (max 8)
@@ -164,7 +169,7 @@ class Entity : public enable_shared_from_this<Entity>
 
   private:
     bool invulnerable;
-    wstring uuid;
+    std::wstring uuid;
 
   protected:
     // 4J Added so that client side simulations on the host are not affected by zero-lag
@@ -184,7 +189,7 @@ class Entity : public enable_shared_from_this<Entity>
     virtual void defineSynchedData() = 0;
 
   public:
-    shared_ptr<SynchedEntityData> getEntityData();
+    std::shared_ptr<SynchedEntityData> getEntityData();
 
     /*
     public bool equals(Object obj) {
@@ -269,12 +274,12 @@ class Entity : public enable_shared_from_this<Entity>
     virtual void setLevel(Level *level);
     void absMoveTo(double x, double y, double z, float yRot, float xRot);
     void moveTo(double x, double y, double z, float yRot, float xRot);
-    float distanceTo(shared_ptr<Entity> e);
+    float distanceTo(std::shared_ptr<Entity> e);
     double distanceToSqr(double x2, double y2, double z2);
     double distanceTo(double x2, double y2, double z2);
-    double distanceToSqr(shared_ptr<Entity> e);
-    virtual void playerTouch(shared_ptr<Player> player);
-    virtual void push(shared_ptr<Entity> e);
+    double distanceToSqr(std::shared_ptr<Entity> e);
+    virtual void playerTouch(std::shared_ptr<Player> player);
+    virtual void push(std::shared_ptr<Entity> e);
     virtual void push(double xa, double ya, double za);
 
   protected:
@@ -287,7 +292,7 @@ class Entity : public enable_shared_from_this<Entity>
     virtual bool isPickable();
     virtual bool isPushable();
     virtual bool isShootable();
-    virtual void awardKillScore(shared_ptr<Entity> victim, int score);
+    virtual void awardKillScore(std::shared_ptr<Entity> victim, int score);
     virtual bool shouldRender(Vec3 *c);
     virtual bool shouldRenderAtSqrDistance(double distance);
     virtual bool isCreativeModeAllowed();
@@ -298,7 +303,7 @@ class Entity : public enable_shared_from_this<Entity>
 
   protected:
     virtual bool repositionEntityAfterLoad();
-    const wstring getEncodeId();
+    const std::wstring getEncodeId();
 
   public:
     virtual void readAdditionalSaveData(CompoundTag *tag) = 0;
@@ -315,29 +320,29 @@ class Entity : public enable_shared_from_this<Entity>
 
   public:
     virtual float getShadowHeightOffs();
-    shared_ptr<ItemEntity> spawnAtLocation(int resource, int count);
-    shared_ptr<ItemEntity> spawnAtLocation(int resource, int count, float yOffs);
-    shared_ptr<ItemEntity> spawnAtLocation(shared_ptr<ItemInstance> itemInstance, float yOffs);
+    std::shared_ptr<ItemEntity> spawnAtLocation(int resource, int count);
+    std::shared_ptr<ItemEntity> spawnAtLocation(int resource, int count, float yOffs);
+    std::shared_ptr<ItemEntity> spawnAtLocation(std::shared_ptr<ItemInstance> itemInstance, float yOffs);
     virtual bool isAlive();
     virtual bool isInWall();
-    virtual bool interact(shared_ptr<Player> player);
-    virtual AABB *getCollideAgainstBox(shared_ptr<Entity> entity);
+    virtual bool interact(std::shared_ptr<Player> player);
+    virtual AABB *getCollideAgainstBox(std::shared_ptr<Entity> entity);
 
     virtual void rideTick();
     virtual void positionRider();
     virtual double getRidingHeight();
     virtual double getRideHeight();
-    virtual void ride(shared_ptr<Entity> e);
+    virtual void ride(std::shared_ptr<Entity> e);
     virtual void lerpTo(double x, double y, double z, float yRot, float xRot, int steps);
     virtual float getPickRadius();
     virtual Vec3 *getLookAngle();
     virtual void handleInsidePortal();
     virtual int getDimensionChangingDelay();
     virtual void lerpMotion(double xd, double yd, double zd);
-    virtual void handleEntityEvent(byte eventId);
+    virtual void handleEntityEvent(std::byte eventId);
     virtual void animateHurt();
-    virtual ItemInstanceArray getEquipmentSlots();                         // ItemInstance[]
-    virtual void setEquippedSlot(int slot, shared_ptr<ItemInstance> item); // 4J Stu - Brought forward change from 1.3 to fix #64688 - Customer Encountered: TU7: Content: Art: Aura of enchanted item is not displayed for other players in online game
+    virtual std::vector<std::shared_ptr<ItemInstance>> getEquipmentSlots();     // ItemInstance[]
+    virtual void setEquippedSlot(int slot, std::shared_ptr<ItemInstance> item); // 4J Stu - Brought forward change from 1.3 to fix #64688 - Customer Encountered: TU7: Content: Art: Aura of enchanted item is not displayed for other players in online game
     virtual bool isOnFire();
     virtual bool isRiding();
     virtual bool isSneaking();
@@ -347,7 +352,7 @@ class Entity : public enable_shared_from_this<Entity>
     virtual bool isSprinting();
     virtual void setSprinting(bool value);
     virtual bool isInvisible();
-    virtual bool isInvisibleTo(shared_ptr<Player> plr);
+    virtual bool isInvisibleTo(std::shared_ptr<Player> plr);
     virtual void setInvisible(bool value);
     virtual bool isUsingItemFlag();
     virtual void setUsingItemFlag(bool value);
@@ -367,7 +372,7 @@ class Entity : public enable_shared_from_this<Entity>
     void setAirSupply(int supply);
 
     virtual void thunderHit(const LightningBolt *lightningBolt);
-    virtual void killed(shared_ptr<LivingEntity> mob);
+    virtual void killed(std::shared_ptr<LivingEntity> mob);
 
   protected:
     bool checkInTile(double x, double y, double z);
@@ -375,7 +380,7 @@ class Entity : public enable_shared_from_this<Entity>
   public:
     virtual void makeStuckInWeb();
 
-    virtual wstring getAName();
+    virtual std::wstring getAName();
 
     // 4J - added to manage allocation of small ids
   private:
@@ -393,7 +398,7 @@ class Entity : public enable_shared_from_this<Entity>
     static int extraWanderIds[EXTRA_WANDER_MAX];
     static int extraWanderCount;
     static int extraWanderTicks;
-    static DWORD tlsIdx;
+    static std::size_t tlsIdx;
 
   public:
     static void tickExtraWandering();
@@ -404,15 +409,15 @@ class Entity : public enable_shared_from_this<Entity>
     bool isExtraWanderingEnabled();
     int getWanderingQuadrant();
 
-    virtual vector<shared_ptr<Entity>> *getSubEntities();
-    virtual bool is(shared_ptr<Entity> other);
+    virtual std::vector<std::shared_ptr<Entity>> *getSubEntities();
+    virtual bool is(std::shared_ptr<Entity> other);
     virtual float getYHeadRot();
     virtual void setYHeadRot(float yHeadRot);
     virtual bool isAttackable();
-    virtual bool skipAttackInteraction(shared_ptr<Entity> source);
+    virtual bool skipAttackInteraction(std::shared_ptr<Entity> source);
     virtual bool isInvulnerable();
-    virtual void copyPosition(shared_ptr<Entity> target);
-    virtual void restoreFrom(shared_ptr<Entity> oldEntity, bool teleporting);
+    virtual void copyPosition(std::shared_ptr<Entity> target);
+    virtual void restoreFrom(std::shared_ptr<Entity> oldEntity, bool teleporting);
     virtual void changeDimension(int i);
     virtual float getTileExplosionResistance(Explosion *explosion, Level *level, int x, int y, int z, Tile *tile);
     virtual bool shouldTileExplode(Explosion *explosion, Level *level, int x, int y, int z, int id, float power);
@@ -420,11 +425,11 @@ class Entity : public enable_shared_from_this<Entity>
     virtual int getPortalEntranceDir();
     virtual bool isIgnoringTileTriggers();
     virtual bool displayFireAnimation();
-    virtual void setUUID(const wstring &UUID);
-    virtual wstring getUUID();
+    virtual void setUUID(const std::wstring &UUID);
+    virtual std::wstring getUUID();
     virtual bool isPushedByWater();
-    virtual wstring getDisplayName();
-    virtual wstring getNetworkName(); // 4J: Added
+    virtual std::wstring getDisplayName();
+    virtual std::wstring getNetworkName(); // 4J: Added
 
   private:
     unsigned int m_uiAnimOverrideBitmask;

@@ -8,7 +8,7 @@ class NetherSphere : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_NETHER_SPHERE;
-    };
+    }
 
   public:
     NetherSphere(Level *level);

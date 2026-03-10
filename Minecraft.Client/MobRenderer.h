@@ -1,7 +1,7 @@
 #pragma once
 #include "LivingEntityRenderer.h"
 class Mob;
-using namespace std;
+;
 
 // This was used in MobRenderer but lots of code moved to LivingEntity and I haven't put this back yet
 /*#define PLAYER_NAME_READABLE_FULLSCREEN 16

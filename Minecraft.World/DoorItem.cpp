@@ -1,4 +1,4 @@
-using namespace std;
+;
 
 #include "DoorItem.h"
 #include "Facing.h"

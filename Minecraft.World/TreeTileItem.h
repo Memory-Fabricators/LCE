@@ -1,6 +1,4 @@
 #pragma once
-using namespace std;
-
 #include "TileItem.h"
 
 class TreeTileItem : public TileItem

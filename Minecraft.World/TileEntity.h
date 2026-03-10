@@ -1,16 +1,18 @@
 #pragma once
-using namespace std;
+#include <functional>
+#include <memory>
 
-#include "..\Minecraft.World\JavaIntHash.h"
 #include "HashExtension.h"
+#include "JavaIntHash.h"
+#include "Tile.h"
 
 class Level;
 class Packet;
 class CompoundTag;
 
-typedef TileEntity *(*tileEntityCreateFn)();
+// typedef TileEntity *(*tileEntityCreateFn)();
 
-class TileEntity : public enable_shared_from_this<TileEntity>
+class TileEntity : public std::enable_shared_from_this<TileEntity>
 {
   public:
     static void staticCtor();
@@ -20,11 +22,11 @@ class TileEntity : public enable_shared_from_this<TileEntity>
     }
 
   private:
-    typedef unordered_map<wstring, tileEntityCreateFn> idToCreateMapType;
+    typedef unordered_map<wstring, std::function<TileEntity *()>> idToCreateMapType;
     typedef unordered_map<eINSTANCEOF, wstring, eINSTANCEOFKeyHash, eINSTANCEOFKeyEq> classToIdMapType;
     static idToCreateMapType idCreateMap;
     static classToIdMapType classIdMap;
-    static void setId(tileEntityCreateFn createFn, eINSTANCEOF clas, wstring id);
+    static void setId(std::function<TileEntity *()> createFn, eINSTANCEOF clas, wstring id);
     bool remove;
     unsigned char renderRemoveStage; // 4J added
 

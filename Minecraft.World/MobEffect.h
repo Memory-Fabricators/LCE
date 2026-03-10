@@ -1,7 +1,10 @@
 #pragma once
-using namespace std;
 
 #include "AttributeModifier.h"
+#include "Common/App_enums.h"
+#include "LivingEntity.h"
+#include <string>
+#include <unordered_map>
 
 class Mob;
 class MobEffectInstance;
@@ -78,25 +81,25 @@ class MobEffect
     static void staticCtor();
 
   private:
-    unordered_map<Attribute *, AttributeModifier *> attributeModifiers;
+    std::unordered_map<Attribute *, AttributeModifier *> attributeModifiers;
     int descriptionId;
     int m_postfixDescriptionId; // 4J added
     EMobEffectIcon icon;        // 4J changed type
     const bool _isHarmful;
     double durationModifier;
     bool _isDisabled;
-    const eMinecraftColour color;
+    const MinecraftColor color;
 
   protected:
-    MobEffect(int id, bool isHarmful, eMinecraftColour color);
+    MobEffect(int id, bool isHarmful, MinecraftColor color);
 
     // MobEffect *setIcon(int xPos, int yPos);
     MobEffect *setIcon(EMobEffectIcon icon);
 
   public:
     virtual int getId();
-    virtual void applyEffectTick(shared_ptr<LivingEntity> mob, int amplification);
-    virtual void applyInstantenousEffect(shared_ptr<LivingEntity> source, shared_ptr<LivingEntity> mob, int amplification, double scale);
+    virtual void applyEffectTick(std::shared_ptr<LivingEntity> mob, int amplification);
+    virtual void applyInstantenousEffect(std::shared_ptr<LivingEntity> source, std::shared_ptr<LivingEntity> mob, int amplification, double scale);
     virtual bool isInstantenous();
     virtual bool isDurationEffectTick(int remainingDuration, int amplification);
 
@@ -110,7 +113,7 @@ class MobEffect
     bool hasIcon();
     EMobEffectIcon getIcon(); // 4J changed return type
     bool isHarmful();
-    static wstring formatDuration(MobEffectInstance *instance);
+    static std::wstring formatDuration(MobEffectInstance *instance);
 
   protected:
     MobEffect *setDurationModifier(double durationModifier);
@@ -119,11 +122,11 @@ class MobEffect
     virtual double getDurationModifier();
     virtual MobEffect *setDisabled();
     virtual bool isDisabled();
-    virtual eMinecraftColour getColor();
+    virtual MinecraftColor getColor();
 
     virtual MobEffect *addAttributeModifier(Attribute *attribute, eMODIFIER_ID id, double amount, int operation);
-    virtual unordered_map<Attribute *, AttributeModifier *> *getAttributeModifiers();
-    virtual void removeAttributeModifiers(shared_ptr<LivingEntity> entity, BaseAttributeMap *attributes, int amplifier);
-    virtual void addAttributeModifiers(shared_ptr<LivingEntity> entity, BaseAttributeMap *attributes, int amplifier);
+    virtual std::unordered_map<Attribute *, AttributeModifier *> *getAttributeModifiers();
+    virtual void removeAttributeModifiers(std::shared_ptr<LivingEntity> entity, BaseAttributeMap *attributes, int amplifier);
+    virtual void addAttributeModifiers(std::shared_ptr<LivingEntity> entity, BaseAttributeMap *attributes, int amplifier);
     virtual double getAttributeModifierValue(int amplifier, AttributeModifier *original);
 };

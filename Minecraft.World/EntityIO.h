@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "Entity.h"
 #include "JavaIntHash.h"
@@ -14,11 +14,11 @@ class EntityIO
     {
       public:
         int id;
-        eMinecraftColour eggColor1;
-        eMinecraftColour eggColor2;
+        MinecraftColor eggColor1;
+        MinecraftColor eggColor2;
         int nameId; // 4J Added
 
-        SpawnableMobInfo(int id, eMinecraftColour eggColor1, eMinecraftColour eggColor2, int nameId)
+        SpawnableMobInfo(int id, MinecraftColor eggColor1, MinecraftColor eggColor2, int nameId)
         {
             this->id = id;
             this->eggColor1 = eggColor1;
@@ -40,7 +40,7 @@ class EntityIO
 
   private:
     static void setId(entityCreateFn createFn, eINSTANCEOF clas, const wstring &id, int idNum);
-    static void setId(entityCreateFn createFn, eINSTANCEOF clas, const wstring &id, int idNum, eMinecraftColour color1, eMinecraftColour color2, int nameId);
+    static void setId(entityCreateFn createFn, eINSTANCEOF clas, const wstring &id, int idNum, MinecraftColor color1, MinecraftColor color2, int nameId);
 
   public:
     static void staticCtor();

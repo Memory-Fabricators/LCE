@@ -1,19 +1,21 @@
 #pragma once
-using namespace std;
+
 #include "Tag.h"
+#include <string>
+#include <vector>
 
 template <class T>
 class ListTag : public Tag
 {
   private:
-    vector<Tag *> list;
-    byte type;
+    std::vector<Tag *> list;
+    std::byte type;
 
   public:
     ListTag() : Tag(L"")
     {
     }
-    ListTag(const wstring &name) : Tag(name)
+    ListTag(const std::wstring &name) : Tag(name)
     {
     }
 
@@ -25,14 +27,14 @@ class ListTag : public Tag
         }
         else
         {
-            type = 1;
+            type = static_cast<std::byte>(1);
         }
 
         dos->writeByte(type);
         dos->writeInt((int)list.size());
 
-        AUTO_VAR(itEnd, list.end());
-        for (AUTO_VAR(it, list.begin()); it != itEnd; it++)
+        auto itEnd = list.end();
+        for (auto it = list.begin(); it != itEnd; it++)
         {
             (*it)->write(dos);
         }
@@ -44,7 +46,7 @@ class ListTag : public Tag
         {
 #ifndef _CONTENT_PACKAGE
             printf("Tried to read NBT tag with too high complexity, depth > %d", MAX_DEPTH);
-            __debugbreak();
+            __builtin_debugtrap();
 #endif
             return;
         }
@@ -60,34 +62,34 @@ class ListTag : public Tag
         }
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_List;
     }
 
-    wstring toString()
+    std::wstring toString()
     {
         static wchar_t buf[64];
         swprintf(buf, 64, L"%d entries of type %ls", list.size(), Tag::getTagName(type));
-        return wstring(buf);
+        return std::wstring(buf);
     }
 
-    void print(char *prefix, ostream out)
+    void print(char *prefix, std::ostream &out)
     {
         Tag::print(prefix, out);
 
-        out << prefix << "{" << endl;
+        out << prefix << "{" << std::endl;
 
         char *newPrefix = new char[strlen(prefix) + 4];
         strcpy(newPrefix, prefix);
         strcat(newPrefix, "   ");
-        AUTO_VAR(itEnd, list.end());
-        for (AUTO_VAR(it, list.begin()); it != itEnd; it++)
+        auto itEnd = list.end();
+        for (auto it = list.begin(); it != itEnd; it++)
         {
             (*it)->print(newPrefix, out);
         }
         delete[] newPrefix;
-        out << prefix << "}" << endl;
+        out << prefix << "}" << std::endl;
     }
 
     void add(T *tag)
@@ -113,8 +115,8 @@ class ListTag : public Tag
 
     virtual ~ListTag()
     {
-        AUTO_VAR(itEnd, list.end());
-        for (AUTO_VAR(it, list.begin()); it != itEnd; it++)
+        auto itEnd = list.end();
+        for (auto it = list.begin(); it != itEnd; it++)
         {
             delete *it;
         }
@@ -124,8 +126,8 @@ class ListTag : public Tag
     {
         ListTag<T> *res = new ListTag<T>(getName());
         res->type = type;
-        AUTO_VAR(itEnd, list.end());
-        for (AUTO_VAR(it, list.begin()); it != itEnd; it++)
+        auto itEnd = list.end();
+        for (auto it = list.begin(); it != itEnd; it++)
         {
             T *copy = (T *)(*it)->copy();
             res->list.push_back(copy);
@@ -144,12 +146,12 @@ class ListTag : public Tag
                 if (list.size() == o->list.size())
                 {
                     equal = true;
-                    AUTO_VAR(itEnd, list.end());
+                    auto itEnd = list.end();
                     // 4J Stu - Pretty inefficient method, but I think we can live with it give how often it will happen, and the small sizes of the data sets
-                    for (AUTO_VAR(it, list.begin()); it != itEnd; ++it)
+                    for (auto it = list.begin(); it != itEnd; ++it)
                     {
                         bool thisMatches = false;
-                        for (AUTO_VAR(it2, o->list.begin()); it2 != o->list.end(); ++it2)
+                        for (auto it2 = o->list.begin(); it2 != o->list.end(); ++it2)
                         {
                             if ((*it)->equals(*it2))
                             {

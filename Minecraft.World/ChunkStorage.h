@@ -10,6 +10,10 @@ class ChunkStorage
     virtual void saveEntities(Level *level, LevelChunk *levelChunk) = 0;
     virtual void tick() = 0;
     virtual void flush() = 0;
-    virtual void WaitForAll() {};                // 4J Added
-    virtual void WaitIfTooManyQueuedChunks() {}; // 4J Added
+    virtual void WaitForAll()
+    {
+    } // 4J Added
+    virtual void WaitIfTooManyQueuedChunks()
+    {
+    } // 4J Added
 };

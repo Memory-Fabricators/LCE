@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "Player.h"
 #include "net.minecraft.world.inventory.ContainerListener.h"

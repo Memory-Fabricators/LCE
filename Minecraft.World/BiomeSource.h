@@ -3,6 +3,7 @@
 #include "BiomeCache.h"
 #include "BiomeSource.h"
 #include "net.minecraft.world.level.levelgen.synth.h"
+#include <cstdint>
 
 class ChunkPos;
 class Level;
@@ -13,8 +14,8 @@ class LevelType;
 class BiomeSource
 {
   private:
-    shared_ptr<Layer> layer;
-    shared_ptr<Layer> zoomedLayer;
+    std::shared_ptr<Layer> layer;
+    std::shared_ptr<Layer> zoomedLayer;
 
   public:
     static const int CACHE_DIAMETER = 256;
@@ -22,11 +23,11 @@ class BiomeSource
   private:
     BiomeCache *cache;
 
-    vector<Biome *> playerSpawnBiomes;
+    std::vector<Biome *> playerSpawnBiomes;
 
   protected:
     void _init();
-    void _init(__int64 seed, LevelType *generator);
+    void _init(std::int64_t seed, LevelType *generator);
     BiomeSource();
 
   public:

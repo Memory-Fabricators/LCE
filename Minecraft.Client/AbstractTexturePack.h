@@ -1,18 +1,20 @@
 #pragma once
-using namespace std;
 
 #include "TexturePack.h"
+#include <filesystem>
+#include <vector>
+#include <string>
 
 class BufferedImage;
 
 class AbstractTexturePack : public TexturePack
 {
   private:
-    const DWORD id;
+    const std::size_t id;
     const wstring name;
 
   protected:
-    File *file;
+    std::filesystem::path file;
     wstring texname;
     wstring m_wsWorldName;
 
@@ -22,8 +24,8 @@ class AbstractTexturePack : public TexturePack
     PBYTE m_iconData;
     DWORD m_iconSize;
 
-    PBYTE m_comparisonData;
-    DWORD m_comparisonSize;
+    std::vector<char> m_comparisonData;
+    std::size_t m_comparisonSize;
 
     TexturePack *fallback;
 
@@ -36,7 +38,7 @@ class AbstractTexturePack : public TexturePack
     int textureId;
 
   protected:
-    AbstractTexturePack(DWORD id, File *file, const wstring &name, TexturePack *fallback);
+    AbstractTexturePack(std::size_t id, const std::filesystem::path &file, const wstring &name, TexturePack *fallback);
 
   private:
     static wstring trim(wstring line);
@@ -60,7 +62,7 @@ class AbstractTexturePack : public TexturePack
     virtual void load(Textures *textures);
     virtual bool hasFile(const wstring &name, bool allowFallback);
     virtual bool hasFile(const wstring &name) = 0;
-    virtual DWORD getId();
+    virtual std::size_t getId();
     virtual wstring getName();
     virtual wstring getDesc1();
     virtual wstring getDesc2();

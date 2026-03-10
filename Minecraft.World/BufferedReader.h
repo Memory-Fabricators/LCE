@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Reader.h"
+#include <string>
 
 class BufferedReader : public Reader
 {
@@ -23,5 +24,5 @@ class BufferedReader : public Reader
     virtual void close();
     virtual int read();
     virtual int read(wchar_t cbuf[], unsigned int off, unsigned int len);
-    wstring readLine();
+    std::wstring readLine();
 };

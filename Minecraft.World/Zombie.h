@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 #include "MobGroupData.h"
 #include "Monster.h"

@@ -1,6 +1,5 @@
 #include "LeashKnotModel.h"
 #include "ModelPart.h"
-#include "stdafx.h";
 
 LeashKnotModel::LeashKnotModel()
 {

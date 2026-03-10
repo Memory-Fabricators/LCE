@@ -51,5 +51,7 @@ class EmptyLevelChunk : public LevelChunk
     bool testSetBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p);                         // 4J added
     Random *getRandom(__int64 l);
     bool isEmpty();
-    virtual void reSyncLighting() {}; // 4J added
+    virtual void reSyncLighting()
+    {
+    } // 4J added
 };

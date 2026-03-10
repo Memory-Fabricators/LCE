@@ -8,7 +8,7 @@ class MinecartChest : public MinecartContainer
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_CHEST;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartChest(level);

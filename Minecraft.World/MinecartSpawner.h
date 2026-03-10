@@ -9,7 +9,7 @@ class MinecartSpawner : public Minecart
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_SPAWNER;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartSpawner(level);

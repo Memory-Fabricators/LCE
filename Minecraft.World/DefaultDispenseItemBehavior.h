@@ -20,8 +20,12 @@ class DefaultDispenseItemBehavior : public DispenseItemBehavior
     };
 
   public:
-    DefaultDispenseItemBehavior() {};
-    virtual ~DefaultDispenseItemBehavior() {};
+    DefaultDispenseItemBehavior()
+    {
+    }
+    virtual ~DefaultDispenseItemBehavior()
+    {
+    }
     virtual shared_ptr<ItemInstance> dispense(BlockSource *source, shared_ptr<ItemInstance> dispensed);
 
   protected:

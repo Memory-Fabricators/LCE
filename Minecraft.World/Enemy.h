@@ -7,7 +7,7 @@ class Enemy : public Creature
   public:
     class EnemyEntitySelector : public EntitySelector
     {
-        bool matches(shared_ptr<Entity> entity) const;
+        bool matches(std::shared_ptr<Entity> entity) const;
     };
 
     static const int XP_REWARD_NONE = 0;

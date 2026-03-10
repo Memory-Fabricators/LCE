@@ -8,7 +8,7 @@ class MinecartTNT : public Minecart
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_TNT;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartTNT(level);

@@ -1,7 +1,6 @@
 #pragma once
 #include "Definitions.h"
 #include "Tile.h"
-using namespace std;
 
 class Random;
 class Level;

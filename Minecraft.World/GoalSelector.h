@@ -1,5 +1,6 @@
 #pragma once
-using namespace std;
+
+#include "Level.h"
 
 class Goal;
 
@@ -18,8 +19,8 @@ class GoalSelector
     };
 
   private:
-    vector<InternalGoal *> goals;
-    vector<InternalGoal *> usingGoals;
+    std::vector<InternalGoal *> goals;
+    std::vector<InternalGoal *> usingGoals;
     int tickCount;
     int newGoalRate;
 
@@ -31,7 +32,7 @@ class GoalSelector
     void addGoal(int prio, Goal *goal, bool canDeletePointer = true);
     void removeGoal(Goal *toRemove);
     void tick();
-    vector<InternalGoal *> *getRunningGoals();
+    std::vector<InternalGoal *> *getRunningGoals();
 
   private:
     bool canContinueToUse(InternalGoal *ig);

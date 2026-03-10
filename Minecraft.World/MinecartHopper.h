@@ -9,7 +9,7 @@ class MinecartHopper : public MinecartContainer, public Hopper
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_HOPPER;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartHopper(level);

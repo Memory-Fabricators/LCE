@@ -1,15 +1,14 @@
 #pragma once
-#include "InputOutputStream.h"
 #include "Tag.h"
 
 class DoubleTag : public Tag
 {
   public:
     double data;
-    DoubleTag(const wstring &name) : Tag(name)
+    DoubleTag(const std::wstring &name) : Tag(name)
     {
     }
-    DoubleTag(const wstring &name, double data) : Tag(name)
+    DoubleTag(const std::wstring &name, double data) : Tag(name)
     {
         this->data = data;
     }
@@ -23,15 +22,16 @@ class DoubleTag : public Tag
         data = dis->readDouble();
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Double;
     }
-    wstring toString()
+
+    std::wstring toString()
     {
         static wchar_t buf[32];
         swprintf(buf, 32, L"%f", data);
-        return wstring(buf);
+        return std::wstring(buf);
     }
 
     Tag *copy()

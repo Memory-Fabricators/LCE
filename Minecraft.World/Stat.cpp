@@ -16,12 +16,12 @@ void Stat::_init()
     awardLocallyOnly = false;
 }
 
-Stat::Stat(int id, const wstring &name, StatFormatter *formatter) : id(id), name(name), formatter(formatter)
+Stat::Stat(int id, const std::wstring &name, StatFormatter *formatter) : id(id), name(name), formatter(formatter)
 {
     _init();
 }
 
-Stat::Stat(int id, const wstring &name) : id(id), name(name), formatter(defaultFormatter)
+Stat::Stat(int id, const std::wstring &name) : id(id), name(name), formatter(defaultFormatter)
 {
     _init();
 }

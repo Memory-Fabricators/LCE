@@ -15,7 +15,7 @@ class GameType;
 class LoginPacket;
 class ServerScoreboard;
 
-using namespace std;
+;
 
 class PlayerList
 {

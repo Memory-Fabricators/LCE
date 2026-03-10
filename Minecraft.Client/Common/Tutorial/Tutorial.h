@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "TutorialConstraint.h"
 #include "TutorialEnum.h"
 #include "TutorialHint.h"

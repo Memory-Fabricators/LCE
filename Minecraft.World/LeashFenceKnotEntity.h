@@ -9,7 +9,7 @@ class LeashFenceKnotEntity : public HangingEntity
     eINSTANCEOF GetType()
     {
         return eTYPE_LEASHFENCEKNOT;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new LeashFenceKnotEntity(level);

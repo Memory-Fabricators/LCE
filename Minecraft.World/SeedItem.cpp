@@ -1,4 +1,4 @@
-using namespace std;
+;
 
 #include "SeedItem.h"
 #include "Item.h"

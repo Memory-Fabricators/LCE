@@ -3,7 +3,7 @@
 // #include "Vec3.h"
 // #include "Definitions.h"
 // #include "SoundTypes.h"
-// using namespace std;
+// ;
 #include "Icon_SPU.h"
 #include "Material_SPU.h"
 #include <stddef.h>

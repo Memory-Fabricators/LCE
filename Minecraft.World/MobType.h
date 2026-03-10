@@ -1,6 +1,6 @@
 #pragma once
 
-enum MobType
+enum class MobType
 {
     UNDEFINED,
 

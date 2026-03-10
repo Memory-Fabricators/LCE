@@ -1,6 +1,4 @@
 #pragma once
-using namespace std;
-
 #include "Enemy.h"
 #include "PathfinderMob.h"
 

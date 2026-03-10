@@ -1,8 +1,8 @@
 #pragma once
 class Mob;
 class Options;
-using namespace std;
-#include "..\..\Minecraft.World\SoundTypes.h"
+#include "SoundTypes.h"
+#include <string>
 
 enum eMUSICFILES
 {

@@ -22,5 +22,7 @@ class Goal
     virtual int getRequiredControlFlags();
 
     // 4J Added override to update ai elements when loading entity from schematics
-    virtual void setLevel(Level *level) {};
+    virtual void setLevel(Level *level)
+    {
+    }
 };

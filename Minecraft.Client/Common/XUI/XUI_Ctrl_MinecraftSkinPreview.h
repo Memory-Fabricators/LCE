@@ -4,9 +4,7 @@
 #include <XuiApp.h>
 #include <string>
 // #include "..\..\Xbox\DLC\DLCSkinFile.h"
-#include "..\..\Model.h"
-
-using namespace std;
+#include "Model.h"
 
 class EntityRenderer;
 
@@ -43,7 +41,9 @@ class CXuiCtrlMinecraftSkinPreview : public CXuiControlImpl
                         L"CXuiCtrlMinecraftSkinPreview", XUI_CLASS_LABEL)
 
     CXuiCtrlMinecraftSkinPreview();
-    virtual ~CXuiCtrlMinecraftSkinPreview() {};
+    virtual ~CXuiCtrlMinecraftSkinPreview()
+    {
+    }
 
     void SetTexture(const wstring &url, TEXTURE_NAME backupTexture = TN_MOB_CHAR);
     void SetCapeTexture(const wstring &url)

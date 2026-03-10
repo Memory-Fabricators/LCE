@@ -1,9 +1,11 @@
 #pragma once
-using namespace std;
 
 #include "GoalSelector.h"
+#include "ItemInstance.h"
 #include "LivingEntity.h"
 #include "MobType.h"
+#include "Player.h"
+#include <memory>
 
 class HitResult;
 class Level;
@@ -64,13 +66,13 @@ class Mob : public LivingEntity
     GoalSelector targetSelector;
 
   private:
-    shared_ptr<LivingEntity> target;
+    std::shared_ptr<LivingEntity> target;
     Sensing *sensing;
 
-    ItemInstanceArray equipment;
+    std::vector<std::shared_ptr<ItemInstance>> equipment;
 
   protected:
-    floatArray dropChances;
+    std::vector<float> dropChances;
 
   private:
     bool _canPickUpLoot;
@@ -93,8 +95,8 @@ class Mob : public LivingEntity
     virtual JumpControl *getJumpControl();
     virtual PathNavigation *getNavigation();
     virtual Sensing *getSensing();
-    shared_ptr<LivingEntity> getTarget();
-    virtual void setTarget(shared_ptr<LivingEntity> target);
+    std::shared_ptr<LivingEntity> getTarget();
+    virtual void setTarget(std::shared_ptr<LivingEntity> target);
     virtual bool canAttackType(eINSTANCEOF targetType);
     virtual void ate();
 
@@ -107,7 +109,7 @@ class Mob : public LivingEntity
     virtual void baseTick();
 
   protected:
-    virtual int getExperienceReward(shared_ptr<Player> killedBy);
+    virtual int getExperienceReward(std::shared_ptr<Player> killedBy);
 
   public:
     virtual void spawnAnim();
@@ -136,7 +138,7 @@ class Mob : public LivingEntity
     virtual bool removeWhenFarAway();
 
   private:
-    shared_ptr<Entity> lookingAt;
+    std::shared_ptr<Entity> lookingAt;
 
   protected:
     int lookTime;
@@ -149,9 +151,9 @@ class Mob : public LivingEntity
     virtual int getMaxHeadXRot();
 
   protected:
-    void lookAt(shared_ptr<Entity> e, float yMax, float xMax);
+    void lookAt(std::shared_ptr<Entity> e, float yMax, float xMax);
     bool isLookingAtAnEntity();
-    shared_ptr<Entity> getLookingAt();
+    std::shared_ptr<Entity> getLookingAt();
 
   private:
     float rotlerp(float a, float b, float max);
@@ -162,18 +164,18 @@ class Mob : public LivingEntity
     virtual float getHeadSizeScale();
     virtual int getMaxSpawnClusterSize();
     virtual int getMaxFallDistance();
-    virtual shared_ptr<ItemInstance> getCarriedItem();
-    virtual shared_ptr<ItemInstance> getCarried(int slot);
-    virtual shared_ptr<ItemInstance> getArmor(int pos);
-    virtual void setEquippedSlot(int slot, shared_ptr<ItemInstance> item);
-    virtual ItemInstanceArray getEquipmentSlots();
+    virtual std::shared_ptr<ItemInstance> getCarriedItem();
+    virtual std::shared_ptr<ItemInstance> getCarried(int slot);
+    virtual std::shared_ptr<ItemInstance> getArmor(int pos);
+    virtual void setEquippedSlot(int slot, std::shared_ptr<ItemInstance> item);
+    virtual std::span<std::shared_ptr<ItemInstance>> getEquipmentSlots();
 
   protected:
     virtual void dropEquipment(bool byPlayer, int playerBonusLevel);
     virtual void populateDefaultEquipmentSlots();
 
   public:
-    static int getEquipmentSlotForItem(shared_ptr<ItemInstance> item);
+    static int getEquipmentSlotForItem(std::shared_ptr<ItemInstance> item);
     static Item *getEquipmentForSlot(int slot, int type);
 
   protected:
@@ -191,10 +193,10 @@ class Mob : public LivingEntity
     virtual MobGroupData *finalizeMobSpawn(MobGroupData *groupData, int extraData = 0); // 4J Added extraData param
     virtual void finalizeSpawnEggSpawn(int extraData);                                  // 4J Added
     virtual bool canBeControlledByRider();
-    virtual wstring getAName();
+    virtual std::wstring getAName();
     virtual void setPersistenceRequired();
-    virtual void setCustomName(const wstring &name);
-    virtual wstring getCustomName();
+    virtual void setCustomName(const std::wstring &name);
+    virtual std::wstring getCustomName();
     virtual bool hasCustomName();
     virtual void setCustomNameVisible(bool visible);
     virtual bool isCustomNameVisible();
@@ -203,16 +205,16 @@ class Mob : public LivingEntity
     virtual bool canPickUpLoot();
     virtual void setCanPickUpLoot(bool canPickUpLoot);
     virtual bool isPersistenceRequired();
-    virtual bool interact(shared_ptr<Player> player);
+    virtual bool interact(std::shared_ptr<Player> player);
 
   protected:
-    virtual bool mobInteract(shared_ptr<Player> player);
+    virtual bool mobInteract(std::shared_ptr<Player> player);
 
     // roper / leash methods
 
   private:
     bool _isLeashed;
-    shared_ptr<Entity> leashHolder;
+    std::shared_ptr<Entity> leashHolder;
     CompoundTag *leashInfoTag;
 
   protected:
@@ -222,8 +224,9 @@ class Mob : public LivingEntity
     virtual void dropLeash(bool synch, bool createItemDrop);
     virtual bool canBeLeashed();
     virtual bool isLeashed();
-    virtual shared_ptr<Entity> getLeashHolder();
-    virtual void setLeashedTo(shared_ptr<Entity> holder, bool synch);
+    virtual std::shared_ptr<Entity> getLeashHolder();
+
+    virtual void setLeashedTo(std::shared_ptr<Entity> holder, bool synch);
 
   private:
     virtual void restoreLeashFromSave();

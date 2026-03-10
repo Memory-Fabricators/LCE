@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "Entity.h"
 
 class Level;
@@ -11,7 +10,7 @@ class BossMobPart : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_BOSS_MOB_PART;
-    };
+    }
 
   public:
     BossMob *bossMob;

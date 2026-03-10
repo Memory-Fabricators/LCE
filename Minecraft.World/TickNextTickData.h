@@ -3,25 +3,26 @@
 // 4J Stu - In Java TickNextTickData implements Comparable<TickNextTickData>
 // We don't need to do that as it is only as helper for the java sdk sorting operations
 
+#include <cstdint>
 class TickNextTickData
 {
   private:
-    static __int64 C;
+    static std::int64_t C;
 
   public:
     int x, y, z, tileId;
-    __int64 m_delay;
+    std::int64_t m_delay;
     int priorityTilt;
 
   private:
-    __int64 c;
+    std::int64_t c;
 
   public:
     TickNextTickData(int x, int y, int z, int tileId);
 
     bool equals(const TickNextTickData *o) const;
     int hashCode() const;
-    TickNextTickData *delay(__int64 l);
+    TickNextTickData *delay(std::int64_t l);
     void setPriorityTilt(int priorityTilt);
     int compareTo(const TickNextTickData *tnd) const;
 
@@ -31,7 +32,7 @@ class TickNextTickData
     bool operator==(const TickNextTickData &k);
 };
 
-typedef struct
+typedef struct TickNextTickDataKeyHash
 {
     int operator()(const TickNextTickData &k) const
     {
@@ -40,7 +41,7 @@ typedef struct
 
 } TickNextTickDataKeyHash;
 
-typedef struct
+typedef struct TickNextTickDataKeyEq
 {
     bool operator()(const TickNextTickData &x, const TickNextTickData &y) const
     {
@@ -48,7 +49,7 @@ typedef struct
     }
 } TickNextTickDataKeyEq;
 
-typedef struct
+typedef struct TickNextTickDataKeyCompare
 {
     bool operator()(const TickNextTickData &x, const TickNextTickData &y) const
     {

@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_furnace.h"
 #include "..\UI\IUIScene_FurnaceMenu.h"
 #include "XUI_Scene_AbstractContainer.h"

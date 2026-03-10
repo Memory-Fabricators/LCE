@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 #include "IUIController.h"
 #include "UIEnums.h"
 #include "UIGroup.h"

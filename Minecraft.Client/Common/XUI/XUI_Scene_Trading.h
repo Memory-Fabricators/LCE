@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_trading.h"
 #include "..\UI\IUIScene_TradingMenu.h"
 

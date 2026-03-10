@@ -1,18 +1,18 @@
 #pragma once
 
-enum eBodyPart
+enum class BodyPart
 {
-    eBodyPart_Unknown = 0,
-    eBodyPart_Head,
-    eBodyPart_Body,
-    eBodyPart_Arm0,
-    eBodyPart_Arm1,
-    eBodyPart_Leg0,
-    eBodyPart_Leg1,
+    Unknown = 0,
+    Head,
+    Body,
+    Arm0,
+    Arm1,
+    Leg0,
+    Leg1,
 };
 
-typedef struct
+struct SkinBox
 {
-    eBodyPart ePart;
+    BodyPart ePart;
     float fX, fY, fZ, fW, fH, fD, fU, fV;
-} SKIN_BOX;
+};

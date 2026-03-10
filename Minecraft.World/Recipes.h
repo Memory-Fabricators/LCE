@@ -18,7 +18,7 @@ import net.minecraft.world.level.tile.Tile;
 #include "Recipy.h"
 
 #pragma once
-using namespace std;
+;
 
 class CraftingContainer;
 class FireTile;
@@ -85,7 +85,7 @@ class Object
     eINSTANCEOF GetType()
     {
         return eType;
-    };
+    }
 
   private:
     eINSTANCEOF eType;

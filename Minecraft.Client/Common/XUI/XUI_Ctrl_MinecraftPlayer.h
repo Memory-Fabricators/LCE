@@ -3,8 +3,6 @@
 #include <XuiApp.h>
 #include <string>
 
-using namespace std;
-
 class TileRenderer;
 class ItemRenderer;
 class CXuiSceneInventory;
@@ -19,7 +17,9 @@ class CXuiCtrlMinecraftPlayer : public CXuiControlImpl
                         XUI_CLASS_LABEL)
 
     CXuiCtrlMinecraftPlayer();
-    virtual ~CXuiCtrlMinecraftPlayer() {};
+    virtual ~CXuiCtrlMinecraftPlayer()
+    {
+    }
 
   protected:
     XUI_BEGIN_MSG_MAP()

@@ -1,5 +1,7 @@
 #pragma once
 #include "FileHeader.h"
+#include <cstddef>
+#include <mutex>
 
 #ifdef _XBOX_ONE
 #include "..\Minecraft.Client\Durango\DurangoExtras\xcompress.h"
@@ -27,7 +29,7 @@ class Compression
         ThreadStorage();
         ~ThreadStorage();
     };
-    static DWORD tlsIdx;
+    static std::size_t tlsIdx;
     static ThreadStorage *tlsDefault;
 
   public:
@@ -40,14 +42,14 @@ class Compression
     static Compression *getCompression();
 
   public:
-    HRESULT Compress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
-    HRESULT Decompress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
-    HRESULT CompressLZXRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
-    HRESULT DecompressLZXRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
-    HRESULT CompressRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
-    HRESULT DecompressRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t Compress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t Decompress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t CompressLZXRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t DecompressLZXRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t CompressRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t DecompressRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
 #ifndef _XBOX
-    static VOID VitaVirtualDecompress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    static void *VitaVirtualDecompress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
 #endif
 
     void SetDecompressionType(ECompressionTypes type)
@@ -64,15 +66,15 @@ class Compression
     ~Compression();
 
   private:
-    HRESULT DecompressWithType(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
+    std::size_t DecompressWithType(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize);
 
-#if defined __ORBIS__ || defined __PS3__
-#else
-    XMEMCOMPRESSION_CONTEXT compressionContext;
-    XMEMDECOMPRESSION_CONTEXT decompressionContext;
-#endif
-    CRITICAL_SECTION rleCompressLock;
-    CRITICAL_SECTION rleDecompressLock;
+    // #if defined __ORBIS__ || defined __PS3__
+    // #else
+    //     XMEMCOMPRESSION_CONTEXT compressionContext;
+    //     XMEMDECOMPRESSION_CONTEXT decompressionContext;
+    // #endif
+    std::mutex rleCompressLock;
+    std::mutex rleDecompressLock;
 
     unsigned char rleCompressBuf[1024 * 100];
     static const unsigned int staticRleSize = 1024 * 200;

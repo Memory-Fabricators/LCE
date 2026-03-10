@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_multi_gameinfo.h"
 #include <qnet.h>
 #include <vector>

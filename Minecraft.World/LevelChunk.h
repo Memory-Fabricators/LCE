@@ -1,19 +1,21 @@
 #pragma once
-using namespace std;
+
+#include "BiomeSource.h"
+#include "TilePos.h"
+
+#include "CompressedTileStorage.h"
+#include "Entity.h"
+#include "Level.h"
+#include "LightLayer.h"
+#include "SparseDataStorage.h"
+#include "SparseLightStorage.h"
+#include <mutex>
 
 class DataLayer;
 class TileEntity;
 class Random;
 class ChunkSource;
 class EntitySelector;
-
-#include "CompressedTileStorage.h"
-#include "SparseDataStorage.h"
-#include "SparseLightStorage.h"
-
-#include "Entity.h"
-#include "Level.h"
-#include "LightLayer.h"
 
 #define SHARING_ENABLED
 class TileCompressData_SPU;
@@ -28,7 +30,7 @@ class LevelChunk
     friend class LevelRenderer;
 
   public:
-    byteArray biomes; // 4J Stu - Made public
+    std::span<std::byte> biomes; // 4J Stu - Made public
 
     // 4J Stu - No longer static in 1.8.2
     const int ENTITY_BLOCKS_LENGTH;
@@ -51,8 +53,8 @@ class LevelChunk
     CompressedTileStorage *upperBlocks; // 128 - 255
   public:
     bool isRenderChunkEmpty(int y);
-    void setBlockData(byteArray data); // Set block data to that passed in in the input array of size 32768
-    void getBlockData(byteArray data); // Sets data in passed in array of size 32768, from the block data in this chunk
+    void setBlockData(std::span<std::byte> data); // Set block data to that passed in in the input array of size 32768
+    void getBlockData(std::span<std::byte> data); // Sets data in passed in array of size 32768, from the block data in this chunk
     int getBlocksAllocatedSize(int *count0, int *count1, int *count2, int *count4, int *count8);
 
     bool loaded;
@@ -65,8 +67,8 @@ class LevelChunk
     SparseDataStorage *lowerData; // 0 - 127
     SparseDataStorage *upperData; // 128 - 255
   public:
-    void setDataData(byteArray data); // Set data to that passed in in the input array of size 32768
-    void getDataData(byteArray data); // Sets data in passed in array of size 16384, from the data in this chunk
+    void setDataData(std::span<std::byte> data); // Set data to that passed in in the input array of size 32768
+    void getDataData(std::span<std::byte> data); // Sets data in passed in array of size 16384, from the data in this chunk
 
     //    DataLayer *data;
   private:
@@ -77,11 +79,11 @@ class LevelChunk
     SparseLightStorage *lowerBlockLight; // 0 - 127
     SparseLightStorage *upperBlockLight; // 128 - 255
   public:
-    void getSkyLightData(byteArray data);   // Get a byte array of length 16384 ( 128 x 16 x 16 x 0.5 ), containing sky light data. Ordering same as java version.
-    void getBlockLightData(byteArray data); // Get a byte array of length 16384 ( 128 x 16 x 16 x 0.5 ), containing block light data. Ordering same as java version.
-    void setSkyLightData(byteArray data);   // Set sky light data to data passed in input byte array of length 16384. This data must be in original (java version) order
-    void setBlockLightData(byteArray data); // Set block light data to data passed in input byte array of length 16384. This data must be in original (java version) order
-    void setSkyLightDataAllBright();        // Set sky light data to be all fully lit
+    void getSkyLightData(std::span<std::byte> data);   // Get a byte array of length 16384 ( 128 x 16 x 16 x 0.5 ), containing sky light data. Ordering same as java version.
+    void getBlockLightData(std::span<std::byte> data); // Get a byte array of length 16384 ( 128 x 16 x 16 x 0.5 ), containing block light data. Ordering same as java version.
+    void setSkyLightData(std::span<std::byte> data);   // Set sky light data to data passed in input byte array of length 16384. This data must be in original (java version) order
+    void setBlockLightData(std::span<std::byte> data); // Set block light data to data passed in input byte array of length 16384. This data must be in original (java version) order
+    void setSkyLightDataAllBright();                   // Set sky light data to be all fully lit
     bool isLowerBlockStorageCompressed();
     int isLowerBlockLightStorageCompressed();
     int isLowerDataStorageCompressed();
@@ -96,7 +98,7 @@ class LevelChunk
     void readCompressedSkyLightData(DataInputStream *dis);
     void readCompressedBlockLightData(DataInputStream *dis);
 
-    byteArray heightmap;
+    std::vector<std::byte> heightmap;
     int minHeight;
     int x, z;
 
@@ -104,8 +106,8 @@ class LevelChunk
     bool hasGapsToCheck;
 
   public:
-    unordered_map<TilePos, shared_ptr<TileEntity>, TilePosKeyHash, TilePosKeyEq> tileEntities;
-    vector<shared_ptr<Entity>> **entityBlocks;
+    std::unordered_map<TilePos, std::shared_ptr<TileEntity>, TilePosKeyHash, TilePosKeyEq> tileEntities;
+    std::vector<std::shared_ptr<Entity>> **entityBlocks;
 
     static const int sTerrainPopulatedFromHere = 2;
     static const int sTerrainPopulatedFromW = 4;
@@ -138,11 +140,11 @@ class LevelChunk
     void stopSharingTilesAndData();                 // 4J added
     virtual void reSyncLighting();                  // 4J added
     void startSharingTilesAndData(int forceMs = 0); // 4J added
-    __int64 lastUnsharedTime;                       // 4J added
-    __int64 lastSaveTime;
+    std::int64_t lastUnsharedTime;                  // 4J added
+    std::int64_t lastSaveTime;
     bool seenByPlayer;
     int lowestHeightmap;
-    __int64 inhabitedTime;
+    std::int64_t inhabitedTime;
 
 #ifdef _LARGE_WORLDS
     bool m_bUnloaded;
@@ -156,7 +158,7 @@ class LevelChunk
   public:
     virtual void init(Level *level, int x, int z);
     LevelChunk(Level *level, int x, int z);
-    LevelChunk(Level *level, byteArray blocks, int x, int z);
+    LevelChunk(Level *level, std::span<std::byte> blocks, int x, int z);
     LevelChunk(Level *level, int x, int z, LevelChunk *lc);
     ~LevelChunk();
 
@@ -194,14 +196,14 @@ class LevelChunk
     virtual void getNeighbourBrightnesses(int *brightnesses, LightLayer::variety layer, int x, int y, int z); // 4J added
     virtual void setBrightness(LightLayer::variety layer, int x, int y, int z, int brightness);
     virtual int getRawBrightness(int x, int y, int z, int skyDampen);
-    virtual void addEntity(shared_ptr<Entity> e);
-    virtual void removeEntity(shared_ptr<Entity> e);
-    virtual void removeEntity(shared_ptr<Entity> e, int yc);
+    virtual void addEntity(std::shared_ptr<Entity> e);
+    virtual void removeEntity(std::shared_ptr<Entity> e);
+    virtual void removeEntity(std::shared_ptr<Entity> e, int yc);
     virtual bool isSkyLit(int x, int y, int z);
     virtual void skyBrightnessChanged();
-    virtual shared_ptr<TileEntity> getTileEntity(int x, int y, int z);
-    virtual void addTileEntity(shared_ptr<TileEntity> te);
-    virtual void setTileEntity(int x, int y, int z, shared_ptr<TileEntity> tileEntity);
+    virtual std::shared_ptr<TileEntity> getTileEntity(int x, int y, int z);
+    virtual void addTileEntity(std::shared_ptr<TileEntity> te);
+    virtual void setTileEntity(int x, int y, int z, std::shared_ptr<TileEntity> tileEntity);
     virtual void removeTileEntity(int x, int y, int z);
     virtual void load();
     virtual void unload(bool unloadTileEntities); // 4J - added parameter
@@ -210,30 +212,30 @@ class LevelChunk
     virtual bool isUnloaded();
 #endif
     virtual void markUnsaved();
-    virtual void getEntities(shared_ptr<Entity> except, AABB *bb, vector<shared_ptr<Entity>> &es, const EntitySelector *selector);
-    virtual void getEntitiesOfClass(const type_info &ec, AABB *bb, vector<shared_ptr<Entity>> &es, const EntitySelector *selector);
+    virtual void getEntities(std::shared_ptr<Entity> except, AABB *bb, std::vector<std::shared_ptr<Entity>> &es, const EntitySelector *selector);
+    virtual void getEntitiesOfClass(const std::type_info &ec, AABB *bb, std::vector<std::shared_ptr<Entity>> &es, const EntitySelector *selector);
     virtual int countEntities();
     virtual bool shouldSave(bool force);
-    virtual int getBlocksAndData(byteArray *data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true); // 4J - added includeLighting parameter
-    static void tileUpdatedCallback(int x, int y, int z, void *param, int yparam);                                                     // 4J added
-    virtual int setBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true);  // 4J - added includeLighting parameter
-    virtual bool testSetBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p);                          // 4J added
+    virtual int getBlocksAndData(std::span<std::byte> data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true); // 4J - added includeLighting parameter
+    static void tileUpdatedCallback(int x, int y, int z, void *param, int yparam);                                                               // 4J added
+    virtual int setBlocksAndData(std::span<std::byte> data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true); // 4J - added includeLighting parameter
+    virtual bool testSetBlocksAndData(std::span<std::byte> data, int x0, int y0, int z0, int x1, int y1, int z1, int p);                         // 4J added
     virtual void setCheckAllLight();
 
-    virtual Random *getRandom(__int64 l);
+    virtual Random *getRandom(std::int64_t l);
     virtual bool isEmpty();
     virtual void attemptCompression();
 
 #ifdef SHARING_ENABLED
-    static CRITICAL_SECTION m_csSharing; // 4J added
+    static std::mutex m_csSharing; // 4J added
 #endif
     // 4J  added
 #ifdef _ENTITIES_RW_SECTION
     static CRITICAL_RW_SECTION m_csEntities; // AP - we're using a RW critical so we can do multiple reads without contention
 #else
-    static CRITICAL_SECTION m_csEntities;
+    static std::mutex m_csEntities;
 #endif
-    static CRITICAL_SECTION m_csTileEntities; // 4J  added
+    static std::mutex m_csTileEntities; // 4J  added
     static void staticCtor();
     void checkPostProcess(ChunkSource *source, ChunkSource *parent, int x, int z);
     void checkChests(ChunkSource *source, int x, int z); // 4J added
@@ -243,8 +245,8 @@ class LevelChunk
     bool isYSpaceEmpty(int y1, int y2);
     void reloadBiomes(); // 4J added
     virtual Biome *getBiome(int x, int z, BiomeSource *biomeSource);
-    byteArray getBiomes();
-    void setBiomes(byteArray biomes);
+    std::span<std::byte> getBiomes();
+    void setBiomes(std::span<std::byte> biomes);
     bool biomeHasRain(int x, int z); // 4J added
     bool biomeHasSnow(int x, int z); // 4J added
   private:
@@ -254,8 +256,8 @@ class LevelChunk
     void compressBlocks();   // 4J added
     void compressData();     // 4J added
     int getHighestNonEmptyY();
-    byteArray getReorderedBlocksAndData(int x, int y, int z, int xs, int &ys, int zs);
-    static void reorderBlocksAndDataToXZY(int y0, int xs, int ys, int zs, byteArray *data);
+    std::span<std::byte> getReorderedBlocksAndData(int x, int y, int z, int xs, int &ys, int zs);
+    static void reorderBlocksAndDataToXZY(int y0, int xs, int ys, int zs, std::span<std::byte> *data);
 #ifdef LIGHT_COMPRESSION_STATS
     int getBlockLightPlanesLower()
     {

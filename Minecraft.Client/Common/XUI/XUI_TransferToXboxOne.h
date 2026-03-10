@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 // #include <vector>
 
 #include "..\Media\xuiscene_TransferToXboxOne.h"

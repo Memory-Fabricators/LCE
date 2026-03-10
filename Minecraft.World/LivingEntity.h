@@ -1,10 +1,11 @@
 #pragma once
-using namespace std;
 
+#include "CompoundTag.h"
 #include "Entity.h"
 #include "GoalSelector.h"
 #include "MobType.h"
 #include "SharedConstants.h"
+#include <memory>
 
 class CombatTracker;
 class AttributeInstance;
@@ -61,8 +62,8 @@ class LivingEntity : public Entity
   private:
     BaseAttributeMap *attributes;
     CombatTracker *combatTracker;
-    unordered_map<int, MobEffectInstance *> activeEffects;
-    ItemInstanceArray lastEquipment;
+    std::unordered_map<int, MobEffectInstance *> activeEffects;
+    std::vector<std::shared_ptr<ItemInstance>> lastEquipment;
 
   public:
     bool swinging;
@@ -89,7 +90,7 @@ class LivingEntity : public Entity
     float flyingSpeed;
 
   protected:
-    shared_ptr<Player> lastHurtByPlayer;
+    std::shared_ptr<Player> lastHurtByPlayer;
     int lastHurtByPlayerTime;
     bool dead;
     int noActionTime;
@@ -112,9 +113,9 @@ class LivingEntity : public Entity
   private:
     bool effectsDirty;
 
-    shared_ptr<LivingEntity> lastHurtByMob;
+    std::shared_ptr<LivingEntity> lastHurtByMob;
     int lastHurtByMobTimestamp;
-    shared_ptr<LivingEntity> lastHurtMob;
+    std::shared_ptr<LivingEntity> lastHurtMob;
     int lastHurtMobTimestamp;
 
     float speed;
@@ -142,17 +143,17 @@ class LivingEntity : public Entity
   protected:
     virtual void tickDeath();
     virtual int decreaseAirSupply(int currentSupply);
-    virtual int getExperienceReward(shared_ptr<Player> killedBy);
+    virtual int getExperienceReward(std::shared_ptr<Player> killedBy);
     virtual bool isAlwaysExperienceDropper();
 
   public:
     virtual Random *getRandom();
-    virtual shared_ptr<LivingEntity> getLastHurtByMob();
+    virtual std::shared_ptr<LivingEntity> getLastHurtByMob();
     virtual int getLastHurtByMobTimestamp();
-    virtual void setLastHurtByMob(shared_ptr<LivingEntity> hurtBy);
-    virtual shared_ptr<LivingEntity> getLastHurtMob();
+    virtual void setLastHurtByMob(std::shared_ptr<LivingEntity> hurtBy);
+    virtual std::shared_ptr<LivingEntity> getLastHurtMob();
     virtual int getLastHurtMobTimestamp();
-    virtual void setLastHurtMob(shared_ptr<Entity> target);
+    virtual void setLastHurtMob(std::shared_ptr<Entity> target);
     virtual int getNoActionTime();
     virtual void addAdditonalSaveData(CompoundTag *entityTag);
     virtual void readAdditionalSaveData(CompoundTag *tag);
@@ -162,7 +163,7 @@ class LivingEntity : public Entity
 
   public:
     virtual void removeAllEffects();
-    virtual vector<MobEffectInstance *> *getActiveEffects();
+    virtual std::vector<MobEffectInstance *> *getActiveEffects();
     virtual bool hasEffect(int id);
     virtual bool hasEffect(MobEffect *effect);
     virtual MobEffectInstance *getEffect(MobEffect *effect);
@@ -183,14 +184,14 @@ class LivingEntity : public Entity
     virtual float getHealth();
     virtual void setHealth(float health);
     virtual bool hurt(DamageSource *source, float dmg);
-    virtual void breakItem(shared_ptr<ItemInstance> itemInstance);
+    virtual void breakItem(std::shared_ptr<ItemInstance> itemInstance);
     virtual void die(DamageSource *source);
 
   protected:
     virtual void dropEquipment(bool byPlayer, int playerBonusLevel);
 
   public:
-    virtual void knockback(shared_ptr<Entity> source, float dmg, double xd, double zd);
+    virtual void knockback(std::shared_ptr<Entity> source, float dmg, double xd, double zd);
 
   protected:
     virtual int getHurtSound();
@@ -216,7 +217,7 @@ class LivingEntity : public Entity
 
   public:
     virtual CombatTracker *getCombatTracker();
-    virtual shared_ptr<LivingEntity> getKillCredit();
+    virtual std::shared_ptr<LivingEntity> getKillCredit();
     virtual float getMaxHealth();
     virtual int getArrowCount();
     virtual void setArrowCount(int count);
@@ -226,7 +227,7 @@ class LivingEntity : public Entity
 
   public:
     virtual void swing();
-    virtual void handleEntityEvent(byte id);
+    virtual void handleEntityEvent(std::byte id);
 
   protected:
     virtual void outOfWorld();
@@ -237,15 +238,15 @@ class LivingEntity : public Entity
     virtual BaseAttributeMap *getAttributes();
     virtual MobType getMobType();
 
-    virtual shared_ptr<ItemInstance> getCarriedItem() = 0;
-    virtual shared_ptr<ItemInstance> getCarried(int slot) = 0;
-    virtual shared_ptr<ItemInstance> getArmor(int pos) = 0;
-    virtual void setEquippedSlot(int slot, shared_ptr<ItemInstance> item) = 0;
+    virtual std::shared_ptr<ItemInstance> getCarriedItem() = 0;
+    virtual std::shared_ptr<ItemInstance> getCarried(int slot) = 0;
+    virtual std::shared_ptr<ItemInstance> getArmor(int pos) = 0;
+    virtual void setEquippedSlot(int slot, std::shared_ptr<ItemInstance> item) = 0;
     virtual void setSprinting(bool value);
 
-    virtual ItemInstanceArray getEquipmentSlots() = 0;
+    virtual std::vector<std::shared_ptr<ItemInstance>> getEquipmentSlots() = 0;
 
-    virtual Icon *getItemInHandIcon(shared_ptr<ItemInstance> item, int layer);
+    virtual Icon *getItemInHandIcon(std::shared_ptr<ItemInstance> item, int layer);
 
   protected:
     virtual float getSoundVolume();
@@ -256,7 +257,7 @@ class LivingEntity : public Entity
     virtual void teleportTo(double x, double y, double z);
 
   protected:
-    virtual void findStandUpPosition(shared_ptr<Entity> vehicle);
+    virtual void findStandUpPosition(std::shared_ptr<Entity> vehicle);
 
   public:
     virtual bool shouldShowName();
@@ -275,7 +276,7 @@ class LivingEntity : public Entity
   public:
     virtual float getSpeed();
     virtual void setSpeed(float speed);
-    virtual bool doHurtTarget(shared_ptr<Entity> target);
+    virtual bool doHurtTarget(std::shared_ptr<Entity> target);
     virtual bool isSleeping();
     virtual void tick();
 
@@ -288,7 +289,7 @@ class LivingEntity : public Entity
   protected:
     virtual void newServerAiStep();
     virtual void pushEntities();
-    virtual void doPush(shared_ptr<Entity> e);
+    virtual void doPush(std::shared_ptr<Entity> e);
 
   public:
     virtual void rideTick();
@@ -300,8 +301,8 @@ class LivingEntity : public Entity
 
   public:
     virtual void setJumping(bool jump);
-    virtual void take(shared_ptr<Entity> e, int orgCount);
-    virtual bool canSee(shared_ptr<Entity> target);
+    virtual void take(std::shared_ptr<Entity> e, int orgCount);
+    virtual bool canSee(std::shared_ptr<Entity> target);
 
   public:
     virtual Vec3 *getLookAngle();
@@ -325,6 +326,6 @@ class LivingEntity : public Entity
     virtual float getAbsorptionAmount();
     virtual void setAbsorptionAmount(float absorptionAmount);
     virtual Team *getTeam();
-    virtual bool isAlliedTo(shared_ptr<LivingEntity> other);
+    virtual bool isAlliedTo(std::shared_ptr<LivingEntity> other);
     virtual bool isAlliedTo(Team *other);
 };

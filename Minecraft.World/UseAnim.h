@@ -1,10 +1,10 @@
 #pragma once
 
-enum UseAnim
+enum class UseAnim
 {
-    UseAnim_none,
-    UseAnim_eat,
-    UseAnim_drink,
-    UseAnim_block,
-    UseAnim_bow
+    none,
+    eat,
+    drink,
+    block,
+    bow
 };

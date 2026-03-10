@@ -1,6 +1,5 @@
 #pragma once
 #include "UIEnums.h"
-using namespace std;
 class UIScene;
 class UIGroup;
 

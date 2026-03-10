@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 #include "..\..\..\Minecraft.World\C4JThread.h"
 #include "NetworkPlayerInterface.h"
 #include "SessionInfo.h"

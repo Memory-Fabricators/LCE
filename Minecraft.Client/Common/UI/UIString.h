@@ -46,7 +46,7 @@ class IdsStringBuilder : public StringBuilderCore
 };
 #endif
 
-using namespace std;
+;
 
 class UIString
 {

@@ -4,11 +4,11 @@
 class StringTag : public Tag
 {
   public:
-    wstring data;
-    StringTag(const wstring &name) : Tag(name)
+    std::wstring data;
+    StringTag(const std::wstring &name) : Tag(name)
     {
     }
-    StringTag(const wstring &name, const wstring &data) : Tag(name)
+    StringTag(const std::wstring &name, const std::wstring &data) : Tag(name)
     {
         this->data = data;
     }
@@ -23,12 +23,12 @@ class StringTag : public Tag
         data = dis->readUTF();
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_String;
     }
 
-    wstring toString()
+    std::wstring toString()
     {
         return data;
     }

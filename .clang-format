@@ -35,7 +35,7 @@ InsertNewlineAtEOF: true
 NamespaceIndentation: None
 PointerAlignment: Right
 RemoveParentheses: Leave
-RemoveSemicolon: false
+RemoveSemicolon: true
 SeparateDefinitionBlocks: Leave
 ShortNamespaceLines: 1
 SkipMacroDefinitionBody: false

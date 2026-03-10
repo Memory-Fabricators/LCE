@@ -9,6 +9,13 @@ find_package(SDL3 REQUIRED)
 find_package(SDL3_image REQUIRED)
 find_package(SDL3_ttf REQUIRED)
 find_package(SDL3_mixer REQUIRED)
+find_package(Vulkan REQUIRED)
+
+option(ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
+
+if(ENABLE_CLANG_TIDY)
+    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-p;${CMAKE_CURRENT_BINARY_DIR}")
+endif()
 
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/WorldSources.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/ClientSources.cmake")
@@ -19,27 +26,17 @@ list(TRANSFORM MINECRAFT_CLIENT_SOURCES PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/Min
 #   "${CMAKE_CURRENT_SOURCE_DIR}/Minecraft.Client/Xbox/MinecraftWindows.rc"
 # )
 
-add_library(MinecraftWorld ${MINECRAFT_WORLD_SOURCES})
-target_include_directories(MinecraftWorld PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/Minecraft.World"
-)
-target_link_libraries(MinecraftWorld PRIVATE
-  SDL3::SDL3
-  ZLIB::ZLIB
-)
-target_compile_features(MinecraftWorld PRIVATE
-  cxx_std_26
-)
-
-add_executable(MinecraftClient ${MINECRAFT_CLIENT_SOURCES})
-target_include_directories(MinecraftClient PRIVATE
+add_executable(MinecraftClient ${MINECRAFT_CLIENT_SOURCES} ${MINECRAFT_WORLD_SOURCES})
+target_include_directories(MinecraftClient PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}/Minecraft.World"
   "${CMAKE_CURRENT_SOURCE_DIR}/Minecraft.Client"
   "${CMAKE_CURRENT_SOURCE_DIR}/Minecraft.Client/Xbox/Sentient/Include"
 )
 target_link_libraries(MinecraftClient PRIVATE
-  MinecraftWorld
   SDL3::SDL3
   ZLIB::ZLIB
+  Vulkan::Vulkan
+  MinecraftWorld
 )
 target_compile_features(MinecraftClient PRIVATE
   cxx_std_26

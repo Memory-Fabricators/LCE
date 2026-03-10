@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 wstring toLower(const wstring &a);
 wstring trimString(const wstring &a);

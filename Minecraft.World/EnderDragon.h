@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 #include "BossMob.h"
 #include "Enemy.h"
 #include "MultiEntityMob.h"
@@ -16,7 +16,7 @@ class EnderDragon : public Mob, public BossMob, public MultiEntityMob, public En
     eINSTANCEOF GetType()
     {
         return eTYPE_ENDERDRAGON;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new EnderDragon(level);
@@ -193,13 +193,13 @@ class EnderDragon : public Mob, public BossMob, public MultiEntityMob, public En
     virtual wstring getAName()
     {
         return app.GetString(IDS_ENDERDRAGON);
-    };
+    }
     virtual float getHealth()
     {
         return LivingEntity::getHealth();
-    };
+    }
     virtual float getMaxHealth()
     {
         return LivingEntity::getMaxHealth();
-    };
+    }
 };

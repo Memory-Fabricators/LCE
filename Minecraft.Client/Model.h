@@ -1,7 +1,10 @@
 #pragma once
-using namespace std;
-#include "..\Minecraft.Client\SkinBox.h"
-#include "..\Minecraft.World\Random.h"
+#include "Entity.h"
+#include "Random.h"
+#include "SkinBox.h"
+#include <unordered_map>
+#include <vector>
+
 class Mob;
 class ModelPart;
 class TexOffs;
@@ -12,33 +15,33 @@ class Model
   public:
     float attackTime;
     bool riding;
-    vector<ModelPart *> cubes;
+    std::vector<ModelPart *> cubes;
     bool young;
-    unordered_map<wstring, TexOffs *> mappedTexOffs;
+    std::unordered_map<std::wstring, TexOffs *> mappedTexOffs;
     int texWidth;
     int texHeight;
 
     Model(); // 4J added
-    virtual void render(shared_ptr<Entity> entity, float time, float r, float bob, float yRot, float xRot, float scale, bool usecompiled)
+    virtual void render(std::shared_ptr<Entity> entity, float time, float r, float bob, float yRot, float xRot, float scale, bool usecompiled)
     {
     }
-    virtual void setupAnim(float time, float r, float bob, float yRot, float xRot, float scale, shared_ptr<Entity> entity, unsigned int uiBitmaskOverrideAnim = 0)
+    virtual void setupAnim(float time, float r, float bob, float yRot, float xRot, float scale, std::shared_ptr<Entity> entity, unsigned int uiBitmaskOverrideAnim = 0)
     {
     }
-    virtual void prepareMobModel(shared_ptr<LivingEntity> mob, float time, float r, float a)
+    virtual void prepareMobModel(std::shared_ptr<LivingEntity> mob, float time, float r, float a)
     {
     }
     virtual ModelPart *getRandomModelPart(Random random)
     {
         return cubes.at(random.nextInt((int)cubes.size()));
     }
-    virtual ModelPart *AddOrRetrievePart(SKIN_BOX *pBox)
+    virtual ModelPart *AddOrRetrievePart(SkinBox *pBox)
     {
-        return NULL;
+        return nullptr;
     }
 
-    void setMapTex(wstring id, int x, int y);
-    TexOffs *getMapTex(wstring id);
+    void setMapTex(std::wstring id, int x, int y);
+    TexOffs *getMapTex(std::wstring id);
 
   protected:
     float yHeadOffs;

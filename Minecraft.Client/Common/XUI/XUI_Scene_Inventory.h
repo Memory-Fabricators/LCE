@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "..\Media\xuiscene_inventory.h"
 #include "..\UI\IUIScene_InventoryMenu.h"
 #include "XUI_CustomMessages.h"

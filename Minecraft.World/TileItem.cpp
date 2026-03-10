@@ -1,4 +1,4 @@
-using namespace std;
+;
 
 #include "TileItem.h"
 #include "facing.h"

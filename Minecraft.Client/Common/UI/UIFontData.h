@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-using namespace std;
+;
 
 #define _DEBUG_BLOCK_CHARS 0
 

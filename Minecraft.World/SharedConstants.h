@@ -1,12 +1,12 @@
 #pragma once
-using namespace std;
-#include "Class.h"
+
+#include <string>
 
 class SharedConstants
 {
   public:
     static void staticCtor();
-    static const wstring VERSION_STRING;
+    static const std::wstring VERSION_STRING;
     static const int NETWORK_PROTOCOL_VERSION = 78;
     static const bool INGAME_DEBUG_OUTPUT = false;
 
@@ -17,11 +17,11 @@ class SharedConstants
     static bool isAllowedChatCharacter(char ch);
 
   private:
-    static wstring readAcceptableChars();
+    static std::wstring readAcceptableChars();
 
   public:
     static const int maxChatLength = 100;
-    static wstring acceptableLetters;
+    static std::wstring acceptableLetters;
 
     static const int ILLEGAL_FILE_CHARACTERS_LENGTH = 15;
     static const wchar_t ILLEGAL_FILE_CHARACTERS[ILLEGAL_FILE_CHARACTERS_LENGTH];

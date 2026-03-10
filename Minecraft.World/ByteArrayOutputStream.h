@@ -1,12 +1,13 @@
 #pragma once
 
 #include "OutputStream.h"
+#include <span>
 
 class ByteArrayOutputStream : public OutputStream
 {
     // Note - when actually implementing, byteArray will need to grow as data is written
   public:
-    byteArray buf; // The buffer where data is stored.
+    std::vector<std::byte> buf; // The buffer where data is stored.
 
   protected:
     unsigned int count; // The number of valid bytes in the buffer.
@@ -20,10 +21,10 @@ class ByteArrayOutputStream : public OutputStream
     {
     }
     virtual void write(unsigned int b);
-    virtual void write(byteArray b);
-    virtual void write(byteArray b, unsigned int offset, unsigned int length);
+    virtual void write(std::span<std::byte> b);
+    virtual void write(std::span<std::byte> b, unsigned int offset, unsigned int length);
     virtual void close();
-    virtual byteArray toByteArray();
+    virtual std::vector<std::byte> toByteArray();
 
     void reset()
     {

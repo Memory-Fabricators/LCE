@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 #include "Entity.h"
 #include "HangingEntity.h"
 
@@ -11,7 +11,7 @@ class ItemFrame : public HangingEntity
     eINSTANCEOF GetType()
     {
         return eTYPE_ITEM_FRAME;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new ItemFrame(level);

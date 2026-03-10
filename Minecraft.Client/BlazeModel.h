@@ -1,16 +1,18 @@
 #pragma once
 #include "Model.h"
+#include <memory>
+#include <vector>
 
 class BlazeModel : public Model
 {
 
   private:
-    ModelPartArray upperBodyParts;
+    std::vector<ModelPart *> upperBodyParts;
     ModelPart *head;
 
   public:
     BlazeModel();
     int modelVersion();
-    virtual void render(shared_ptr<Entity> entity, float time, float r, float bob, float yRot, float xRot, float scale, bool usecompiled);
-    virtual void setupAnim(float time, float r, float bob, float yRot, float xRot, float scale, shared_ptr<Entity> entity, unsigned int uiBitmaskOverrideAnim = 0);
+    virtual void render(std::shared_ptr<Entity> entity, float time, float r, float bob, float yRot, float xRot, float scale, bool usecompiled);
+    virtual void setupAnim(float time, float r, float bob, float yRot, float xRot, float scale, std::shared_ptr<Entity> entity, unsigned int uiBitmaskOverrideAnim = 0);
 };

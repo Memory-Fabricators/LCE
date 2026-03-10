@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 #include "..\..\..\Minecraft.World\AbstractContainerMenu.h"
 #include "..\..\..\Minecraft.World\SimpleContainer.h"

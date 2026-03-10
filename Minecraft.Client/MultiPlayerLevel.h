@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 #include "..\Minecraft.World\HashExtension.h"
 #include "..\Minecraft.World\JavaIntHash.h"
 #include "..\Minecraft.World\net.minecraft.world.entity.h"
@@ -8,7 +8,7 @@ using namespace std;
 class ClientConnection;
 class MultiPlayerChunkCache;
 
-using namespace std;
+;
 
 class MultiPlayerLevel : public Level
 {

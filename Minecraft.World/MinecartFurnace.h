@@ -8,7 +8,7 @@ class MinecartFurnace : public Minecart
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART_FURNACE;
-    };
+    }
     static Entity *create(Level *level)
     {
         return new MinecartFurnace(level);

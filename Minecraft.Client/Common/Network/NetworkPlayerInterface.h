@@ -1,5 +1,7 @@
 #pragma once
 
+#include "PlayerUID.h"
+
 class Socket;
 
 // This is the platform independent interface for dealing with players within a network game. This should be used directly by game code (and GameNetworkManager) rather than the platform-specific implementations.
@@ -29,7 +31,7 @@ class INetworkPlayer
     virtual void SetSocket(Socket *pSocket) = 0;
     virtual Socket *GetSocket() = 0;
     virtual const wchar_t *GetOnlineName() = 0;
-    virtual wstring GetDisplayName() = 0;
+    virtual std::wstring GetDisplayName() = 0;
     virtual PlayerUID GetUID() = 0;
     virtual void SentChunkPacket() = 0;
     virtual int GetTimeSinceLastChunkPacket_ms() = 0;

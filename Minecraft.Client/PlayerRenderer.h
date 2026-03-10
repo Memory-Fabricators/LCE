@@ -4,7 +4,7 @@
 
 class HumanoidModel;
 
-using namespace std;
+;
 
 class PlayerRenderer : public LivingEntityRenderer
 {

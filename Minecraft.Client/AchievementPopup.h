@@ -1,8 +1,11 @@
 #pragma once
 #include "GuiComponent.h"
+#include "Minecraft.h"
+#include <chrono>
+#include <string>
+
 class Achievement;
 class ItemRenderer;
-using namespace std;
 
 class AchievementPopup : public GuiComponent
 {
@@ -10,10 +13,10 @@ class AchievementPopup : public GuiComponent
     Minecraft *mc;
     int width, height;
 
-    wstring title;
-    wstring desc;
+    std::wstring title;
+    std::wstring desc;
     Achievement *ach;
-    __int64 startTime;
+    std::chrono::steady_clock::time_point startTime;
     ItemRenderer *ir;
     bool isHelper;
 

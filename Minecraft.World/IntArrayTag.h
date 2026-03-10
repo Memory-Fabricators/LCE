@@ -1,32 +1,27 @@
 #pragma once
 
-#include "System.h"
 #include "Tag.h"
+#include <vector>
 
 class IntArrayTag : public Tag
 {
   public:
-    intArray data;
+    std::vector<int> data;
 
-    IntArrayTag(const wstring &name) : Tag(name)
+    IntArrayTag(const std::wstring &name) : Tag(name)
     {
-        data = intArray();
+        data = std::vector<int>();
     }
 
-    IntArrayTag(const wstring &name, intArray data) : Tag(name)
+    IntArrayTag(const std::wstring &name, std::vector<int> data) : Tag(name)
     {
         this->data = data;
     }
 
-    ~IntArrayTag()
-    {
-        delete[] data.data;
-    }
-
     void write(DataOutput *dos)
     {
-        dos->writeInt(data.length);
-        for (unsigned int i = 0; i < data.length; i++)
+        dos->writeInt(data.size());
+        for (unsigned int i = 0; i < data.size(); i++)
         {
             dos->writeInt(data[i]);
         }
@@ -36,27 +31,27 @@ class IntArrayTag : public Tag
     {
         int length = dis->readInt();
 
-        if (data.data)
+        if (!data.empty())
         {
-            delete[] data.data;
+            data.clear();
         }
-        data = intArray(length);
+        data.resize(length);
         for (int i = 0; i < length; i++)
         {
             data[i] = dis->readInt();
         }
     }
 
-    byte getId()
+    std::byte getId()
     {
         return TAG_Int_Array;
     }
 
-    wstring toString()
+    std::wstring toString()
     {
         static wchar_t buf[32];
-        swprintf(buf, 32, L"[%d bytes]", data.length);
-        return wstring(buf);
+        swprintf(buf, 32, L"[%d bytes]", data.size());
+        return std::wstring(buf);
     }
 
     bool equals(Tag *obj)
@@ -64,15 +59,15 @@ class IntArrayTag : public Tag
         if (Tag::equals(obj))
         {
             IntArrayTag *o = (IntArrayTag *)obj;
-            return ((data.data == NULL && o->data.data == NULL) || (data.data != NULL && data.length == o->data.length && memcmp(data.data, o->data.data, data.length * sizeof(int)) == 0));
+            return ((data.data() == nullptr && o->data.data() == nullptr) || (data.data() != nullptr && data.size() == o->data.size() && memcmp(data.data(), o->data.data(), data.size() * sizeof(int)) == 0));
         }
         return false;
     }
 
     Tag *copy()
     {
-        intArray cp = intArray(data.length);
-        System::arraycopy(data, 0, &cp, 0, data.length);
+        std::vector<int> cp(data.size());
+        std::copy(data.begin(), data.end(), cp.begin());
         return new IntArrayTag(getName(), cp);
     }
 };

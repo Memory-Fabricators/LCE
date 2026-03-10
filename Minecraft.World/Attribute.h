@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 class AttributeModifier;
 
 // 4J: This ID is serialised into save data so new attributes must always be added after existing ones
@@ -65,7 +66,7 @@ class Attribute
 };
 
 #ifdef __ORBIS__
-typedef unordered_map<eATTRIBUTE_ID, AttributeModifier *, std::hash<int>> attrAttrModMap;
+typedef std::unordered_map<eATTRIBUTE_ID, AttributeModifier *, std::hash<int>> attrAttrModMap;
 #else
-typedef unordered_map<eATTRIBUTE_ID, AttributeModifier *> attrAttrModMap;
+typedef std::pmr::unordered_map<eATTRIBUTE_ID, AttributeModifier *> attrAttrModMap;
 #endif

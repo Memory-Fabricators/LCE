@@ -1,22 +1,20 @@
 #pragma once
-using namespace std;
-#include "..\..\..\Minecraft.World\C4JThread.h"
+
 #include "NetworkPlayerInterface.h"
-#include <qnet.h>
 #include <vector>
 #ifdef _XBOX
-#include "..\..\Xbox\Network\PlatformNetworkManagerXbox.h"
+#include "Minecraft.Client/Xbox/Network/PlatformNetworkManagerXbox.h"
 #elif defined __PS3__ || defined __ORBIS__ || defined __PSVITA__
-#include "..\..\Common\Network\Sony\PlatformNetworkManagerSony.h"
+#include "Minecraft.Client/Common/Network/Sony/PlatformNetworkManagerSony.h"
 #elif defined _DURANGO
-#include "..\..\Durango\Network\PlatformNetworkManagerDurango.h"
+#include "Minecraft.Client/Durango/Network/PlatformNetworkManagerDurango.h"
 #else
 #include "PlatformNetworkManagerStub.h"
 #endif
 #include "SessionInfo.h"
 
 #ifdef __ORBIS__
-#include "..\..\Orbis\Network\PsPlusUpsellWrapper_Orbis.h"
+#include "Minecraft.Client/Orbis/Network/PsPlusUpsellWrapper_Orbis.h"
 #endif
 
 class ClientConnection;

@@ -1,6 +1,6 @@
 #include "Biome.h"
-#include "..\Minecraft.Client\Minecraft.h"
 #include "Color.h"
+#include "Minecraft.h"
 #include "net.minecraft.world.entity.animal.h"
 #include "net.minecraft.world.entity.h"
 #include "net.minecraft.world.entity.monster.h"

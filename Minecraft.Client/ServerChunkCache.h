@@ -5,7 +5,6 @@
 #include "..\Minecraft.World\RandomLevelSource.h"
 #include "..\Minecraft.World\net.minecraft.world.level.h"
 #include "..\Minecraft.World\net.minecraft.world.level.storage.h"
-using namespace std;
 class ServerLevel;
 
 class ServerChunkCache : public ChunkSource

@@ -9,23 +9,25 @@ class GZIPOutputStream : public OutputStream
     OutputStream *stream;
 
   public:
-    GZIPOutputStream(OutputStream *out) : stream(out) {};
+    GZIPOutputStream(OutputStream *out) : stream(out)
+    {
+    }
     virtual void write(unsigned int b)
     {
         stream->write(b);
-    };
+    }
     virtual void write(std::vector<std::uint8_t> b)
     {
         stream->write(b);
-    };
+    }
     virtual void write(std::vector<std::uint8_t> b, unsigned int offset, unsigned int length)
     {
         stream->write(b, offset, length);
-    };
+    }
     virtual void close()
     {
         stream->close();
-    };
+    }
     virtual void flush()
     {
     }

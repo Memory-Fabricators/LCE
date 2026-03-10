@@ -54,12 +54,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#else
-#define AUTO_VAR(_var, _val) auto _var = _val
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-typedef unsigned __int64 __uint64;
 #endif
 
 #ifdef _WINDOWS64
@@ -103,9 +97,7 @@ typedef XNKID SessionID;
 typedef XUID GameSessionUID;
 #define HRESULT_SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
 
-#include "..\Minecraft.Client\xbox\network\extra.h"
-#else
-#include "extraX64.h"
+#include "Minecraft.Client/xbox/network/extra.h"
 #endif
 
 #ifdef __PS3__
@@ -119,72 +111,48 @@ typedef XUID GameSessionUID;
 #include <sysutil/sysutil_common.h>
 #include <sysutil/sysutil_savedata.h>
 #include <sysutil/sysutil_sysparam.h>
-
 #endif
 
-// C RunTime Header Files
-#include <stdlib.h>
+// #ifdef _XBOX
+// #include <xonline.h>
+// #include <xparty.h>
+// #endif
 
-#include <memory>
+// #include "Class.h"
+// #include "Definitions.h"
+// #include "PerformanceTimer.h"
+// #include "Random.h"
+// #include "SharedConstants.h"
+// #include "compression.h"
 
-#include <algorithm>
-#include <deque>
-#include <exception>
-#include <iostream>
-#include <list>
-#include <map>
-#include <set>
-#include <sstream>
-#include <string>
+// #ifdef _XBOX
+// #include "xbox\4JLibs\inc\4J_Input.h"
+// #include "xbox\4JLibs\inc\4J_Profile.h"
+// #include "xbox\4JLibs\inc\4J_Render.h"
+// #include "xbox\4JLibs\inc\4J_Storage.h"
+// #include "xbox\4JLibs\inc\4J_XTMS.h"
+// #elif defined(__PS3__)
 
-#include <assert.h>
-
-#ifdef _XBOX
-#include <xonline.h>
-#include <xparty.h>
-#endif
-
-#include "..\Minecraft.World\ArrayWithLength.h"
-#include "..\Minecraft.World\Definitions.h"
-#include "..\Minecraft.World\PerformanceTimer.h"
-#include "..\Minecraft.World\Random.h"
-#include "..\Minecraft.World\SharedConstants.h"
-#include "..\Minecraft.World\class.h"
-#include "..\Minecraft.World\compression.h"
-
-#ifdef _XBOX
-#include "xbox\4JLibs\inc\4J_Input.h"
-#include "xbox\4JLibs\inc\4J_Profile.h"
-#include "xbox\4JLibs\inc\4J_Render.h"
-#include "xbox\4JLibs\inc\4J_Storage.h"
-#include "xbox\4JLibs\inc\4J_XTMS.h"
-#elif defined(__PS3__)
-
-#include "PS3\4JLibs\inc\4J_Input.h"
-#include "PS3\4JLibs\inc\4J_Profile.h"
-#include "PS3\4JLibs\inc\4J_Render.h"
-#include "PS3\4JLibs\inc\4J_Storage.h"
-#elif defined _DURANGO
-#include "Durango\4JLibs\inc\4J_Input.h"
-#include "Durango\4JLibs\inc\4J_Profile.h"
-#include "Durango\4JLibs\inc\4J_Render.h"
-#include "Durango\4JLibs\inc\4J_Storage.h"
-#elif defined _WINDOWS64
-#include "Windows64\4JLibs\inc\4J_Input.h"
-#include "Windows64\4JLibs\inc\4J_Profile.h"
-#include "Windows64\4JLibs\inc\4J_Render.h"
-#include "Windows64\4JLibs\inc\4J_Storage.h"
-#elif defined __PSVITA__
-#include "PSVita\4JLibs\inc\4J_Input.h"
-#include "PSVita\4JLibs\inc\4J_Profile.h"
-#include "PSVita\4JLibs\inc\4J_Render.h"
-#include "PSVita\4JLibs\inc\4J_Storage.h"
-#else
-#include "Orbis\4JLibs\inc\4J_Input.h"
-#include "Orbis\4JLibs\inc\4J_Profile.h"
-#include "Orbis\4JLibs\inc\4J_Render.h"
-#include "Orbis\4JLibs\inc\4J_Storage.h"
-#endif
+// #include "PS3\4JLibs\inc\4J_Input.h"
+// #include "PS3\4JLibs\inc\4J_Profile.h"
+// #include "PS3\4JLibs\inc\4J_Render.h"
+// #include "PS3\4JLibs\inc\4J_Storage.h"
+// #elif defined _DURANGO
+// #include "Durango\4JLibs\inc\4J_Input.h"
+// #include "Durango\4JLibs\inc\4J_Profile.h"
+// #include "Durango\4JLibs\inc\4J_Render.h"
+// #include "Durango\4JLibs\inc\4J_Storage.h"
+// #elif defined _WINDOWS64
+// #include "Windows64\4JLibs\inc\4J_Input.h"
+// #include "Windows64\4JLibs\inc\4J_Profile.h"
+// #include "Windows64\4JLibs\inc\4J_Render.h"
+// #include "Windows64\4JLibs\inc\4J_Storage.h"
+// #elif defined __PSVITA__
+// #include "PSVita\4JLibs\inc\4J_Input.h"
+// #include "PSVita\4JLibs\inc\4J_Profile.h"
+// #include "PSVita\4JLibs\inc\4J_Render.h"
+// #include "PSVita\4JLibs\inc\4J_Storage.h"
+// #endif
 
 #include "BufferedImage.h"
 #include "ClientConstants.h"

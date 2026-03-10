@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 // 4J Stu - The java formated numbers based on a local passed in, but I am just going for a constant format here
 class NumberFormat
@@ -31,5 +31,7 @@ class DecimalFormat
     }
 
     // 4J Stu - The java code took a string format, we take a printf format string
-    DecimalFormat(wstring x) : formatString(x) {};
+    DecimalFormat(wstring x) : formatString(x)
+    {
+    }
 };

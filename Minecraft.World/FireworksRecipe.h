@@ -44,7 +44,7 @@ class FireworksRecipe : public Recipy
         requires(int iRecipe)
     {
         return false;
-    };
+    }
     virtual void
         requires(INGREDIENTS_REQUIRED *pIngReq)
     {};

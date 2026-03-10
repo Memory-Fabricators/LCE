@@ -1,6 +1,5 @@
 #pragma once
 #include "TileEntityRenderer.h"
-using namespace std;
 
 class BaseMobSpawner;
 

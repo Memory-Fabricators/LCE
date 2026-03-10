@@ -1,20 +1,20 @@
 #pragma once
 
-enum eFileExtensionType
+enum class eFileExtensionType
 {
     eFileExtensionType_PNG = 0,
     eFileExtensionType_INF,
     eFileExtensionType_DAT,
 };
 
-enum eTMSFileType
+enum class eTMSFileType
 {
     eTMSFileType_MinecraftStore = 0,
     eTMSFileType_TexturePack,
     eTMSFileType_All
 };
 
-enum eTPDFileType
+enum class eTPDFileType
 {
     eTPDFileType_Loc = 0,
     eTPDFileType_Icon,
@@ -22,7 +22,7 @@ enum eTPDFileType
     eTPDFileType_Comparison,
 };
 
-enum eFont
+enum class eFont
 {
     eFont_European = 0,
     eFont_Korean,
@@ -31,7 +31,7 @@ enum eFont
     eFont_None, // to fallback to nothing
 };
 
-enum eXuiAction
+enum class eXuiAction
 {
     eAppAction_Idle = 0,
     eAppAction_SaveGame,
@@ -82,7 +82,7 @@ enum eXuiAction
     eAppAction_DebugText,
 };
 
-enum eTMSAction
+enum class eTMSAction
 {
     eTMSAction_Idle = 0,
     eTMSAction_TMS_RetrieveFiles_Complete,
@@ -109,7 +109,7 @@ enum eTMSAction
 
 // The server runs on its own thread, so we need to call its actions there rather than where all other Xui actions are performed
 // In general these are debugging options
-enum eXuiServerAction
+enum class eXuiServerAction
 {
     eXuiServerAction_Idle = 0,
     eXuiServerAction_DropItem, // Debug
@@ -126,7 +126,7 @@ enum eXuiServerAction
     eXuiServerAction_SetCameraLocation, // Debug
 };
 
-enum eGameSetting
+enum class eGameSetting
 {
     eGameSetting_MusicVolume = 0,
     eGameSetting_SoundFXVolume,
@@ -174,282 +174,279 @@ enum eGameSetting
     eGameSetting_PSVita_NetworkModeAdhoc,
 };
 
-enum eGameMode
+enum class eGameMode
 {
     eMode_Singleplayer,
     eMode_Multiplayer
 };
 
-enum eMinecraftColour
+enum class MinecraftColor
 {
-    eMinecraftColour_NOT_SET,
+    NOT_SET,
+    Foliage_Evergreen,
+    Foliage_Birch,
+    Foliage_Default,
+    Foliage_Common,
+    Foliage_Ocean,
+    Foliage_Plains,
+    Foliage_Desert,
+    Foliage_ExtremeHills,
+    Foliage_Forest,
+    Foliage_Taiga,
+    Foliage_Swampland,
+    Foliage_River,
+    Foliage_Hell,
+    Foliage_Sky,
+    Foliage_FrozenOcean,
+    Foliage_FrozenRiver,
+    Foliage_IcePlains,
+    Foliage_IceMountains,
+    Foliage_MushroomIsland,
+    Foliage_MushroomIslandShore,
+    Foliage_Beach,
+    Foliage_DesertHills,
+    Foliage_ForestHills,
+    Foliage_TaigaHills,
+    Foliage_ExtremeHillsEdge,
+    Foliage_Jungle,
+    Foliage_JungleHills,
+    Grass_Common,
+    Grass_Ocean,
+    Grass_Plains,
+    Grass_Desert,
+    Grass_ExtremeHills,
+    Grass_Forest,
+    Grass_Taiga,
+    Grass_Swampland,
+    Grass_River,
+    Grass_Hell,
+    Grass_Sky,
+    Grass_FrozenOcean,
+    Grass_FrozenRiver,
+    Grass_IcePlains,
+    Grass_IceMountains,
+    Grass_MushroomIsland,
+    Grass_MushroomIslandShore,
+    Grass_Beach,
+    Grass_DesertHills,
+    Grass_ForestHills,
+    Grass_TaigaHills,
+    Grass_ExtremeHillsEdge,
+    Grass_Jungle,
+    Grass_JungleHills,
+    Water_Ocean,
+    Water_Plains,
+    Water_Desert,
+    Water_ExtremeHills,
+    Water_Forest,
+    Water_Taiga,
+    Water_Swampland,
+    Water_River,
+    Water_Hell,
+    Water_Sky,
+    Water_FrozenOcean,
+    Water_FrozenRiver,
+    Water_IcePlains,
+    Water_IceMountains,
+    Water_MushroomIsland,
+    Water_MushroomIslandShore,
+    Water_Beach,
+    Water_DesertHills,
+    Water_ForestHills,
+    Water_TaigaHills,
+    Water_ExtremeHillsEdge,
+    Water_Jungle,
+    Water_JungleHills,
 
-    eMinecraftColour_Foliage_Evergreen,
-    eMinecraftColour_Foliage_Birch,
-    eMinecraftColour_Foliage_Default,
-    eMinecraftColour_Foliage_Common,
-    eMinecraftColour_Foliage_Ocean,
-    eMinecraftColour_Foliage_Plains,
-    eMinecraftColour_Foliage_Desert,
-    eMinecraftColour_Foliage_ExtremeHills,
-    eMinecraftColour_Foliage_Forest,
-    eMinecraftColour_Foliage_Taiga,
-    eMinecraftColour_Foliage_Swampland,
-    eMinecraftColour_Foliage_River,
-    eMinecraftColour_Foliage_Hell,
-    eMinecraftColour_Foliage_Sky,
-    eMinecraftColour_Foliage_FrozenOcean,
-    eMinecraftColour_Foliage_FrozenRiver,
-    eMinecraftColour_Foliage_IcePlains,
-    eMinecraftColour_Foliage_IceMountains,
-    eMinecraftColour_Foliage_MushroomIsland,
-    eMinecraftColour_Foliage_MushroomIslandShore,
-    eMinecraftColour_Foliage_Beach,
-    eMinecraftColour_Foliage_DesertHills,
-    eMinecraftColour_Foliage_ForestHills,
-    eMinecraftColour_Foliage_TaigaHills,
-    eMinecraftColour_Foliage_ExtremeHillsEdge,
-    eMinecraftColour_Foliage_Jungle,
-    eMinecraftColour_Foliage_JungleHills,
+    Sky_Ocean,
+    Sky_Plains,
+    Sky_Desert,
+    Sky_ExtremeHills,
+    Sky_Forest,
+    Sky_Taiga,
+    Sky_Swampland,
+    Sky_River,
+    Sky_Hell,
+    Sky_Sky,
+    Sky_FrozenOcean,
+    Sky_FrozenRiver,
+    Sky_IcePlains,
+    Sky_IceMountains,
+    Sky_MushroomIsland,
+    Sky_MushroomIslandShore,
+    Sky_Beach,
+    Sky_DesertHills,
+    Sky_ForestHills,
+    Sky_TaigaHills,
+    Sky_ExtremeHillsEdge,
+    Sky_Jungle,
+    Sky_JungleHills,
 
-    eMinecraftColour_Grass_Common,
-    eMinecraftColour_Grass_Ocean,
-    eMinecraftColour_Grass_Plains,
-    eMinecraftColour_Grass_Desert,
-    eMinecraftColour_Grass_ExtremeHills,
-    eMinecraftColour_Grass_Forest,
-    eMinecraftColour_Grass_Taiga,
-    eMinecraftColour_Grass_Swampland,
-    eMinecraftColour_Grass_River,
-    eMinecraftColour_Grass_Hell,
-    eMinecraftColour_Grass_Sky,
-    eMinecraftColour_Grass_FrozenOcean,
-    eMinecraftColour_Grass_FrozenRiver,
-    eMinecraftColour_Grass_IcePlains,
-    eMinecraftColour_Grass_IceMountains,
-    eMinecraftColour_Grass_MushroomIsland,
-    eMinecraftColour_Grass_MushroomIslandShore,
-    eMinecraftColour_Grass_Beach,
-    eMinecraftColour_Grass_DesertHills,
-    eMinecraftColour_Grass_ForestHills,
-    eMinecraftColour_Grass_TaigaHills,
-    eMinecraftColour_Grass_ExtremeHillsEdge,
-    eMinecraftColour_Grass_Jungle,
-    eMinecraftColour_Grass_JungleHills,
+    Tile_RedstoneDust,
+    Tile_RedstoneDustUnlit,
+    Tile_RedstoneDustLitMin,
+    Tile_RedstoneDustLitMax,
+    Tile_StemMin,
+    Tile_StemMax,
+    Tile_WaterLily,
 
-    eMinecraftColour_Water_Ocean,
-    eMinecraftColour_Water_Plains,
-    eMinecraftColour_Water_Desert,
-    eMinecraftColour_Water_ExtremeHills,
-    eMinecraftColour_Water_Forest,
-    eMinecraftColour_Water_Taiga,
-    eMinecraftColour_Water_Swampland,
-    eMinecraftColour_Water_River,
-    eMinecraftColour_Water_Hell,
-    eMinecraftColour_Water_Sky,
-    eMinecraftColour_Water_FrozenOcean,
-    eMinecraftColour_Water_FrozenRiver,
-    eMinecraftColour_Water_IcePlains,
-    eMinecraftColour_Water_IceMountains,
-    eMinecraftColour_Water_MushroomIsland,
-    eMinecraftColour_Water_MushroomIslandShore,
-    eMinecraftColour_Water_Beach,
-    eMinecraftColour_Water_DesertHills,
-    eMinecraftColour_Water_ForestHills,
-    eMinecraftColour_Water_TaigaHills,
-    eMinecraftColour_Water_ExtremeHillsEdge,
-    eMinecraftColour_Water_Jungle,
-    eMinecraftColour_Water_JungleHills,
+    Sky_Dawn_Dark,
+    Sky_Dawn_Bright,
 
-    eMinecraftColour_Sky_Ocean,
-    eMinecraftColour_Sky_Plains,
-    eMinecraftColour_Sky_Desert,
-    eMinecraftColour_Sky_ExtremeHills,
-    eMinecraftColour_Sky_Forest,
-    eMinecraftColour_Sky_Taiga,
-    eMinecraftColour_Sky_Swampland,
-    eMinecraftColour_Sky_River,
-    eMinecraftColour_Sky_Hell,
-    eMinecraftColour_Sky_Sky,
-    eMinecraftColour_Sky_FrozenOcean,
-    eMinecraftColour_Sky_FrozenRiver,
-    eMinecraftColour_Sky_IcePlains,
-    eMinecraftColour_Sky_IceMountains,
-    eMinecraftColour_Sky_MushroomIsland,
-    eMinecraftColour_Sky_MushroomIslandShore,
-    eMinecraftColour_Sky_Beach,
-    eMinecraftColour_Sky_DesertHills,
-    eMinecraftColour_Sky_ForestHills,
-    eMinecraftColour_Sky_TaigaHills,
-    eMinecraftColour_Sky_ExtremeHillsEdge,
-    eMinecraftColour_Sky_Jungle,
-    eMinecraftColour_Sky_JungleHills,
+    Material_None,
+    Material_Grass,
+    Material_Sand,
+    Material_Cloth,
+    Material_Fire,
+    Material_Ice,
+    Material_Metal,
+    Material_Plant,
+    Material_Snow,
+    Material_Clay,
+    Material_Dirt,
+    Material_Stone,
+    Material_Water,
+    Material_Wood,
+    Material_Emerald,
 
-    eMinecraftColour_Tile_RedstoneDust,
-    eMinecraftColour_Tile_RedstoneDustUnlit,
-    eMinecraftColour_Tile_RedstoneDustLitMin,
-    eMinecraftColour_Tile_RedstoneDustLitMax,
-    eMinecraftColour_Tile_StemMin,
-    eMinecraftColour_Tile_StemMax,
-    eMinecraftColour_Tile_WaterLily,
+    Particle_Note_00,
+    Particle_Note_01,
+    Particle_Note_02,
+    Particle_Note_03,
+    Particle_Note_04,
+    Particle_Note_05,
+    Particle_Note_06,
+    Particle_Note_07,
+    Particle_Note_08,
+    Particle_Note_09,
+    Particle_Note_10,
+    Particle_Note_11,
+    Particle_Note_12,
+    Particle_Note_13,
+    Particle_Note_14,
+    Particle_Note_15,
+    Particle_Note_16,
+    Particle_Note_17,
+    Particle_Note_18,
+    Particle_Note_19,
+    Particle_Note_20,
+    Particle_Note_21,
+    Particle_Note_22,
+    Particle_Note_23,
+    Particle_Note_24,
 
-    eMinecraftColour_Sky_Dawn_Dark,
-    eMinecraftColour_Sky_Dawn_Bright,
+    Particle_NetherPortal,
+    Particle_EnderPortal,
+    Particle_Smoke,
+    Particle_Ender,
+    Particle_Explode,
+    Particle_HugeExplosion,
+    Particle_DripWater,
+    Particle_DripLavaStart,
+    Particle_DripLavaEnd,
+    Particle_EnchantmentTable,
+    Particle_DragonBreathMin,
+    Particle_DragonBreathMax,
+    Particle_Suspend,
+    Particle_CritStart,
+    Particle_CritEnd,
 
-    eMinecraftColour_Material_None,
-    eMinecraftColour_Material_Grass,
-    eMinecraftColour_Material_Sand,
-    eMinecraftColour_Material_Cloth,
-    eMinecraftColour_Material_Fire,
-    eMinecraftColour_Material_Ice,
-    eMinecraftColour_Material_Metal,
-    eMinecraftColour_Material_Plant,
-    eMinecraftColour_Material_Snow,
-    eMinecraftColour_Material_Clay,
-    eMinecraftColour_Material_Dirt,
-    eMinecraftColour_Material_Stone,
-    eMinecraftColour_Material_Water,
-    eMinecraftColour_Material_Wood,
-    eMinecraftColour_Material_Emerald,
+    Effect_MovementSpeed,
+    Effect_MovementSlowDown,
+    Effect_DigSpeed,
+    Effect_DigSlowdown,
+    Effect_DamageBoost,
+    Effect_Heal,
+    Effect_Harm,
+    Effect_Jump,
+    Effect_Confusion,
+    Effect_Regeneration,
+    Effect_DamageResistance,
+    Effect_FireResistance,
+    Effect_WaterBreathing,
+    Effect_Invisiblity,
+    Effect_Blindness,
+    Effect_NightVision,
+    Effect_Hunger,
+    Effect_Weakness,
+    Effect_Poison,
+    Effect_Wither,
+    Effect_HealthBoost,
+    Effect_Absorption,
+    Effect_Saturation,
 
-    eMinecraftColour_Particle_Note_00,
-    eMinecraftColour_Particle_Note_01,
-    eMinecraftColour_Particle_Note_02,
-    eMinecraftColour_Particle_Note_03,
-    eMinecraftColour_Particle_Note_04,
-    eMinecraftColour_Particle_Note_05,
-    eMinecraftColour_Particle_Note_06,
-    eMinecraftColour_Particle_Note_07,
-    eMinecraftColour_Particle_Note_08,
-    eMinecraftColour_Particle_Note_09,
-    eMinecraftColour_Particle_Note_10,
-    eMinecraftColour_Particle_Note_11,
-    eMinecraftColour_Particle_Note_12,
-    eMinecraftColour_Particle_Note_13,
-    eMinecraftColour_Particle_Note_14,
-    eMinecraftColour_Particle_Note_15,
-    eMinecraftColour_Particle_Note_16,
-    eMinecraftColour_Particle_Note_17,
-    eMinecraftColour_Particle_Note_18,
-    eMinecraftColour_Particle_Note_19,
-    eMinecraftColour_Particle_Note_20,
-    eMinecraftColour_Particle_Note_21,
-    eMinecraftColour_Particle_Note_22,
-    eMinecraftColour_Particle_Note_23,
-    eMinecraftColour_Particle_Note_24,
+    Potion_BaseColor,
 
-    eMinecraftColour_Particle_NetherPortal,
-    eMinecraftColour_Particle_EnderPortal,
-    eMinecraftColour_Particle_Smoke,
-    eMinecraftColour_Particle_Ender,
-    eMinecraftColour_Particle_Explode,
-    eMinecraftColour_Particle_HugeExplosion,
-    eMinecraftColour_Particle_DripWater,
-    eMinecraftColour_Particle_DripLavaStart,
-    eMinecraftColour_Particle_DripLavaEnd,
-    eMinecraftColour_Particle_EnchantmentTable,
-    eMinecraftColour_Particle_DragonBreathMin,
-    eMinecraftColour_Particle_DragonBreathMax,
-    eMinecraftColour_Particle_Suspend,
-    eMinecraftColour_Particle_CritStart,
-    eMinecraftColour_Particle_CritEnd,
+    Mob_Creeper_Colour1,
+    Mob_Creeper_Colour2,
+    Mob_Skeleton_Colour1,
+    Mob_Skeleton_Colour2,
+    Mob_Spider_Colour1,
+    Mob_Spider_Colour2,
+    Mob_Zombie_Colour1,
+    Mob_Zombie_Colour2,
+    Mob_Slime_Colour1,
+    Mob_Slime_Colour2,
+    Mob_Ghast_Colour1,
+    Mob_Ghast_Colour2,
+    Mob_PigZombie_Colour1,
+    Mob_PigZombie_Colour2,
+    Mob_Enderman_Colour1,
+    Mob_Enderman_Colour2,
+    Mob_CaveSpider_Colour1,
+    Mob_CaveSpider_Colour2,
+    Mob_Silverfish_Colour1,
+    Mob_Silverfish_Colour2,
+    Mob_Blaze_Colour1,
+    Mob_Blaze_Colour2,
+    Mob_LavaSlime_Colour1,
+    Mob_LavaSlime_Colour2,
+    Mob_Pig_Colour1,
+    Mob_Pig_Colour2,
+    Mob_Sheep_Colour1,
+    Mob_Sheep_Colour2,
+    Mob_Cow_Colour1,
+    Mob_Cow_Colour2,
+    Mob_Chicken_Colour1,
+    Mob_Chicken_Colour2,
+    Mob_Squid_Colour1,
+    Mob_Squid_Colour2,
+    Mob_Wolf_Colour1,
+    Mob_Wolf_Colour2,
+    Mob_MushroomCow_Colour1,
+    Mob_MushroomCow_Colour2,
+    Mob_Ocelot_Colour1,
+    Mob_Ocelot_Colour2,
+    Mob_Villager_Colour1,
+    Mob_Villager_Colour2,
+    Mob_Bat_Colour1,
+    Mob_Bat_Colour2,
+    Mob_Witch_Colour1,
+    Mob_Witch_Colour2,
+    Mob_Horse_Colour1,
+    Mob_Horse_Colour2,
 
-    eMinecraftColour_Effect_MovementSpeed,
-    eMinecraftColour_Effect_MovementSlowDown,
-    eMinecraftColour_Effect_DigSpeed,
-    eMinecraftColour_Effect_DigSlowdown,
-    eMinecraftColour_Effect_DamageBoost,
-    eMinecraftColour_Effect_Heal,
-    eMinecraftColour_Effect_Harm,
-    eMinecraftColour_Effect_Jump,
-    eMinecraftColour_Effect_Confusion,
-    eMinecraftColour_Effect_Regeneration,
-    eMinecraftColour_Effect_DamageResistance,
-    eMinecraftColour_Effect_FireResistance,
-    eMinecraftColour_Effect_WaterBreathing,
-    eMinecraftColour_Effect_Invisiblity,
-    eMinecraftColour_Effect_Blindness,
-    eMinecraftColour_Effect_NightVision,
-    eMinecraftColour_Effect_Hunger,
-    eMinecraftColour_Effect_Weakness,
-    eMinecraftColour_Effect_Poison,
-    eMinecraftColour_Effect_Wither,
-    eMinecraftColour_Effect_HealthBoost,
-    eMinecraftColour_Effect_Absoprtion,
-    eMinecraftColour_Effect_Saturation,
+    Armour_Default_Leather_Colour,
 
-    eMinecraftColour_Potion_BaseColour,
+    Under_Water_Clear_Colour,
+    Under_Lava_Clear_Colour,
+    In_Cloud_Base_Colour,
 
-    eMinecraftColour_Mob_Creeper_Colour1,
-    eMinecraftColour_Mob_Creeper_Colour2,
-    eMinecraftColour_Mob_Skeleton_Colour1,
-    eMinecraftColour_Mob_Skeleton_Colour2,
-    eMinecraftColour_Mob_Spider_Colour1,
-    eMinecraftColour_Mob_Spider_Colour2,
-    eMinecraftColour_Mob_Zombie_Colour1,
-    eMinecraftColour_Mob_Zombie_Colour2,
-    eMinecraftColour_Mob_Slime_Colour1,
-    eMinecraftColour_Mob_Slime_Colour2,
-    eMinecraftColour_Mob_Ghast_Colour1,
-    eMinecraftColour_Mob_Ghast_Colour2,
-    eMinecraftColour_Mob_PigZombie_Colour1,
-    eMinecraftColour_Mob_PigZombie_Colour2,
-    eMinecraftColour_Mob_Enderman_Colour1,
-    eMinecraftColour_Mob_Enderman_Colour2,
-    eMinecraftColour_Mob_CaveSpider_Colour1,
-    eMinecraftColour_Mob_CaveSpider_Colour2,
-    eMinecraftColour_Mob_Silverfish_Colour1,
-    eMinecraftColour_Mob_Silverfish_Colour2,
-    eMinecraftColour_Mob_Blaze_Colour1,
-    eMinecraftColour_Mob_Blaze_Colour2,
-    eMinecraftColour_Mob_LavaSlime_Colour1,
-    eMinecraftColour_Mob_LavaSlime_Colour2,
-    eMinecraftColour_Mob_Pig_Colour1,
-    eMinecraftColour_Mob_Pig_Colour2,
-    eMinecraftColour_Mob_Sheep_Colour1,
-    eMinecraftColour_Mob_Sheep_Colour2,
-    eMinecraftColour_Mob_Cow_Colour1,
-    eMinecraftColour_Mob_Cow_Colour2,
-    eMinecraftColour_Mob_Chicken_Colour1,
-    eMinecraftColour_Mob_Chicken_Colour2,
-    eMinecraftColour_Mob_Squid_Colour1,
-    eMinecraftColour_Mob_Squid_Colour2,
-    eMinecraftColour_Mob_Wolf_Colour1,
-    eMinecraftColour_Mob_Wolf_Colour2,
-    eMinecraftColour_Mob_MushroomCow_Colour1,
-    eMinecraftColour_Mob_MushroomCow_Colour2,
-    eMinecraftColour_Mob_Ocelot_Colour1,
-    eMinecraftColour_Mob_Ocelot_Colour2,
-    eMinecraftColour_Mob_Villager_Colour1,
-    eMinecraftColour_Mob_Villager_Colour2,
-    eMinecraftColour_Mob_Bat_Colour1,
-    eMinecraftColour_Mob_Bat_Colour2,
-    eMinecraftColour_Mob_Witch_Colour1,
-    eMinecraftColour_Mob_Witch_Colour2,
-    eMinecraftColour_Mob_Horse_Colour1,
-    eMinecraftColour_Mob_Horse_Colour2,
+    Under_Water_Fog_Colour,
+    Under_Lava_Fog_Colour,
+    In_Cloud_Fog_Colour,
 
-    eMinecraftColour_Armour_Default_Leather_Colour,
+    Default_Fog_Colour,
+    Nether_Fog_Colour,
+    End_Fog_Colour,
 
-    eMinecraftColour_Under_Water_Clear_Colour,
-    eMinecraftColour_Under_Lava_Clear_Colour,
-    eMinecraftColour_In_Cloud_Base_Colour,
+    Sign_Text,
+    Map_Text,
 
-    eMinecraftColour_Under_Water_Fog_Colour,
-    eMinecraftColour_Under_Lava_Fog_Colour,
-    eMinecraftColour_In_Cloud_Fog_Colour,
+    Leash_Light_Colour,
+    Leash_Dark_Colour,
 
-    eMinecraftColour_Default_Fog_Colour,
-    eMinecraftColour_Nether_Fog_Colour,
-    eMinecraftColour_End_Fog_Colour,
-
-    eMinecraftColour_Sign_Text,
-    eMinecraftColour_Map_Text,
-
-    eMinecraftColour_Leash_Light_Colour,
-    eMinecraftColour_Leash_Dark_Colour,
-
-    eMinecraftColour_Fire_Overlay,
+    Fire_Overlay,
 
     eHTMLColor_0,
     eHTMLColor_1,
@@ -527,10 +524,10 @@ enum eMinecraftColour
     // eHTMLColor_e_dark = 0x3f3f15, //r:3f , g: 3f, b: 15, i: 1e
     // eHTMLColor_f_dark = 0x3f3f3f, //r:3f , g: 3f, b: 3f, i: 1f
 
-    eMinecraftColour_COUNT,
+    COUNT,
 };
 
-enum eDLCContentType
+enum class eDLCContentType
 {
     e_DLC_SkinPack = 0,
     e_DLC_TexturePacks,
@@ -544,7 +541,7 @@ enum eDLCContentType
     e_DLC_NotDefined,
 };
 
-enum eDLCMarketplaceType
+enum class eDLCMarketplaceType
 {
     e_Marketplace_Content = 0, // skins, texture packs and mashup packs
     e_Marketplace_Themes,
@@ -554,14 +551,14 @@ enum eDLCMarketplaceType
     e_Marketplace_NotDefined,
 };
 
-enum eDLCContentState
+enum class eDLCContentState
 {
     e_DLC_ContentState_Idle = 0,
     e_DLC_ContentState_Retrieving,
     e_DLC_ContentState_Retrieved
 };
 
-enum eTMSContentState
+enum class eTMSContentState
 {
     e_TMS_ContentState_Idle = 0,
     e_TMS_ContentState_Queued,
@@ -569,7 +566,7 @@ enum eTMSContentState
     e_TMS_ContentState_Retrieved
 };
 
-enum eXUID
+enum class eXUID
 {
     eXUID_Undefined = 0,
     eXUID_NoName, // name not needed
@@ -587,7 +584,7 @@ enum eXUID
     eXUID_4JSteven,
 };
 
-enum _eTerrainFeatureType
+enum class _eTerrainFeatureType
 {
     eTerrainFeature_None = 0,
     eTerrainFeature_Stronghold,
@@ -601,7 +598,7 @@ enum _eTerrainFeatureType
 
 // 4J Stu - Whend adding new options you should consider whether having them on should disable achievements, and if so add them to the CanRecordStatsAndAchievements function
 // 4J Stu - These options are now saved in save data, so new options can ONLY be added to the end
-enum eGameHostOption
+enum class eGameHostOption
 {
     eGameHostOption_Difficulty = 0,
     eGameHostOption_OnlineGame, // Unused
@@ -641,7 +638,7 @@ enum eGameHostOption
 
 // 4J-PB - If any new DLC items are added to the TMSFiles, this array needs updated
 #ifdef _XBOX
-enum _TMSFILES
+enum class _TMSFILES
 {
     TMS_SP1 = 0,
     TMS_SP2,
@@ -789,7 +786,7 @@ enum _TMSFILES
 };
 #endif
 
-enum EHTMLFontSize
+enum class EHTMLFontSize
 {
     eHTMLSize_Normal,
     eHTMLSize_Splitscreen,
@@ -799,7 +796,7 @@ enum EHTMLFontSize
     eHTMLSize_COUNT,
 };
 
-enum EControllerActions
+enum class EControllerActions
 {
     ACTION_MENU_A,
     ACTION_MENU_B,
@@ -869,7 +866,7 @@ enum EControllerActions
     MINECRAFT_ACTION_RENDER_DEBUG
 };
 
-enum eMCLang
+enum class eMCLang
 {
     eMCLang_null = 0,
     eMCLang_enUS,

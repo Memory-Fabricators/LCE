@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LocatableSource.h"
+#include <memory>
 
 class Tile;
 class Material;
@@ -32,5 +33,5 @@ class BlockSource : public LocatableSource
     virtual int getData() = 0;
     virtual Material *getMaterial() = 0;
 
-    virtual shared_ptr<TileEntity> getEntity() = 0;
+    virtual std::shared_ptr<TileEntity> getEntity() = 0;
 };

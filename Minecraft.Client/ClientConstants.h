@@ -1,5 +1,6 @@
 #pragma once
-using namespace std;
+
+#include <string>
 
 class ClientConstants
 {
@@ -12,7 +13,7 @@ class ClientConstants
 
     // INTERNAL DEVELOPMENT SETTINGS
   public:
-    static const wstring VERSION_STRING;
+    static const std::wstring VERSION_STRING;
 
     static const bool DEADMAU5_CAMERA_CHEATS = false;
 };

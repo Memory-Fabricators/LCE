@@ -1,5 +1,6 @@
 #pragma once
-using namespace std;
+
+#include <vector>
 
 class AABB;
 class Recipy;

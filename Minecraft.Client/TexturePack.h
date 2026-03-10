@@ -1,7 +1,14 @@
 #pragma once
-using namespace std;
+#include "BufferedImage.h"
+#include "Common/Colours/ColourTable.h"
+#include <cstddef>
+#include <string>
+#include <vector>
+#include "Textures.h"
 
-#include "Common\App_enums.h"
+;
+
+#include "Common/App_enums.h"
 
 class InputStream;
 class Minecraft;
@@ -51,15 +58,15 @@ class TexturePack
     }
 
     // 4J Added
-    virtual wstring getPath(bool bTitleUpdateTexture = false, const char *pchBDPatchFilename = NULL);
-    virtual wstring getAnimationString(const wstring &textureName, const wstring &path, bool allowFallback) = 0;
-    virtual BufferedImage *getImageResource(const wstring &File, bool filenameHasExtension = false, bool bTitleUpdateTexture = false, const wstring &drive = L"") = 0;
+    virtual std::wstring getPath(bool bTitleUpdateTexture = false, const char *pchBDPatchFilename = NULL);
+    virtual std::wstring getAnimationString(const std::wstring &textureName, const wstring &path, bool allowFallback) = 0;
+    virtual BufferedImage *getImageResource(const std::wstring &File, bool filenameHasExtension = false, bool bTitleUpdateTexture = false, const wstring &drive = L"") = 0;
     virtual void loadColourTable() = 0;
     virtual void loadUI() = 0;
     virtual void unloadUI() = 0;
     virtual wstring getXuiRootPath() = 0;
-    virtual PBYTE getPackIcon(DWORD &dwImageBytes) = 0;
-    virtual PBYTE getPackComparison(DWORD &dwImageBytes) = 0;
+    virtual std::vector<char> getPackIcon(std::size_t &dwImageBytes) = 0;
+    virtual std::vector<char> getPackComparison(std::size_t &dwImageBytes) = 0;
     virtual unsigned int getDLCParentPackId() = 0;
     virtual unsigned char getDLCSubPackId() = 0;
     virtual ColourTable *getColourTable() = 0;

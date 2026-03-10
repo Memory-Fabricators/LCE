@@ -1,5 +1,7 @@
 #pragma once
-#include "..\Minecraft.World\ArrayWithLength.h"
+
+#include "Entity.h"
+#include <vulkan/vulkan.h>
 
 class DynamicTexture;
 class BufferedImage;
@@ -9,7 +11,7 @@ class TexturePackRepository;
 class HttpTextureProcessor;
 class MemTextureProcessor;
 class Options;
-using namespace std;
+;
 class IntBuffer;
 class PreStitchedTextureMap;
 class ResourceLocation;
@@ -291,7 +293,7 @@ class Textures
     void clearLastBoundId();
 
   private:
-    int loadTexture(TEXTURE_NAME texId, const wstring &resourceName);
+    int loadTexture(TEXTURE_NAME texId, const std::wstring &resourceName);
 
   public:
     int loadTexture(int idx); // 4J added
@@ -300,12 +302,12 @@ class Textures
     void loadTexture(BufferedImage *img, int id, bool blur, bool clamp);
 
   private:
-    intArray anaglyph(intArray rawPixels);
+    std::vector<int> anaglyph(std::vector<int> rawPixels);
 
   public:
-    void replaceTexture(intArray rawPixels, int w, int h, int id);
-    void replaceTextureDirect(intArray rawPixels, int w, int h, int id);   // 4J added as optimisation
-    void replaceTextureDirect(shortArray rawPixels, int w, int h, int id); // 4J added as optimisation
+    void replaceTexture(std::vector<int> rawPixels, int w, int h, int id);
+    void replaceTextureDirect(std::vector<int> rawPixels, int w, int h, int id);   // 4J added as optimisation
+    void replaceTextureDirect(std::vector<short> rawPixels, int w, int h, int id); // 4J added as optimisation
     void releaseTexture(int id);
     int loadHttpTexture(const wstring &url, const wstring &backup);
     int loadHttpTexture(const wstring &url, int backup); // 4J added

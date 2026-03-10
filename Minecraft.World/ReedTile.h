@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #include "Definitions.h"
 #include "Tile.h"

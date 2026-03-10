@@ -1,4 +1,4 @@
-using namespace std;
+;
 
 #include "EggItem.h"
 #include "SoundTypes.h"

@@ -13,7 +13,7 @@ class AABB;
 class IconRegister;
 class ResourceLocation;
 
-using namespace std;
+;
 
 class EntityRenderDispatcher;
 class Font;

@@ -1,6 +1,5 @@
 #pragma once
 #include "ConsoleInputSource.h"
-using namespace std;
 
 class ConsoleInput
 {

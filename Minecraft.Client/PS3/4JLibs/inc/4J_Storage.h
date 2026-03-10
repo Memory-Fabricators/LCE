@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include <cell/cell_fs.h>
 #include <sysutil\sysutil_savedata.h>
 #include <vector>

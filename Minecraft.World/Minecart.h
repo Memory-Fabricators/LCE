@@ -12,7 +12,7 @@ class Minecart : public Entity
     eINSTANCEOF GetType()
     {
         return eTYPE_MINECART;
-    };
+    }
 
   public:
     static const int TYPE_RIDEABLE = 0;

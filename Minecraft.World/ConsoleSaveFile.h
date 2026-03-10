@@ -6,7 +6,9 @@
 class ConsoleSaveFile
 {
   public:
-    virtual ~ConsoleSaveFile() {};
+    virtual ~ConsoleSaveFile()
+    {
+    }
 
     virtual FileEntry *createFile(const ConsoleSavePath &fileName) = 0;
     virtual void deleteFile(FileEntry *file) = 0;
@@ -16,7 +18,9 @@ class ConsoleSaveFile
     virtual BOOL readFile(FileEntry *file, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead) = 0;
     virtual BOOL closeHandle(FileEntry *file) = 0;
     virtual void finalizeWrite() = 0;
-    virtual void tick() {};
+    virtual void tick()
+    {
+    }
 
     virtual bool doesFileExist(ConsoleSavePath file) = 0;
 

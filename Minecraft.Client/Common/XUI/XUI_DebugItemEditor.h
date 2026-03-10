@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 #include "../media/xuiscene_debug_item_editor.h"
 
 #include "..\..\..\Minecraft.World\ItemInstance.h"

@@ -1,6 +1,5 @@
 #pragma once
 #include "Screen.h"
-using namespace std;
 
 class ConfirmScreen : public Screen
 {

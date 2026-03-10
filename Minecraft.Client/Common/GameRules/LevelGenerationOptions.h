@@ -1,5 +1,5 @@
 #pragma once
-using namespace std;
+;
 
 #pragma message("LevelGenerationOptions.h ")
 

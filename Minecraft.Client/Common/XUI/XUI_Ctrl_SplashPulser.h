@@ -3,8 +3,6 @@
 #include <XuiApp.h>
 #include <string>
 
-using namespace std;
-
 //-----------------------------------------------------------------------------
 //  CXuiCtrlSplashPulser class
 //-----------------------------------------------------------------------------
@@ -15,7 +13,9 @@ class CXuiCtrlSplashPulser : public CXuiControlImpl
                         XUI_CLASS_LABEL)
 
     CXuiCtrlSplashPulser();
-    virtual ~CXuiCtrlSplashPulser() {};
+    virtual ~CXuiCtrlSplashPulser()
+    {
+    }
 
   protected:
     XUI_BEGIN_MSG_MAP()
