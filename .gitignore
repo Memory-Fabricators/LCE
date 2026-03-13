@@ -1,0 +1,9 @@
+/build
+.build/
+.cache/
+.DS_Store
+/res
+*.cpp
+*.h
+!Vulkan/vulkan_wrapper.h
+target/
