@@ -7,3 +7,4 @@
 *.h
 !Vulkan/vulkan_wrapper.h
 target/
+*.spv
