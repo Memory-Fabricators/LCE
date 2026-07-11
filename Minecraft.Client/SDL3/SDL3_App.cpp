@@ -1,0 +1,159 @@
+#include "../../Minecraft.Client/Minecraft.h"
+#include "../../Minecraft.Client/MinecraftServer.h"
+#include "../../Minecraft.Client/PlayerList.h"
+#include "../../Minecraft.Client/ServerPlayer.h"
+#include "../../Minecraft.World/BiomeSource.h"
+#include "../../Minecraft.World/Level.h"
+#include "../../Minecraft.World/LevelSettings.h"
+#include "../../Minecraft.World/LevelType.h"
+#include "../Common/Consoles_App.h"
+#include "../User.h"
+#include "stdafx.h"
+
+CConsoleMinecraftApp app;
+
+// CMinecraftApp declares these as non-pure virtuals (overridden below by
+// CConsoleMinecraftApp), so the base class still needs a definition of its
+// own to anchor its vtable - normally provided by Common/Consoles_App.cpp,
+// which is excluded from the SDL3 build (Iggy dependency).
+void CMinecraftApp::StoreLaunchData()
+{
+}
+
+void CMinecraftApp::ExitGame()
+{
+}
+
+void CMinecraftApp::FatalLoadError()
+{
+}
+
+CConsoleMinecraftApp::CConsoleMinecraftApp() : CMinecraftApp()
+{
+}
+
+void CConsoleMinecraftApp::SetRichPresenceContext(int iPad, int contextId)
+{
+}
+
+void CConsoleMinecraftApp::StoreLaunchData()
+{
+}
+
+void CConsoleMinecraftApp::ExitGame()
+{
+}
+
+void CConsoleMinecraftApp::FatalLoadError()
+{
+}
+
+void CConsoleMinecraftApp::CaptureSaveThumbnail()
+{
+}
+
+void CConsoleMinecraftApp::GetSaveThumbnail(PBYTE *pbData, DWORD *pdwSize)
+{
+}
+
+void CConsoleMinecraftApp::ReleaseSaveThumbnail()
+{
+}
+
+void CConsoleMinecraftApp::GetScreenshot(int iPad, PBYTE *pbData, DWORD *pdwSize)
+{
+}
+
+void CConsoleMinecraftApp::TemporaryCreateGameStart()
+{
+    app.setLevelGenerationOptions(NULL);
+
+    Minecraft *pMinecraft = Minecraft::GetInstance();
+    app.ReleaseSaveThumbnail();
+    ProfileManager.SetLockedProfile(0);
+    pMinecraft->user->name = L"Player";
+    app.ApplyGameSettingsChanged(0);
+
+    MinecraftServer::resetFlags();
+
+    app.SetTutorialMode(false);
+    app.SetCorruptSaveDeleted(false);
+
+    app.ClearTerrainFeaturePosition();
+    wstring wWorldName = L"TestWorld";
+
+    StorageManager.ResetSaveData();
+    StorageManager.SetSaveTitle(wWorldName.c_str());
+
+    bool isFlat = false;
+    __int64 seedValue = 0;
+
+    NetworkGameInitData *param = new NetworkGameInitData();
+    param->seed = seedValue;
+    param->saveData = NULL;
+
+    app.SetGameHostOption(eGameHostOption_Difficulty, 0);
+    app.SetGameHostOption(eGameHostOption_FriendsOfFriends, 0);
+    app.SetGameHostOption(eGameHostOption_Gamertags, 1);
+    app.SetGameHostOption(eGameHostOption_BedrockFog, 1);
+    app.SetGameHostOption(eGameHostOption_GameType, GameType::CREATIVE->getId());
+    app.SetGameHostOption(eGameHostOption_LevelType, 0);
+    app.SetGameHostOption(eGameHostOption_Structures, 1);
+    app.SetGameHostOption(eGameHostOption_BonusChest, 0);
+    app.SetGameHostOption(eGameHostOption_PvP, 1);
+    app.SetGameHostOption(eGameHostOption_TrustPlayers, 1);
+    app.SetGameHostOption(eGameHostOption_FireSpreads, 1);
+    app.SetGameHostOption(eGameHostOption_TNT, 1);
+    app.SetGameHostOption(eGameHostOption_HostCanFly, 1);
+    app.SetGameHostOption(eGameHostOption_HostCanChangeHunger, 1);
+    app.SetGameHostOption(eGameHostOption_HostCanBeInvisible, 1);
+
+    param->settings = app.GetGameHostOption(eGameHostOption_All);
+    g_NetworkManager.FakeLocalPlayerJoined();
+
+    LoadingInputParams *loadingParams = new LoadingInputParams();
+    loadingParams->func = &CGameNetworkManager::RunNetworkGameThreadProc;
+    loadingParams->lpParam = (LPVOID)param;
+
+    app.SetAutosaveTimerTime();
+
+    C4JThread *thread = new C4JThread(loadingParams->func, loadingParams->lpParam, "RunNetworkGame");
+    thread->Run();
+}
+
+int CConsoleMinecraftApp::GetLocalTMSFileIndex(WCHAR *wchTMSFile, bool bFilenameIncludesExtension, int eEXT)
+{
+    return -1;
+}
+
+int CConsoleMinecraftApp::LoadLocalTMSFile(WCHAR *wchTMSFile)
+{
+    return -1;
+}
+
+int CConsoleMinecraftApp::LoadLocalTMSFile(WCHAR *wchTMSFile, int eExt)
+{
+    return -1;
+}
+
+void CConsoleMinecraftApp::FreeLocalTMSFiles(int eType)
+{
+}
+
+void CConsoleMinecraftApp::ReadBannedList(int iPad, eTMSAction action, bool bCallback)
+{
+}
+
+int CConsoleMinecraftApp::LoadLocalTMSFile(WCHAR *wchTMSFile, eFileExtensionType eExt)
+{
+    return -1;
+}
+
+void CConsoleMinecraftApp::FreeLocalTMSFiles(eTMSFileType eType)
+{
+}
+
+int CConsoleMinecraftApp::GetLocalTMSFileIndex(WCHAR *wchTMSFile, bool bFilenameIncludesExtension, eFileExtensionType eEXT)
+{
+    return -1;
+}
