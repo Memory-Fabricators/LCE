@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Goal.h"
+#include "Path.h"
 
 class Level;
 class Mob;
-class Path;
 
 class MeleeAttackGoal : public Goal
 {

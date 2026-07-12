@@ -1912,7 +1912,7 @@ void UIScene_LoadOrJoinMenu::LoadSaveFromDisk(File *saveFile, ESavePlatform save
     // Make our next save default to the name of the level
     StorageManager.SetSaveTitle(saveFile->getName().c_str());
 
-    __int64 fileSize = saveFile->length();
+    std::int64_t fileSize = saveFile->length();
     FileInputStream fis(*saveFile);
     byteArray ba(fileSize);
     fis.read(ba);
@@ -1973,7 +1973,7 @@ void UIScene_LoadOrJoinMenu::LoadSaveFromCloud()
     mbstowcs(wSaveName, app.getRemoteStorage()->getSaveNameUTF8(), strlen(app.getRemoteStorage()->getSaveNameUTF8()) + 1); // plus null
     StorageManager.SetSaveTitle(wSaveName);
 
-    __int64 fileSize = cloudFile.length();
+    std::int64_t fileSize = cloudFile.length();
     FileInputStream fis(cloudFile);
     byteArray ba(fileSize);
     fis.read(ba);

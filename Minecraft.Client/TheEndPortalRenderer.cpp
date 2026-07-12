@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Tesselator.h"
 #include "TileEntityRenderDispatcher.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 void TheEndPortalRenderer::render(shared_ptr<TileEntity> _table, double x, double y, double z, float a, bool setColor, float alpha, bool useCompiled)
 {
@@ -60,11 +60,6 @@ void TheEndPortalRenderer::render(shared_ptr<TileEntity> _table, double x, doubl
         glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
         glTexGeni(GL_R, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
         glTexGeni(GL_Q, GL_TEXTURE_GEN_MODE, GL_EYE_LINEAR);
-
-        glTexGen(GL_S, GL_OBJECT_PLANE, getBuffer(1, 0, 0, 0));
-        glTexGen(GL_T, GL_OBJECT_PLANE, getBuffer(0, 0, 1, 0));
-        glTexGen(GL_R, GL_OBJECT_PLANE, getBuffer(0, 0, 0, 1));
-        glTexGen(GL_Q, GL_EYE_PLANE, getBuffer(0, 1, 0, 0));
 
         glEnable(GL_TEXTURE_GEN_S);
         glEnable(GL_TEXTURE_GEN_T);

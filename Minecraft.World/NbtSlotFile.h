@@ -9,7 +9,7 @@ class NbtSlotFile
     static byteArray READ_BUFFER;
 
     static const int FILE_HEADER_SIZE = 1024;
-    static const int MAGIC_NUMBER = 0x13737001;
+    inline static const int MAGIC_NUMBER = 0x13737001;
 
     static const int FILE_SLOT_HEADER_SIZE = 12;
     static const int FILE_SLOT_SIZE = 500;
@@ -19,7 +19,7 @@ class NbtSlotFile
     int fileSlotMapLength;
     vector<int> freeFileSlots;
     int totalFileSlots;
-    static __int64 largest;
+    static std::int64_t largest;
 
   public:
     NbtSlotFile(File file);

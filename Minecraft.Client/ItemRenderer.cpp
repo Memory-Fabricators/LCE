@@ -10,6 +10,8 @@
 #include "Options.h"
 #include "TileRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <GL/glext.h>
 
 ItemRenderer::ItemRenderer() : EntityRenderer()
 {

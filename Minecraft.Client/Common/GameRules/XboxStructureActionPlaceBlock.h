@@ -13,9 +13,9 @@ class XboxStructureActionPlaceBlock : public ConsoleGenerateStructureAction
   public:
     XboxStructureActionPlaceBlock();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_PlaceBlock;
+        return GameRuleType::PlaceBlock;
     }
 
     virtual int getEndX()

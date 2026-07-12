@@ -6,6 +6,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 Screen::Screen() // 4J added
 {
@@ -40,7 +41,7 @@ void Screen::keyPressed(wchar_t eventCharacter, int eventKey)
 wstring Screen::getClipboard()
 {
     // 4J - removed
-    return NULL;
+    return {};
 }
 
 void Screen::setClipboard(const wstring &str)
@@ -102,43 +103,37 @@ void Screen::init()
 
 void Screen::updateEvents()
 {
-    /* 4J - TODO
-    while (Mouse.next()) {
+    while (Mouse::next())
+    {
         mouseEvent();
     }
 
-    while (Keyboard.next()) {
+    while (Keyboard::next())
+    {
         keyboardEvent();
     }
-    */
 }
 
 void Screen::mouseEvent()
 {
-    /* 4J - TODO
-    if (Mouse.getEventButtonState()) {
-        int xm = Mouse.getEventX() * width / minecraft.width;
-        int ym = height - Mouse.getEventY() * height / minecraft.height - 1;
-        mouseClicked(xm, ym, Mouse.getEventButton());
-    } else {
-        int xm = Mouse.getEventX() * width / minecraft.width;
-        int ym = height - Mouse.getEventY() * height / minecraft.height - 1;
-        mouseReleased(xm, ym, Mouse.getEventButton());
+    int xm = Mouse::getEventX() * width / minecraft->width;
+    int ym = height - Mouse::getEventY() * height / minecraft->height - 1;
+    if (Mouse::getEventButtonState())
+    {
+        mouseClicked(xm, ym, Mouse::getEventButton());
     }
-    */
+    else
+    {
+        mouseReleased(xm, ym, Mouse::getEventButton());
+    }
 }
 
 void Screen::keyboardEvent()
 {
-    /* 4J - TODO
-    if (Keyboard.getEventKeyState()) {
-        if (Keyboard.getEventKey() == Keyboard.KEY_F11) {
-            minecraft.toggleFullScreen();
-            return;
-        }
-        keyPressed(Keyboard.getEventCharacter(), Keyboard.getEventKey());
+    if (Keyboard::getEventKeyState())
+    {
+        keyPressed(Keyboard::getEventCharacter(), Keyboard::getEventKey());
     }
-    */
 }
 
 void Screen::tick()

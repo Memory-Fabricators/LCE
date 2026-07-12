@@ -852,10 +852,10 @@ void UILayer::handleUnlockFullVersion()
     }
 }
 
-void UILayer::PrintTotalMemoryUsage(__int64 &totalStatic, __int64 &totalDynamic)
+void UILayer::PrintTotalMemoryUsage(std::int64_t &totalStatic, std::int64_t &totalDynamic)
 {
-    __int64 layerStatic = 0;
-    __int64 layerDynamic = 0;
+    std::int64_t layerStatic = 0;
+    std::int64_t layerDynamic = 0;
     for (AUTO_VAR(it, m_components.begin()); it != m_components.end(); ++it)
     {
         (*it)->PrintTotalMemoryUsage(layerStatic, layerDynamic);

@@ -3,6 +3,7 @@
 #include "../Minecraft.World/FloatBuffer.h"
 #include "../Minecraft.World/IntBuffer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 unordered_map<int, int> MemoryTracker::GL_LIST_IDS;
 vector<int> MemoryTracker::TEXTURE_IDS;
@@ -16,7 +17,8 @@ int MemoryTracker::genLists(int count)
 
 int MemoryTracker::genTextures()
 {
-    int id = glGenTextures();
+    GLuint id = 0;
+    glGenTextures(1, &id);
     TEXTURE_IDS.push_back(id);
     return id;
 }
@@ -35,7 +37,7 @@ void MemoryTracker::releaseTextures()
 {
     for (int i = 0; i < TEXTURE_IDS.size(); i++)
     {
-        glDeleteTextures(TEXTURE_IDS.at(i));
+        glBindTexture(GL_TEXTURE_2D, TEXTURE_IDS.at(i));
     }
     TEXTURE_IDS.clear();
 }

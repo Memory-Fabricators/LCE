@@ -30,7 +30,7 @@ CRITICAL_RW_SECTION LevelChunk::m_csEntities;
 CRITICAL_SECTION LevelChunk::m_csEntities;
 #endif
 CRITICAL_SECTION LevelChunk::m_csTileEntities;
-bool LevelChunk::touchedSky = false;
+thread_local bool LevelChunk::touchedSky = false;
 
 void LevelChunk::staticCtor()
 {
@@ -399,7 +399,7 @@ void LevelChunk::startSharingTilesAndData(int forceMs)
     else
     {
         // Only force if it has been more than forceMs milliseconds since we last wanted to unshare this chunk
-        __int64 timenow = System::currentTimeMillis();
+        std::int64_t timenow = System::currentTimeMillis();
         if ((timenow - lastUnsharedTime) < forceMs)
         {
             LeaveCriticalSection(&m_csSharing);
@@ -549,7 +549,7 @@ void LevelChunk::recalcHeightmapOnly()
                 blocks = (y - 1) >= Level::COMPRESSED_CHUNK_SECTION_HEIGHT ? upperBlocks : lowerBlocks;
             }
 #endif
-            heightmap[z << 4 | x] = (byte)y;
+            heightmap[z << 4 | x] = (unsigned char)y;
             if (y < min)
             {
                 min = y;
@@ -610,7 +610,7 @@ void LevelChunk::recalcHeightmap()
                 blocks = (y - 1) >= Level::COMPRESSED_CHUNK_SECTION_HEIGHT ? upperBlocks : lowerBlocks;
             }
 #endif
-            heightmap[z << 4 | x] = (byte)y;
+            heightmap[z << 4 | x] = (unsigned char)y;
             if (y < min)
             {
                 min = y;
@@ -877,7 +877,7 @@ void LevelChunk::recalcHeight(int x, int yStart, int z)
     }
 
     //    level->lightColumnChanged(x, z, y, yOld);		// 4J - this call moved below & corrected - see comment further down
-    heightmap[z << 4 | x] = (byte)y;
+    heightmap[z << 4 | x] = y;
 
     if (y < minHeight)
     {
@@ -996,7 +996,7 @@ int LevelChunk::getTile(int x, int y, int z)
 
 bool LevelChunk::setTileAndData(int x, int y, int z, int _tile, int _data)
 {
-    byte tile = (byte)_tile;
+    unsigned char tile = (unsigned char)_tile;
 
     // Optimisation brought forward from 1.8.2, change from int to unsigned char & this special value changed from -999 to 255
     int slot = z << 4 | x;
@@ -2122,7 +2122,7 @@ void LevelChunk::setCheckAllLight()
     checkLightPosition = 0;
 }
 
-Random *LevelChunk::getRandom(__int64 l)
+Random *LevelChunk::getRandom(std::int64_t l)
 {
     return new Random((level->getSeed() + x * x * 4987142 + x * 5947611 + z * z * 4392871l + z * 389711) ^ l);
 }
@@ -2234,7 +2234,7 @@ Biome *LevelChunk::getBiome(int x, int z, BiomeSource *biomeSource)
     {
         Biome *biome = biomeSource->getBiome((this->x << 4) + x, (this->z << 4) + z);
         value = biome->id;
-        biomes[(z << 4) | x] = (byte)(value & 0xff);
+        biomes[(z << 4) | x] = value & 0xff;
     }
     if (Biome::biomes[value] == NULL)
     {

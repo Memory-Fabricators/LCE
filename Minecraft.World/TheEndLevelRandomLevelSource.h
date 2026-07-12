@@ -31,7 +31,7 @@ class TheEndLevelRandomLevelSource : public ChunkSource
     Level *level;
 
   public:
-    TheEndLevelRandomLevelSource(Level *level, __int64 seed);
+    TheEndLevelRandomLevelSource(Level *level, std::int64_t seed);
     ~TheEndLevelRandomLevelSource();
 
     void prepareHeights(int xOffs, int zOffs, byteArray blocks, BiomeArray biomes);

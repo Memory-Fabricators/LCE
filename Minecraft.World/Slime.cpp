@@ -45,12 +45,12 @@ void Slime::defineSynchedData()
 {
     Mob::defineSynchedData();
 
-    entityData->define(ID_SIZE, (byte)1);
+    entityData->define(ID_SIZE, 1);
 }
 
 void Slime::setSize(int size)
 {
-    entityData->set(ID_SIZE, (byte)size);
+    entityData->set(ID_SIZE, size);
     Mob::setSize(0.6f * size, 0.6f * size);
     this->setPos(x, y, z);
     setHealth(getMaxHealth());

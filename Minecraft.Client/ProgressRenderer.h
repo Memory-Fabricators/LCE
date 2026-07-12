@@ -25,7 +25,7 @@ class ProgressRenderer : public ProgressListener
     int status;
     Minecraft *minecraft;
     int title;
-    __int64 lastTime;
+    std::int64_t lastTime;
     bool noAbort;
     wstring m_wstrText;
     eProgressStringType m_eType;

@@ -19,9 +19,9 @@ void HellDimension::init()
 Vec3 *HellDimension::getFogColor(float td, float a) const
 {
     int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Nether_Fog_Colour);
-    byte redComponent = ((colour >> 16) & 0xFF);
-    byte greenComponent = ((colour >> 8) & 0xFF);
-    byte blueComponent = ((colour) & 0xFF);
+    unsigned char redComponent = ((colour >> 16) & 0xFF);
+    unsigned char greenComponent = ((colour >> 8) & 0xFF);
+    unsigned char blueComponent = ((colour) & 0xFF);
 
     float rr = (float)redComponent / 256;   // 0.2f;
     float gg = (float)greenComponent / 256; // 0.03f;
@@ -68,7 +68,7 @@ bool HellDimension::isValidSpawn(int x, int z) const
     return false;
 }
 
-float HellDimension::getTimeOfDay(__int64 time, float a) const
+float HellDimension::getTimeOfDay(std::int64_t time, float a) const
 {
     return 0.5f;
 }

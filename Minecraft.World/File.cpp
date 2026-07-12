@@ -15,17 +15,47 @@
 #include <unistd.h>
 #endif
 
+#if defined(_SDL3)
+const wchar_t File::pathSeparator = L'/';
+#else
 const wchar_t File::pathSeparator = L'\\';
+#endif
 #ifdef _XBOX
 const wstring File::pathRoot = L"GAME:"; // Path root after pathSeparator has been removed
 #else
 const wstring File::pathRoot = L""; // Path root after pathSeparator has been removed
 #endif
 
+#if defined(_SDL3)
+static wstring resolve_fallback_path(const wstring &path)
+{
+    if (path.empty())
+    {
+        return path;
+    }
+    struct stat st;
+    string path_str = wstringtofilename(path);
+    if (stat(path_str.c_str(), &st) == 0)
+    {
+        return path;
+    }
+    wstring fallback = L"Minecraft.Client/" + path;
+    string fallback_str = wstringtofilename(fallback);
+    if (stat(fallback_str.c_str(), &st) == 0)
+    {
+        return fallback;
+    }
+    return path;
+}
+#endif
+
 // Creates a new File instance from a parent abstract pathname and a child pathname string.
 File::File(const File &parent, const wstring &child)
 {
     m_abstractPathName = parent.getPath() + pathSeparator + child;
+#if defined(_SDL3)
+    m_abstractPathName = resolve_fallback_path(m_abstractPathName);
+#endif
 }
 
 // Creates a new File instance by converting the given pathname string into an abstract pathname.
@@ -43,6 +73,15 @@ File::File(const wstring &pathname) //: parent( NULL )
     else
     {
         m_abstractPathName = pathname;
+#if defined(_SDL3)
+        for (size_t i = 0; i < m_abstractPathName.length(); ++i)
+        {
+            if (m_abstractPathName[i] == L'\\')
+            {
+                m_abstractPathName[i] = L'/';
+            }
+        }
+#endif
     }
 
 #ifdef _WINDOWS64
@@ -60,6 +99,9 @@ File::File(const wstring &pathname) //: parent( NULL )
         finalPath = m_abstractPathName;
     }
     m_abstractPathName = finalPath;
+#endif
+#if defined(_SDL3)
+    m_abstractPathName = resolve_fallback_path(m_abstractPathName);
 #endif
     /*
     vector<wstring> path = stringSplit( pathname, pathSeparator );
@@ -85,6 +127,9 @@ File::File(const wstring &pathname) //: parent( NULL )
 File::File(const wstring &parent, const wstring &child) //: m_abstractPathName( child  )
 {
     m_abstractPathName = pathRoot + pathSeparator + parent + pathSeparator + child;
+#if defined(_SDL3)
+    m_abstractPathName = resolve_fallback_path(m_abstractPathName);
+#endif
     // this->parent = new File( parent );
 }
 
@@ -614,7 +659,7 @@ bool File::isDirectory() const
 // Returns the length of the file denoted by this abstract pathname. The return value is unspecified if this pathname denotes a directory.
 // Returns:
 // The length, in bytes, of the file denoted by this abstract pathname, or 0L if the file does not exist
-__int64 File::length()
+std::int64_t File::length()
 {
 #ifdef __PS3__
     // extern const char* getPS3HomePath();
@@ -735,7 +780,7 @@ __int64 File::length()
 // Returns:
 // A long value representing the time the file was last modified, measured in milliseconds since the epoch (00:00:00 GMT, January 1, 1970),
 // or 0L if the file does not exist or if an I/O error occurs
-__int64 File::lastModified()
+std::int64_t File::lastModified()
 {
 #if defined _SDL3
     struct stat st;
@@ -743,7 +788,7 @@ __int64 File::lastModified()
     {
         if (S_ISREG(st.st_mode))
         {
-            return (__int64)st.st_mtime * 1000;
+            return (std::int64_t)st.st_mtime * 1000;
         }
     }
     return 0;

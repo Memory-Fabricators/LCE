@@ -23,7 +23,7 @@ class StringTag : public Tag
         data = dis->readUTF();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_String;
     }

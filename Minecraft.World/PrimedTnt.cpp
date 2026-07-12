@@ -96,7 +96,7 @@ void PrimedTnt::explode()
 
 void PrimedTnt::addAdditonalSaveData(CompoundTag *entityTag)
 {
-    entityTag->putByte(L"Fuse", (byte)life);
+    entityTag->putByte(L"Fuse", life);
 }
 
 void PrimedTnt::readAdditionalSaveData(CompoundTag *tag)

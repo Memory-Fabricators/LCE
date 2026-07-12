@@ -327,8 +327,8 @@ void Fireball::addAdditonalSaveData(CompoundTag *tag)
     tag->putShort(L"xTile", (short)xTile);
     tag->putShort(L"yTile", (short)yTile);
     tag->putShort(L"zTile", (short)zTile);
-    tag->putByte(L"inTile", (byte)lastTile);
-    tag->putByte(L"inGround", (byte)(inGround ? 1 : 0));
+    tag->putByte(L"inTile", (unsigned char)lastTile);
+    tag->putByte(L"inGround", (unsigned char)(inGround ? 1 : 0));
     tag->put(L"direction", this->newDoubleList(3, this->xd, this->yd, this->zd));
 }
 

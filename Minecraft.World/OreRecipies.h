@@ -1,5 +1,7 @@
 #pragma once
 
+class Recipes;
+
 #define MAX_ORE_RECIPES 5
 
 class OreRecipies

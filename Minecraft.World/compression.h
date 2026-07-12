@@ -83,7 +83,14 @@ class Compression
 
 // extern Compression gCompression;
 
-#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__
+// SDL3 desktop builds load the same Windows64 media archive (Common/Media/
+// MediaWindows64.arc) and DLC game-rule packs, which were authored with the
+// ZLIB+RLE codec - see the _WIN64 case here and compression.cpp's own
+// _WIN64/_SDL3 branches just above. Missing _SDL3 from this one #if left
+// SDL3 builds falling into the #else (LZXRLE) branch instead, which does
+// not match the compressionType byte actually stored in that data and trips
+// the assert() in GameRuleManager::readRuleFile().
+#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__ || defined _SDL3
 #define APPROPRIATE_COMPRESSION_TYPE Compression::eCompressionType_ZLIBRLE
 #elif defined __PS3__
 #define APPROPRIATE_COMPRESSION_TYPE Compression::eCompressionType_PS3ZLIB

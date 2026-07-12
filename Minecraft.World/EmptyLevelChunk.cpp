@@ -183,7 +183,7 @@ int EmptyLevelChunk::getBlocksAndData(byteArray data, int x0, int y0, int z0, in
         len = s + s / 2;
     }
 
-    Arrays::fill(data, p, p + len, (byte)0);
+    Arrays::fill(data, p, p + len, (unsigned char)0);
     return len;
 }
 
@@ -209,7 +209,7 @@ bool EmptyLevelChunk::testSetBlocksAndData(byteArray data, int x0, int y0, int z
     return false;
 }
 
-Random *EmptyLevelChunk::getRandom(__int64 l)
+Random *EmptyLevelChunk::getRandom(std::int64_t l)
 {
     return new Random((level->getSeed() + x * x * 4987142 + x * 5947611 + z * z * 4392871l + z * 389711) ^ l);
 }

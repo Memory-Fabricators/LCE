@@ -18,7 +18,7 @@ class LightningBolt : public GlobalEntity
     int life;
 
   public:
-    __int64 seed;
+    std::int64_t seed;
 
   private:
     int flashes;

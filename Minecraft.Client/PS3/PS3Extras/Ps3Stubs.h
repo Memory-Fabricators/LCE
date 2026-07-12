@@ -357,7 +357,7 @@ VOID OutputDebugString(LPCSTR lpOutputString);
 VOID OutputDebugStringA(LPCSTR lpOutputString);
 
 errno_t _itoa_s(int _Value, char *_DstBuf, size_t _Size, int _Radix);
-errno_t _i64toa_s(__int64 _Val, char *_DstBuf, size_t _Size, int _Radix);
+errno_t _i64toa_s(std::int64_t _Val, char *_DstBuf, size_t _Size, int _Radix);
 
 int _wtoi(const wchar_t *_Str);
 

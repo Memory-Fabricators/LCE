@@ -1,5 +1,6 @@
 #pragma once
 #include "../Minecraft.World/ArrayWithLength.h"
+#include <GL/gl.h>
 
 class DynamicTexture;
 class BufferedImage;
@@ -240,10 +241,10 @@ class Textures
 
   public:
     void bindTexture(const wstring &resourceName);
-    void bindTexture(int resourceId); // 4J Added
+    void bindTexture(GLuint resourceId); // 4J Added
 
     // 4J Made public for use in XUI controls
-    void bind(int id);
+    void bind(GLuint id);
 
   public:
     void clearLastBoundId();
@@ -264,7 +265,7 @@ class Textures
     void replaceTexture(intArray rawPixels, int w, int h, int id);
     void replaceTextureDirect(intArray rawPixels, int w, int h, int id);   // 4J added as optimisation
     void replaceTextureDirect(shortArray rawPixels, int w, int h, int id); // 4J added as optimisation
-    void releaseTexture(int id);
+    void releaseTexture(GLuint id);
     int loadHttpTexture(const wstring &url, const wstring &backup);
     int loadHttpTexture(const wstring &url, int backup); // 4J added
     bool hasHttpTexture(const wstring &url);

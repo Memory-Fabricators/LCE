@@ -151,7 +151,7 @@ class UIScene
     void getDebugMemoryUseRecursive(const wstring &moviePath, IggyMemoryUseInfo &memoryInfo);
 
   public:
-    void PrintTotalMemoryUsage(__int64 &totalStatic, __int64 &totalDynamic);
+    void PrintTotalMemoryUsage(std::int64_t &totalStatic, std::int64_t &totalDynamic);
 
   public:
     UIScene(int iPad, UILayer *parentLayer);

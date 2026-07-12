@@ -15,7 +15,7 @@ class CompoundGameRuleDefinition : public GameRuleDefinition
     virtual ~CompoundGameRuleDefinition();
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
 
     virtual void populateGameRule(GameRulesInstance::EGameRulesInstanceType type, GameRule *rule);
 

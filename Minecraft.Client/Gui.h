@@ -76,6 +76,6 @@ class Gui : public GuiComponent
     float getJukeboxOpacity(int iPad);
 
     // 4J Added
-    void renderGraph(int dataLength, int dataPos, __int64 *dataA, float dataAScale, int dataAWarning, __int64 *dataB, float dataBScale, int dataBWarning);
-    void renderStackedGraph(int dataPos, int dataLength, int dataSources, __int64 (*func)(unsigned int dataPos, unsigned int dataSource));
+    void renderGraph(int dataLength, int dataPos, std::int64_t *dataA, float dataAScale, int dataAWarning, std::int64_t *dataB, float dataBScale, int dataBWarning);
+    void renderStackedGraph(int dataPos, int dataLength, int dataSources, std::int64_t (*func)(unsigned int dataPos, unsigned int dataSource));
 };

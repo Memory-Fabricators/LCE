@@ -2,6 +2,8 @@
 
 #include "Goal.h"
 
+class PathfinderMob;
+
 class MoveTowardsTargetGoal : public Goal
 {
   private:

@@ -50,7 +50,7 @@ class MapItemSavedData : public SavedData
   public:
     int x, z;
     char dimension;
-    byte scale;
+    unsigned char scale;
     byteArray colors;
     int step;
     vector<shared_ptr<HoldingPlayer>> carriedBy;

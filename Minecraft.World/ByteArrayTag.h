@@ -33,7 +33,7 @@ class ByteArrayTag : public Tag
         dis->readFully(data);
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Byte_Array;
     }

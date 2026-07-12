@@ -1,0 +1,15 @@
+# Restrict Meson's built-in `clang-format`/`clang-format-check` targets
+# (https://mesonbuild.com/Code-formatting.html) to our own source trees.
+#
+# Without this file the default pattern is `**/*`, which walks the entire
+# source tree including subprojects/ (third-party vendored sources such as
+# SDL3, libpng, zlib-ng, mimalloc, etc. - pulled in via wrap files, not ours
+# to reformat). That previously reformatted vendored headers in place and
+# silently broke them by reordering #include directives that upstream
+# projects rely on being in a specific order (e.g. SDL3's
+# src/video/khronos/vulkan/vulkan.h including <xcb/xcb.h> before its own
+# vulkan_xcb.h, or libpng's pngpriv.h including pngstruct.h before
+# pnginfo.h) - clang-format does not treat #include ordering as
+# semantically meaningful the way these files need it to be.
+Minecraft.Client/**/*
+Minecraft.World/**/*

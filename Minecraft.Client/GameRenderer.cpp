@@ -28,6 +28,7 @@
 #include "CreativeMode.h"
 #include "Frustum.h"
 #include "FrustumCuller.h"
+#include "GL/gl.h"
 #include "GameMode.h"
 #include "GuiParticles.h"
 #include "HumanoidModel.h"
@@ -39,14 +40,15 @@
 #include "Options.h"
 #include "PS3/PS3Extras/ShutdownManager.h"
 #include "ParticleEngine.h"
+#include "SDL3_Input.h"
 #include "SmokeParticle.h"
 #include "Tesselator.h"
+#include "TexturePack.h"
+#include "TexturePackRepository.h"
 #include "Textures.h"
 #include "WaterDropParticle.h"
 #include "stdafx.h"
-
-#include "TexturePack.h"
-#include "TexturePackRepository.h"
+#include <GL/gl.h>
 
 bool GameRenderer::anaglyph3d = false;
 int GameRenderer::anaglyphPass = 0;
@@ -56,7 +58,7 @@ C4JThread *GameRenderer::m_updateThread;
 C4JThread::EventArray *GameRenderer::m_updateEvents;
 bool GameRenderer::nearThingsToDo = false;
 bool GameRenderer::updateRunning = false;
-vector<byte *> GameRenderer::m_deleteStackByte;
+vector<unsigned char *> GameRenderer::m_deleteStackByte;
 vector<SparseLightStorage *> GameRenderer::m_deleteStackSparseLightStorage;
 vector<CompressedTileStorage *> GameRenderer::m_deleteStackCompressedTileStorage;
 vector<SparseDataStorage *> GameRenderer::m_deleteStackSparseDataStorage;
@@ -707,9 +709,22 @@ void GameRenderer::setupCamera(float a, int eye)
     if (zoom != 1)
     {
         glTranslatef((float)zoom_x, (float)-zoom_y, 0);
-        glScaled(zoom, zoom, 1);
+        // FIXME: glScaled(zoom, zoom, 1);
     }
-    gluPerspective(fov, aspect, 0.05f, renderDistance * 2);
+    // gluPerspective(fov, aspect, zNear, zFar) - GLU isn't linked, so build the
+    // frustum directly. This was a no-op FIXME stub (never replaced after the
+    // GLU removal), which left the projection matrix as pure identity: world
+    // geometry outside the [-1,1] NDC cube was clipped away entirely, so only
+    // things very close to the origin (e.g. the block selection wireframe)
+    // ever appeared - chunks were being submitted and rendered correctly the
+    // whole time, just clipped by a degenerate (missing) projection.
+    {
+        float zNear = 0.05f;
+        float zFar = renderDistance * 2;
+        float fH = tanf(fov * PI / 360.0f) * zNear;
+        float fW = fH * aspect;
+        glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+    }
 
     if (mc->gameMode->isCutScene())
     {
@@ -816,9 +831,17 @@ void GameRenderer::renderItemInHand(float a, int eye)
     if (zoom != 1)
     {
         glTranslatef((float)zoom_x, (float)-zoom_y, 0);
-        glScaled(zoom, zoom, 1);
+        // FIXME: glScaled(zoom, zoom, 1);
     }
-    gluPerspective(fov, aspect, 0.05f, renderDistance * 2);
+    // gluPerspective(fov, aspect, zNear, zFar) - see setupCamera() above for
+    // why this can't be left as the old FIXME/identity-projection stub.
+    {
+        float zNear = 0.05f;
+        float zFar = renderDistance * 2;
+        float fH = tanf(fov * PI / 360.0f) * zNear;
+        float fW = fH * aspect;
+        glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+    }
 
     if (mc->gameMode->isCutScene())
     {
@@ -893,6 +916,12 @@ void GameRenderer::turnOffLightLayer(double alpha)
 // 4J - change brought forward from 1.8.2
 void GameRenderer::turnOnLightLayer(double alpha)
 { // 4J - TODO
+#ifdef _SDL3
+  // TextureBindVertex() is a no-op in the SDL backend. Without a separate
+    // light-texture unit, these sampler changes would affect the last world
+    // or model texture bound on texture unit zero.
+    return;
+#endif
 #if 0
     if (SharedConstants::TEXTURE_LIGHTING)
 	{
@@ -923,8 +952,8 @@ void GameRenderer::turnOnLightLayer(double alpha)
     RenderManager.TextureBindVertex(getLightTexture(mc->player->GetXboxPad(), mc->level));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 // 4J - change brought forward from 1.8.2
@@ -1109,16 +1138,9 @@ void GameRenderer::render(float a, bool bFirst)
     {
         updateLightTexture(a);
     }
-    if (Display::isActive())
+    if (System::currentTimeMillis() - lastActiveTime > 500)
     {
-        lastActiveTime = System::currentTimeMillis();
-    }
-    else
-    {
-        if (System::currentTimeMillis() - lastActiveTime > 500)
-        {
-            mc->pauseGame();
-        }
+        mc->pauseGame();
     }
 
 #if 0 // 4J - TODO
@@ -1165,7 +1187,9 @@ void GameRenderer::render(float a, bool bFirst)
     }
     GameRenderer::anaglyph3d = mc->options->anaglyph3d;
 
+#ifndef _SDL3
     glViewport(0, 0, mc->width, mc->height); // 4J - added
+#endif
     ScreenSizeCalculator ssc(mc->options, mc->width, mc->height);
     int screenWidth = ssc.getWidth();
     int screenHeight = ssc.getHeight();
@@ -1173,6 +1197,15 @@ void GameRenderer::render(float a, bool bFirst)
     int yMouse = screenHeight - Mouse::getY() * screenHeight / mc->height - 1;
 
     int maxFps = getFpsCap(mc->options->framerateLimit);
+
+    {
+        static int s_probe = 0;
+        if (s_probe < 10)
+        {
+            s_probe++;
+            fprintf(stderr, "[RENDERPROBE2] level=%p framerateLimit=%d maxFps=%d screen=%p noRender=%d\n", (void *)mc->level, mc->options->framerateLimit, maxFps, (void *)mc->screen, mc->noRender ? 1 : 0);
+        }
+    }
 
     if (mc->level != NULL)
     {
@@ -1194,7 +1227,9 @@ void GameRenderer::render(float a, bool bFirst)
     }
     else
     {
+#ifndef _SDL3
         glViewport(0, 0, mc->width, mc->height);
+#endif
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
@@ -1207,6 +1242,21 @@ void GameRenderer::render(float a, bool bFirst)
     if (mc->screen != NULL)
     {
         glClear(GL_DEPTH_BUFFER_BIT);
+        // Screen (menu) rendering always happens in unscaled GUI space (see
+        // Minecraft::setScreen(), which sizes the Screen via a plain
+        // ScreenSizeCalculator with no forced scale). When level != NULL,
+        // everything above only sets up GL's projection for renderLevel()'s
+        // 3D camera and, via Gui::render(), the HUD's own (differently
+        // scaled) GUI projection - neither matches Screen's coordinate
+        // space, which produced garbled/oversized menu geometry instead of
+        // normal buttons and text. Re-establish a matching unscaled GUI
+        // projection right before drawing the Screen, exactly as the
+        // level == NULL branch above already does.
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        setupGuiScreen();
         mc->screen->render(xMouse, yMouse, a);
         if (mc->screen != NULL && mc->screen->particles != NULL)
         {
@@ -1222,7 +1272,7 @@ void GameRenderer::renderLevel(float a)
 
 #ifdef MULTITHREAD_ENABLE
 // Request that an item be deleted, when it is safe to do so
-void GameRenderer::AddForDelete(byte *deleteThis)
+void GameRenderer::AddForDelete(unsigned char *deleteThis)
 {
     EnterCriticalSection(&m_csDeleteStack);
     m_deleteStackByte.push_back(deleteThis);
@@ -1260,9 +1310,9 @@ int GameRenderer::runUpdate(LPVOID lpParam)
     Tesselator::CreateNewThreadStorage(1024 * 1024);
     Compression::UseDefaultThreadStorage();
     RenderManager.InitialiseContext();
-#ifdef _LARGE_WORLDS
-    Chunk::CreateNewThreadStorage();
-#endif
+    // #ifdef _LARGE_WORLDS
+    //     Chunk::CreateNewThreadStorage();
+    // #endif
     Tile::CreateNewThreadStorage();
 
     ShutdownManager::HasStarted(ShutdownManager::eRenderChunkUpdateThread, m_updateEvents);
@@ -1374,7 +1424,7 @@ void GameRenderer::DisableUpdateThread()
 #endif
 }
 
-void GameRenderer::renderLevel(float a, __int64 until)
+void GameRenderer::renderLevel(float a, std::int64_t until)
 {
     //	if (updateLightTexture) updateLightTexture();	// 4J - TODO - Java 1.0.1 has this line enabled, should check why - don't want to put it in now in case it breaks split-screen
 
@@ -1413,7 +1463,9 @@ void GameRenderer::renderLevel(float a, __int64 until)
             }
         }
 
+#ifndef _SDL3
         glViewport(0, 0, mc->width, mc->height);
+#endif
         setupClearColor(a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_CULL_FACE);
@@ -1436,7 +1488,7 @@ void GameRenderer::renderLevel(float a, __int64 until)
 
         if (mc->options->ambientOcclusion)
         {
-            GL11::glShadeModel(GL11::GL_SMOOTH);
+            glShadeModel(GL_SMOOTH);
         }
 
         PIXBeginNamedEvent(0, "Culling");
@@ -1470,7 +1522,7 @@ void GameRenderer::renderLevel(float a, __int64 until)
                     break;
                 }
 
-                __int64 diff = until - System::nanoTime();
+                std::int64_t diff = until - System::nanoTime();
                 if (diff < 0)
                 {
                     break;
@@ -1493,7 +1545,7 @@ void GameRenderer::renderLevel(float a, __int64 until)
         levelRenderer->render(cameraEntity, 0, a, updateChunks);
         PIXEndNamedEvent();
 
-        GL11::glShadeModel(GL11::GL_FLAT);
+        glShadeModel(GL_FLAT);
 
         if (cameraFlip == 0)
         {
@@ -1552,7 +1604,7 @@ void GameRenderer::renderLevel(float a, __int64 until)
         {
             if (mc->options->ambientOcclusion)
             {
-                GL11::glShadeModel(GL11::GL_SMOOTH);
+                glShadeModel(GL_SMOOTH);
             }
 
             glBlendFunc(GL_ZERO, GL_ONE);
@@ -1568,7 +1620,7 @@ void GameRenderer::renderLevel(float a, __int64 until)
                 PIXEndNamedEvent();
             }
 
-            GL11::glShadeModel(GL11::GL_FLAT);
+            glShadeModel(GL_FLAT);
         }
         else
         {
@@ -2034,9 +2086,9 @@ void GameRenderer::setupClearColor(float a)
     {
 
         unsigned int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Under_Water_Clear_Colour);
-        byte redComponent = ((colour >> 16) & 0xFF);
-        byte greenComponent = ((colour >> 8) & 0xFF);
-        byte blueComponent = ((colour) & 0xFF);
+        unsigned char redComponent = ((colour >> 16) & 0xFF);
+        unsigned char greenComponent = ((colour >> 8) & 0xFF);
+        unsigned char blueComponent = ((colour) & 0xFF);
 
         fr = (float)redComponent / 256;   // 0.02f;
         fg = (float)greenComponent / 256; // 0.02f;
@@ -2046,9 +2098,9 @@ void GameRenderer::setupClearColor(float a)
     {
 
         unsigned int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Under_Lava_Clear_Colour);
-        byte redComponent = ((colour >> 16) & 0xFF);
-        byte greenComponent = ((colour >> 8) & 0xFF);
-        byte blueComponent = ((colour) & 0xFF);
+        unsigned char redComponent = ((colour >> 16) & 0xFF);
+        unsigned char greenComponent = ((colour >> 8) & 0xFF);
+        unsigned char blueComponent = ((colour) & 0xFF);
 
         fr = (float)redComponent / 256;   // 0.6f;
         fg = (float)greenComponent / 256; // 0.1f;
@@ -2140,13 +2192,13 @@ void GameRenderer::setupFog(int i, float alpha)
         __debugbreak();
         // 4J TODO
         /*
-        glFog(GL_FOG_COLOR, getBuffer(0, 0, 0, 1));
-        glFogi(GL_FOG_MODE, GL_LINEAR);
+        glFogf(GL_FOG_COLOR, getBuffer(0, 0, 0, 1));
+        glFogf(GL_FOG_MODE, GL_LINEAR);
         glFogf(GL_FOG_START, 0);
         glFogf(GL_FOG_END, 8);
 
         if (GLContext.getCapabilities().GL_NV_fog_distance) {
-            glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
+            glFogf(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
         }
 
         glFogf(GL_FOG_START, 0);
@@ -2154,7 +2206,7 @@ void GameRenderer::setupFog(int i, float alpha)
         return;
     }
 
-    glFog(GL_FOG_COLOR, getBuffer(fr, fg, fb, 1));
+    glFogfv(GL_FOG_COLOR, getBuffer(fr, fg, fb, 1)->_getDataPointer());
     glNormal3f(0, -1, 0);
     glColor4f(1, 1, 1, 1);
 
@@ -2169,7 +2221,7 @@ void GameRenderer::setupFog(int i, float alpha)
             distance = 5.0f + (renderDistance - 5.0f) * (1.0f - (float)duration / 20.0f);
         }
 
-        glFogi(GL_FOG_MODE, GL_LINEAR);
+        glFogf(GL_FOG_MODE, GL_LINEAR);
         if (i < 0)
         {
             glFogf(GL_FOG_START, 0);
@@ -2183,18 +2235,18 @@ void GameRenderer::setupFog(int i, float alpha)
         // 4J - TODO investigate implementing this
         //        if (GLContext.getCapabilities().GL_NV_fog_distance)
         //		{
-        //            glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
+        //            glFogf(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
         //        }
     }
     else if (isInClouds)
     {
-        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_MODE, GL_EXP);
         glFogf(GL_FOG_DENSITY, 0.1f); // was 0.06
 
         unsigned int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_In_Cloud_Fog_Colour);
-        byte redComponent = ((colour >> 16) & 0xFF);
-        byte greenComponent = ((colour >> 8) & 0xFF);
-        byte blueComponent = ((colour) & 0xFF);
+        unsigned char redComponent = ((colour >> 16) & 0xFF);
+        unsigned char greenComponent = ((colour >> 8) & 0xFF);
+        unsigned char blueComponent = ((colour) & 0xFF);
 
         float rr = (float)redComponent / 256;   // 1.0f;
         float gg = (float)greenComponent / 256; // 1.0f;
@@ -2213,7 +2265,7 @@ void GameRenderer::setupFog(int i, float alpha)
     }
     else if (t > 0 && Tile::tiles[t]->material == Material::water)
     {
-        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_MODE, GL_EXP);
         if (player->hasEffect(MobEffect::waterBreathing))
         {
             glFogf(GL_FOG_DENSITY, 0.05f); // was 0.06
@@ -2224,9 +2276,9 @@ void GameRenderer::setupFog(int i, float alpha)
         }
 
         unsigned int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Under_Water_Fog_Colour);
-        byte redComponent = ((colour >> 16) & 0xFF);
-        byte greenComponent = ((colour >> 8) & 0xFF);
-        byte blueComponent = ((colour) & 0xFF);
+        unsigned char redComponent = ((colour >> 16) & 0xFF);
+        unsigned char greenComponent = ((colour >> 8) & 0xFF);
+        unsigned char blueComponent = ((colour) & 0xFF);
 
         float rr = (float)redComponent / 256;   // 0.4f;
         float gg = (float)greenComponent / 256; // 0.4f;
@@ -2245,13 +2297,13 @@ void GameRenderer::setupFog(int i, float alpha)
     }
     else if (t > 0 && Tile::tiles[t]->material == Material::lava)
     {
-        glFogi(GL_FOG_MODE, GL_EXP);
+        glFogf(GL_FOG_MODE, GL_EXP);
         glFogf(GL_FOG_DENSITY, 2.0f); // was 0.06
 
         unsigned int colour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Under_Lava_Fog_Colour);
-        byte redComponent = ((colour >> 16) & 0xFF);
-        byte greenComponent = ((colour >> 8) & 0xFF);
-        byte blueComponent = ((colour) & 0xFF);
+        unsigned char redComponent = ((colour >> 16) & 0xFF);
+        unsigned char greenComponent = ((colour >> 8) & 0xFF);
+        unsigned char blueComponent = ((colour) & 0xFF);
 
         float rr = (float)redComponent / 256;   // 0.4f;
         float gg = (float)greenComponent / 256; // 0.3f;
@@ -2297,7 +2349,7 @@ void GameRenderer::setupFog(int i, float alpha)
             }
         }
 
-        glFogi(GL_FOG_MODE, GL_LINEAR);
+        glFogf(GL_FOG_MODE, GL_LINEAR);
         glFogf(GL_FOG_START, distance * 0.25f);
         glFogf(GL_FOG_END, distance);
         if (i < 0)
@@ -2313,7 +2365,7 @@ void GameRenderer::setupFog(int i, float alpha)
         /* 4J - removed - TODO investigate
         if (GLContext.getCapabilities().GL_NV_fog_distance)
         {
-            glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
+            glFogf(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, NVFogDistance.GL_EYE_RADIAL_NV);
         }
         */
 
@@ -2324,8 +2376,10 @@ void GameRenderer::setupFog(int i, float alpha)
         }
     }
 
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT, GL_AMBIENT);
+    glDisable(GL_COLOR_MATERIAL);
+
+    GLfloat ambientColor[] = {0.2f, 0.2f, 0.2f, 1.0f}; // Replace with your color
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambientColor);
 }
 
 FloatBuffer *GameRenderer::getBuffer(float a, float b, float c, float d)

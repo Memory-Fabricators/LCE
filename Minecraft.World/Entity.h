@@ -301,7 +301,7 @@ class Entity : public enable_shared_from_this<Entity>
     virtual Vec3 *getLookAngle();
     virtual void handleInsidePortal();
     virtual void lerpMotion(double xd, double yd, double zd);
-    virtual void handleEntityEvent(byte eventId);
+    virtual void handleEntityEvent(unsigned char eventId);
     virtual void animateHurt();
     virtual void prepareCustomTextures();
     virtual ItemInstanceArray getEquipmentSlots();                         // ItemInstance[]

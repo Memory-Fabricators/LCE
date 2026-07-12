@@ -1,7 +1,7 @@
 #include "net.minecraft.world.level.newbiome.layer.h"
 #include "stdafx.h"
 
-IslandLayer::IslandLayer(__int64 seedMixup) : Layer(seedMixup)
+IslandLayer::IslandLayer(std::int64_t seedMixup) : Layer(seedMixup)
 {
 }
 

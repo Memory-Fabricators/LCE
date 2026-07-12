@@ -65,7 +65,7 @@ struct SenUGCMetaData
 #pragma warning(disable : 4996) // @TODO - Removed once Int16 Descriptors are deprecated
         memset(descriptors, 0, sizeof(SenUGCDescriptor) * NrUgcDescriptors);
 #pragma warning(default : 4996)
-        memset(descriptors2, 0, sizeof(__int64) * NrUgcDescriptors);
+        memset(descriptors2, 0, sizeof(std::int64_t) * NrUgcDescriptors);
     }
 
     SenUGCID parentID;
@@ -82,7 +82,7 @@ struct SenUGCMetaData
 
     __declspec(deprecated("Descriptors have increased in size (from Int16 to Int64).  Please Use descriptors2 instead"))
     SenUGCDescriptor descriptors[NrUgcDescriptors];
-    __int64 descriptors2[NrUgcDescriptors];
+    std::int64_t descriptors2[NrUgcDescriptors];
 
     static const int BlobSizeLimit = 1024;
     size_t metaDataBlobSize;
@@ -210,7 +210,7 @@ enum SenUGCReviewScoreType
 };
 
 // ***** Leaderboard types
-typedef __int64 SenLeaderboardEntryValue;
+typedef std::int64_t SenLeaderboardEntryValue;
 typedef ULONGLONG SenLeaderboardActorId;
 
 enum SenLeaderboardSortType

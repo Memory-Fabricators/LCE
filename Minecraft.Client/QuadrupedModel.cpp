@@ -1,7 +1,7 @@
 #include "QuadrupedModel.h"
 #include "../Minecraft.World/Mth.h"
 #include "ModelPart.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 QuadrupedModel::QuadrupedModel(int legSize, float g) : Model()
 {

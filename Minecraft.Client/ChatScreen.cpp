@@ -2,6 +2,7 @@
 #include "../Minecraft.World/SharedConstants.h"
 #include "../Minecraft.World/StringHelpers.h"
 #include "MultiPlayerLocalPlayer.h"
+#include "SDL3_Input.h"
 #include "stdafx.h"
 
 const wstring ChatScreen::allowedChars = SharedConstants::acceptableLetters;

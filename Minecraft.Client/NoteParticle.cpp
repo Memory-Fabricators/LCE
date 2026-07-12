@@ -1,6 +1,7 @@
 #include "NoteParticle.h"
 #include "../Minecraft.World/Mth.h"
 #include "stdafx.h"
+#include <cmath>
 
 void NoteParticle::init(Level *level, double x, double y, double z, double xa, double ya, double za, float scale)
 {

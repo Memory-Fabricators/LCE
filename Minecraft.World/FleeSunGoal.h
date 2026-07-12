@@ -2,6 +2,8 @@
 
 #include "Goal.h"
 
+class PathfinderMob;
+
 class FleeSunGoal : public Goal
 {
   private:

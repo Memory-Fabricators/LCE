@@ -1,0 +1,3 @@
+option('lce_debug_menus', type: 'boolean', value: true, description: 'Enable debug menus')
+option('lce_large_worlds', type: 'boolean', value: true, description: 'Enable large worlds')
+option('lce_split_saves', type: 'boolean', value: true, description: 'Enable split saves')

@@ -93,7 +93,7 @@ void ProgressRenderer::progressStagePercentage(int i)
     }
 
 
-    __int64 now = System::currentTimeMillis();
+    std::int64_t now = System::currentTimeMillis();
     if (now - lastTime < 20) return;
     lastTime = now;
 

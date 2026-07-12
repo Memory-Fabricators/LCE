@@ -1,5 +1,8 @@
 #pragma once
 
+#include <GL/gl.h>    // GL_BGRA_EXT
+#include <GL/glext.h> // GL_BGRA_EXT
+
 class Rect2i;
 class ByteBuffer;
 class BufferedImage;
@@ -12,11 +15,11 @@ class Texture
 {
   public:
     static const int WM_WRAP = GL_REPEAT;
-    static const int WM_CLAMP = GL_CLAMP;
+    static const int WM_CLAMP = GL_CLAMP_TO_EDGE;
     static const int WM_MIRROR = 0; // GL_MIRRORED_REPEAT;
 
     static const int TFMT_RGBA = GL_RGBA;
-    static const int TFMT_BGRA = GL_BGRA;
+    static const int TFMT_BGRA = GL_BGRA_EXT;
 
     static const int TFLT_NEAREST = GL_NEAREST;
     static const int TFLT_LINEAR = GL_LINEAR;
@@ -30,7 +33,7 @@ class Texture
     static const int TM_CONTAINER = 2;
 
   private:
-    int glId;
+    GLuint glId;
     int managerId;
 
     // Indicates certain aspects of this texture's behavior in terms of how tightly it is bound, conceptually. A static

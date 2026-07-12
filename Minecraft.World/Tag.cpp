@@ -52,7 +52,7 @@ void Tag::print(ostream out)
     out << "";
 }
 
-void Tag::print(char *prefix, wostream out)
+void Tag::print(char *prefix, wostream &out)
 {
     wstring name = getName();
 
@@ -79,7 +79,7 @@ Tag *Tag::setName(const wstring &name)
 
 Tag *Tag::readNamedTag(DataInput *dis)
 {
-    byte type = dis->readByte();
+    auto type = dis->readByte();
     if (type == 0)
     {
         return new EndTag();
@@ -122,7 +122,7 @@ void Tag::writeNamedTag(Tag *tag, DataOutput *dos)
     tag->write(dos);
 }
 
-Tag *Tag::newTag(byte type, const wstring &name)
+Tag *Tag::newTag(unsigned char type, const wstring &name)
 {
     switch (type)
     {
@@ -154,7 +154,7 @@ Tag *Tag::newTag(byte type, const wstring &name)
     return NULL;
 }
 
-wchar_t *Tag::getTagName(byte type)
+const wchar_t *Tag::getTagName(unsigned char type)
 {
     switch (type)
     {

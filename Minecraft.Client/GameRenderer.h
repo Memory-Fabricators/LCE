@@ -101,8 +101,8 @@ class GameRenderer
 
   private:
     void renderItemInHand(float a, int eye);
-    __int64 lastActiveTime;
-    __int64 lastNsTime;
+    std::int64_t lastActiveTime;
+    std::int64_t lastNsTime;
     // 4J - changes brought forward from 1.8.2
     bool _updateLightTexture;
 
@@ -122,7 +122,7 @@ class GameRenderer
   public:
     void render(float a, bool bFirst); // 4J added bFirst
     void renderLevel(float a);
-    void renderLevel(float a, __int64 until);
+    void renderLevel(float a, std::int64_t until);
 
   private:
     Random *random;
@@ -172,12 +172,12 @@ class GameRenderer
     static bool nearThingsToDo;
     static bool updateRunning;
 #endif
-    static vector<byte *> m_deleteStackByte;
+    static vector<unsigned char *> m_deleteStackByte;
     static vector<SparseLightStorage *> m_deleteStackSparseLightStorage;
     static vector<CompressedTileStorage *> m_deleteStackCompressedTileStorage;
     static vector<SparseDataStorage *> m_deleteStackSparseDataStorage;
     static CRITICAL_SECTION m_csDeleteStack;
-    static void AddForDelete(byte *deleteThis);
+    static void AddForDelete(unsigned char *deleteThis);
     static void AddForDelete(SparseLightStorage *deleteThis);
     static void AddForDelete(CompressedTileStorage *deleteThis);
     static void AddForDelete(SparseDataStorage *deleteThis);

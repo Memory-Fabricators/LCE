@@ -9,6 +9,7 @@
 #include "ModelPart.h"
 #include "SkullTileRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 void HumanoidMobRenderer::_init(HumanoidModel *humanoidModel, float scale)
 {
@@ -39,7 +40,7 @@ void HumanoidMobRenderer::createArmorParts()
 void HumanoidMobRenderer::additionalRendering(shared_ptr<Mob> mob, float a)
 {
     float brightness = SharedConstants::TEXTURE_LIGHTING ? 1 : mob->getBrightness(a);
-    glColor3f(brightness, brightness, brightness);
+    glColor4f(brightness, brightness, brightness, 1.0F);
     shared_ptr<ItemInstance> item = mob->getCarriedItem();
     shared_ptr<ItemInstance> headGear = mob->getArmor(3);
 

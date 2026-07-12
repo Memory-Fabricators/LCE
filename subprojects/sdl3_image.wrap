@@ -1,0 +1,15 @@
+[wrap-file]
+directory = SDL3_image-3.2.4
+source_url = https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz
+source_filename = SDL3_image-3.2.4.tar.gz
+source_hash = a725bd6d04261fdda0dd8d950659e1dc15a8065d025275ef460d32ae7dcfc182
+# Locally maintained meson.build overlay (subprojects/packagefiles/sdl3_image),
+# forked from wrapdb's sdl3_image_3.2.4-1 patch: that upstream patch's
+# src/meson.build omits IMG.c (the file defining IMG_Load/IMG_Load_IO/IMG_Init
+# etc.) from the source list, which builds fine but leaves every caller with
+# undefined-symbol link errors - see the comment in
+# packagefiles/sdl3_image/src/meson.build.
+patch_directory = sdl3_image
+
+[provide]
+sdl3_image = sdl3_image_dep

@@ -1,14 +1,6 @@
 #include "compression.h"
 #include "stdafx.h"
-#if defined __ORBIS__ || defined __PS3__ || defined _DURANGO || defined _WIN64
-#include "../Minecraft.Client/Common/zlib/zlib.h"
-#endif
-
-#if defined __PSVITA__
-#include "../Minecraft.Client/PSVita/PSVitaExtras/zlib.h"
-#elif defined __PS3__
-#include "../Minecraft.Client/PS3/PS3Extras/EdgeZLib.h"
-#endif //__PS3__
+#include "zlib.h"
 
 DWORD Compression::tlsIdx = 0;
 Compression::ThreadStorage *Compression::tlsDefault = NULL;
@@ -214,16 +206,28 @@ HRESULT Compression::DecompressLZXRLE(void *pDestination, unsigned int *pDestSiz
     // unsigned char *pucIn = (unsigned char *)rleDecompressBuf;
     unsigned char *pucEnd = pucIn + rleSize;
     unsigned char *pucOut = (unsigned char *)pDestination;
+    unsigned char *pucOutEnd = pucOut + *pDestSize;
+    bool invalidRLE = false;
 
     while (pucIn != pucEnd)
     {
         unsigned char thisOne = *pucIn++;
         if (thisOne == 255)
         {
+            if (pucIn == pucEnd)
+            {
+                invalidRLE = true;
+                break;
+            }
             unsigned int count = *pucIn++;
             if (count < 3)
             {
                 count++;
+                if (pucOutEnd - pucOut < (ptrdiff_t)count)
+                {
+                    invalidRLE = true;
+                    break;
+                }
                 for (unsigned int i = 0; i < count; i++)
                 {
                     *pucOut++ = 255;
@@ -232,6 +236,11 @@ HRESULT Compression::DecompressLZXRLE(void *pDestination, unsigned int *pDestSiz
             else
             {
                 count++;
+                if (pucIn == pucEnd || pucOutEnd - pucOut < (ptrdiff_t)count)
+                {
+                    invalidRLE = true;
+                    break;
+                }
                 unsigned char data = *pucIn++;
                 for (unsigned int i = 0; i < count; i++)
                 {
@@ -241,10 +250,15 @@ HRESULT Compression::DecompressLZXRLE(void *pDestination, unsigned int *pDestSiz
         }
         else
         {
+            if (pucOut == pucOutEnd)
+            {
+                invalidRLE = true;
+                break;
+            }
             *pucOut++ = thisOne;
         }
     }
-    *pDestSize = (unsigned int)(pucOut - (unsigned char *)pDestination);
+    *pDestSize = invalidRLE ? 0 : (unsigned int)(pucOut - (unsigned char *)pDestination);
 
     //	printf("Decompressed from %d to %d to %d\n",SrcSize,rleSize,*pDestSize);
 
@@ -254,7 +268,7 @@ HRESULT Compression::DecompressLZXRLE(void *pDestination, unsigned int *pDestSiz
     }
 
     LeaveCriticalSection(&rleDecompressLock);
-    return S_OK;
+    return invalidRLE ? E_FAIL : S_OK;
 }
 
 HRESULT Compression::DecompressRLE(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize)
@@ -304,7 +318,7 @@ HRESULT Compression::DecompressRLE(void *pDestination, unsigned int *pDestSize, 
 HRESULT Compression::Compress(void *pDestination, unsigned int *pDestSize, void *pSource, unsigned int SrcSize)
 {
     // Using zlib for x64 compression - 360 is using native 360 compression and PS3 a stubbed non-compressing version of this
-#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__
+#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__ || defined _SDL3
     SIZE_T destSize = (SIZE_T)(*pDestSize);
     int res = ::compress((Bytef *)pDestination, (uLongf *)&destSize, (Bytef *)pSource, SrcSize);
     *pDestSize = (unsigned int)destSize;
@@ -332,7 +346,7 @@ HRESULT Compression::Decompress(void *pDestination, unsigned int *pDestSize, voi
     }
 
     // Using zlib for x64 compression - 360 is using native 360 compression and PS3 a stubbed non-compressing version of this
-#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__
+#if defined __ORBIS__ || defined _DURANGO || defined _WIN64 || defined __PSVITA__ || defined _SDL3
     SIZE_T destSize = (SIZE_T)(*pDestSize);
     int res = ::uncompress((Bytef *)pDestination, (uLongf *)&destSize, (Bytef *)pSource, SrcSize);
     *pDestSize = (unsigned int)destSize;
@@ -408,10 +422,17 @@ HRESULT Compression::DecompressWithType(void *pDestination, unsigned int *pDestS
         }
         break;
     case eCompressionType_ZLIBRLE:
-#if (defined __ORBIS__ || defined __PS3__ || defined _DURANGO || defined _WIN64)
+#if (defined __ORBIS__ || defined __PS3__ || defined _DURANGO || defined _WIN64 || defined _SDL3)
         if (pDestination != NULL)
         {
-            return ::uncompress((PBYTE)pDestination, (unsigned long *)pDestSize, (PBYTE)pSource, SrcSize); // Decompress
+            // zlib's uLongf is 64-bit on Linux, while the engine's size
+            // field is 32-bit. Never cast its address: zlib would overwrite
+            // the adjacent stack member.
+            uLongf destSize = *pDestSize;
+            int result = ::uncompress((Bytef *)pDestination, &destSize,
+                                      (const Bytef *)pSource, SrcSize);
+            *pDestSize = (unsigned int)destSize;
+            return result == Z_OK ? S_OK : E_FAIL;
         }
         else
         {

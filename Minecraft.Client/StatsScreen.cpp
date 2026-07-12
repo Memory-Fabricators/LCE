@@ -9,6 +9,7 @@
 #include "Lighting.h"
 #include "StatsCounter.h"
 #include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 const float StatsScreen::SLOT_TEX_SIZE = 128.0f;
 ItemRenderer *StatsScreen::itemRenderer = NULL;

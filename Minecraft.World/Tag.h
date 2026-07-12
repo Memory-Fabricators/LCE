@@ -1,23 +1,23 @@
 #pragma once
-#include "InputOutputStream.h"
+#include "DataInput.h"
+#include "DataOutput.h"
 #include <ostream>
-using namespace std;
 
 class Tag
 {
   public:
-    static const byte TAG_End = 0;
-    static const byte TAG_Byte = 1;
-    static const byte TAG_Short = 2;
-    static const byte TAG_Int = 3;
-    static const byte TAG_Long = 4;
-    static const byte TAG_Float = 5;
-    static const byte TAG_Double = 6;
-    static const byte TAG_Byte_Array = 7;
-    static const byte TAG_String = 8;
-    static const byte TAG_List = 9;
-    static const byte TAG_Compound = 10;
-    static const byte TAG_Int_Array = 11;
+    static const unsigned char TAG_End = 0;
+    static const unsigned char TAG_Byte = 1;
+    static const unsigned char TAG_Short = 2;
+    static const unsigned char TAG_Int = 3;
+    static const unsigned char TAG_Long = 4;
+    static const unsigned char TAG_Float = 5;
+    static const unsigned char TAG_Double = 6;
+    static const unsigned char TAG_Byte_Array = 7;
+    static const unsigned char TAG_String = 8;
+    static const unsigned char TAG_List = 9;
+    static const unsigned char TAG_Compound = 10;
+    static const unsigned char TAG_Int_Array = 11;
 
   private:
     wstring name;
@@ -29,15 +29,15 @@ class Tag
     virtual void write(DataOutput *dos) = 0;
     virtual void load(DataInput *dis) = 0;
     virtual wstring toString() = 0;
-    virtual byte getId() = 0;
+    virtual unsigned char getId() = 0;
     void print(ostream out);
-    void print(char *prefix, wostream out);
+    void print(char *prefix, wostream &out);
     wstring getName();
     Tag *setName(const wstring &name);
     static Tag *readNamedTag(DataInput *dis);
     static void writeNamedTag(Tag *tag, DataOutput *dos);
-    static Tag *newTag(byte type, const wstring &name);
-    static wchar_t *getTagName(byte type);
+    static Tag *newTag(unsigned char type, const wstring &name);
+    static const wchar_t *getTagName(unsigned char type);
     virtual ~Tag()
     {
     }

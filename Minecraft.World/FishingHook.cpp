@@ -401,9 +401,9 @@ void FishingHook::addAdditonalSaveData(CompoundTag *tag)
     tag->putShort(L"xTile", (short)xTile);
     tag->putShort(L"yTile", (short)yTile);
     tag->putShort(L"zTile", (short)zTile);
-    tag->putByte(L"inTile", (byte)lastTile);
-    tag->putByte(L"shake", (byte)shakeTime);
-    tag->putByte(L"inGround", (byte)(inGround ? 1 : 0));
+    tag->putByte(L"inTile", (unsigned char)lastTile);
+    tag->putByte(L"shake", (unsigned char)shakeTime);
+    tag->putByte(L"inGround", (unsigned char)(inGround ? 1 : 0));
 }
 
 void FishingHook::readAdditionalSaveData(CompoundTag *tag)

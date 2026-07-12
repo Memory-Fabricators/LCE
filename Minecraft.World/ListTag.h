@@ -7,7 +7,7 @@ class ListTag : public Tag
 {
   private:
     vector<Tag *> list;
-    byte type;
+    unsigned char type;
 
   public:
     ListTag() : Tag(L"")
@@ -51,7 +51,7 @@ class ListTag : public Tag
         }
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_List;
     }
@@ -63,7 +63,7 @@ class ListTag : public Tag
         return wstring(buf);
     }
 
-    void print(char *prefix, ostream out)
+    void print(char *prefix, wostream &out)
     {
         Tag::print(prefix, out);
 

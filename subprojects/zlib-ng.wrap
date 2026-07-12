@@ -1,0 +1,9 @@
+[wrap-file]
+directory = zlib-ng-55fb5eb0c15b793a86eff77ce04e56a29b34fc64
+source_url = https://github.com/zlib-ng/zlib-ng/archive/55fb5eb0c15b793a86eff77ce04e56a29b34fc64.tar.gz
+source_filename = zlib-ng-55fb5eb0c15b793a86eff77ce04e56a29b34fc64.tar.gz
+source_hash = 46fe717f50d4d184c7bbdf3935bcf0851e75f2ec1654a2fb72083ccb5c75d1b1
+patch_directory = zlib-ng
+
+[provide]
+dependency_names = zlib-ng

@@ -3,6 +3,7 @@
 #include "VillagerZombieModel.h"
 #include "ZombieModel.h"
 #include "stdafx.h"
+#include <cmath>
 
 ZombieRenderer::ZombieRenderer() : HumanoidMobRenderer(new ZombieModel(), .5f, 1.0f)
 {

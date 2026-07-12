@@ -1,6 +1,7 @@
 #include "NamedAreaRuleDefinition.h"
 #include "../../../Minecraft.World/StringHelpers.h"
 #include "../../../Minecraft.World/net.minecraft.world.phys.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 NamedAreaRuleDefinition::NamedAreaRuleDefinition()
@@ -18,21 +19,21 @@ void NamedAreaRuleDefinition::writeAttributes(DataOutputStream *dos, UINT numAtt
 {
     GameRuleDefinition::writeAttributes(dos, numAttributes + 7);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_name);
+    ::write(dos, GameRuleAttribute::name);
     dos->writeUTF(m_name);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x0);
+    ::write(dos, GameRuleAttribute::x0);
     dos->writeUTF(_toString(m_area->x0));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y0);
+    ::write(dos, GameRuleAttribute::y0);
     dos->writeUTF(_toString(m_area->y0));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z0);
+    ::write(dos, GameRuleAttribute::z0);
     dos->writeUTF(_toString(m_area->z0));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x1);
+    ::write(dos, GameRuleAttribute::x1);
     dos->writeUTF(_toString(m_area->x1));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y1);
+    ::write(dos, GameRuleAttribute::y1);
     dos->writeUTF(_toString(m_area->y1));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z1);
+    ::write(dos, GameRuleAttribute::z1);
     dos->writeUTF(_toString(m_area->z1));
 }
 

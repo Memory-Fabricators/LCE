@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IntBuffer.h"
 #include <cfloat>
 
 class ChunkRebuildData;
@@ -170,7 +171,7 @@ class Tesselator
     void color(float r, float g, float b, float a);
     void color(int r, int g, int b);
     void color(int r, int g, int b, int a);
-    void color(byte r, byte g, byte b);
+    void color(unsigned char r, unsigned char g, unsigned char b);
     void vertexUV(float x, float y, float z, float u, float v);
     void vertex(float x, float y, float z);
     void color(int c);

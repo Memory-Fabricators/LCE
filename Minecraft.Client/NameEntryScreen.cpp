@@ -2,6 +2,7 @@
 #include "../Minecraft.World/StringHelpers.h"
 #include "Button.h"
 #include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 const wstring NameEntryScreen::allowedChars = L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,.:-_'*!\"#%/()=+?[]{}<>";
 

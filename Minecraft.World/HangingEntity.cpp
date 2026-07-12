@@ -276,7 +276,7 @@ void HangingEntity::push(double xa, double ya, double za)
 
 void HangingEntity::addAdditonalSaveData(CompoundTag *tag)
 {
-    tag->putByte(L"Direction", (byte)dir);
+    tag->putByte(L"Direction", dir);
     tag->putInt(L"TileX", xTile);
     tag->putInt(L"TileY", yTile);
     tag->putInt(L"TileZ", zTile);
@@ -285,16 +285,16 @@ void HangingEntity::addAdditonalSaveData(CompoundTag *tag)
     switch (dir)
     {
     case Direction::NORTH:
-        tag->putByte(L"Dir", (byte)0);
+        tag->putByte(L"Dir", 0);
         break;
     case Direction::WEST:
-        tag->putByte(L"Dir", (byte)1);
+        tag->putByte(L"Dir", 1);
         break;
     case Direction::SOUTH:
-        tag->putByte(L"Dir", (byte)2);
+        tag->putByte(L"Dir", 2);
         break;
     case Direction::EAST:
-        tag->putByte(L"Dir", (byte)3);
+        tag->putByte(L"Dir", 3);
         break;
     }
 }

@@ -26,7 +26,7 @@ class HellFlatLevelSource : public ChunkSource
     Level *level;
 
   public:
-    HellFlatLevelSource(Level *level, __int64 seed);
+    HellFlatLevelSource(Level *level, std::int64_t seed);
     ~HellFlatLevelSource();
 
   private:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ConsoleGameRulesConstants.h"
 #include "GameRuleDefinition.h"
 
 class NamedAreaRuleDefinition : public GameRuleDefinition
@@ -14,9 +15,9 @@ class NamedAreaRuleDefinition : public GameRuleDefinition
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttributes);
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_NamedArea;
+        return GameRuleType::NamedArea;
     }
 
     virtual void addAttribute(const wstring &attributeName, const wstring &attributeValue);

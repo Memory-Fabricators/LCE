@@ -23,7 +23,7 @@ class BasicTree : public Feature
     // the index for the y axis.
     // Using this method, the secondary axis will always be horizontal (x or z),
     // and the tertiary always vertical (y), if possible.
-    static byte axisConversionArray[];
+    static unsigned char axisConversionArray[];
 
     // Set up the pseudorandom number generator
     Random *rnd;
@@ -49,7 +49,7 @@ class BasicTree : public Feature
     int **foliageCoords;
     int foliageCoordsLength;
     void prepare();
-    void crossection(int x, int y, int z, float radius, byte direction, int material);
+    void crossection(int x, int y, int z, float radius, unsigned char direction, int material);
     float treeShape(int y);
     float foliageShape(int y);
     void foliageCluster(int x, int y, int z);

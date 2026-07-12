@@ -14,7 +14,7 @@ class GameRule
     typedef struct _ValueType
     {
         union {
-            __int64 i64;
+            std::int64_t i64;
             int i;
             char c;
             bool b;

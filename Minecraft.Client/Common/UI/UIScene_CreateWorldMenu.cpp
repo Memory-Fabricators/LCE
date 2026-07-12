@@ -1112,13 +1112,13 @@ void UIScene_CreateWorldMenu::CreateGame(UIScene_CreateWorldMenu *pClass, DWORD 
 
     // start the game
     bool isFlat = (pClass->m_MoreOptionsParams.bFlatWorld == TRUE);
-    __int64 seedValue = 0;
+    std::int64_t seedValue = 0;
 
     NetworkGameInitData *param = new NetworkGameInitData();
 
     if (wSeed.length() != 0)
     {
-        __int64 value = 0;
+        std::int64_t value = 0;
         unsigned int len = (unsigned int)wSeed.length();
 
         // Check if the input string contains a numerical value
@@ -1138,7 +1138,7 @@ void UIScene_CreateWorldMenu::CreateGame(UIScene_CreateWorldMenu *pClass, DWORD 
         // If the input string is a numerical value, convert it to a number
         if (isNumber)
         {
-            value = _fromString<__int64>(wSeed);
+            value = _fromString<std::int64_t>(wSeed);
         }
 
         // If the value is not 0 use it, otherwise use the algorithm from the java String.hashCode() function to hash it

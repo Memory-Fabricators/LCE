@@ -19,13 +19,13 @@ class ConsoleGenerateStructure : public GameRuleDefinition, public StructurePiec
   public:
     ConsoleGenerateStructure();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_GenerateStructure;
+        return GameRuleType::GenerateStructure;
     }
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttrs);
     virtual void addAttribute(const wstring &attributeName, const wstring &attributeValue);

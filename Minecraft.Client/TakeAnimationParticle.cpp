@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.item.h"
 #include "../Minecraft.World/net.minecraft.world.level.h"
 #include "EntityRenderDispatcher.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 TakeAnimationParticle::TakeAnimationParticle(Level *level, shared_ptr<Entity> item, shared_ptr<Entity> target, float yOffs) : Particle(level, item->x, item->y, item->z, item->xd, item->yd, item->zd)
 {
@@ -49,7 +49,7 @@ void TakeAnimationParticle::render(Tesselator *t, float a, float xa, float ya, f
         int col = getLightColor(a);
         int u = col % 65536;
         int v = col / 65536;
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
     else

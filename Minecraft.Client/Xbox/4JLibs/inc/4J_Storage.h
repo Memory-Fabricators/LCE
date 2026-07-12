@@ -252,7 +252,7 @@ class C4JStorage
     // XMARKETPLACE_CONTENTOFFER_INFO&		GetOffer(DWORD dw);
     XMARKETPLACE_CURRENCY_CONTENTOFFER_INFO &GetOffer(DWORD dw);
     int GetOfferCount();
-    DWORD InstallOffer(int iOfferIDC, unsigned __int64 *ullOfferIDA, int (*Func)(LPVOID, int, int), LPVOID lpParam, bool bTrial = false);
+    DWORD InstallOffer(int iOfferIDC, unsigned std::int64_t *ullOfferIDA, int (*Func)(LPVOID, int, int), LPVOID lpParam, bool bTrial = false);
     DWORD GetAvailableDLCCount(int iPad);
 
     C4JStorage::EDLCStatus GetInstalledDLC(int iPad, int (*Func)(LPVOID, int, int), LPVOID lpParam);

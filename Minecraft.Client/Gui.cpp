@@ -27,6 +27,7 @@
 #include "Options.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 #define RENDER_HUD 0
 // #ifndef _XBOX
@@ -837,7 +838,7 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse)
             glTranslatef(0, 32, 0);
         }
         font->drawShadow(ClientConstants::VERSION_STRING + L" (" + minecraft->fpsString + L")", iSafezoneXHalf + 2, 20, 0xffffff);
-        font->drawShadow(L"Seed: " + _toString<__int64>(minecraft->level->getLevelData()->getSeed()), iSafezoneXHalf + 2, 32 + 00, 0xffffff);
+        font->drawShadow(L"Seed: " + _toString<std::int64_t>(minecraft->level->getLevelData()->getSeed()), iSafezoneXHalf + 2, 32 + 00, 0xffffff);
         font->drawShadow(minecraft->gatherStats1(), iSafezoneXHalf + 2, 32 + 10, 0xffffff);
         font->drawShadow(minecraft->gatherStats2(), iSafezoneXHalf + 2, 32 + 20, 0xffffff);
         font->drawShadow(minecraft->gatherStats3(), iSafezoneXHalf + 2, 32 + 30, 0xffffff);
@@ -1458,7 +1459,7 @@ void Gui::displayClientMessage(int messageId, int iPad)
 }
 
 // 4J Added
-void Gui::renderGraph(int dataLength, int dataPos, __int64 *dataA, float dataAScale, int dataAWarning, __int64 *dataB, float dataBScale, int dataBWarning)
+void Gui::renderGraph(int dataLength, int dataPos, std::int64_t *dataA, float dataAScale, int dataAWarning, std::int64_t *dataB, float dataBScale, int dataBWarning)
 {
     int height = minecraft->height;
     // This causes us to cover xScale*dataLength pixels in the horizontal
@@ -1500,7 +1501,7 @@ void Gui::renderGraph(int dataLength, int dataPos, __int64 *dataA, float dataASc
                 t->color(0xff000000 + cc * 256);
             }
 
-            __int64 aVal = dataA[i] / dataAScale;
+            std::int64_t aVal = dataA[i] / dataAScale;
 
             t->vertex((float)(xScale * i + 0.5f), (float)(height - aVal + 0.5f), (float)(0));
             t->vertex((float)(xScale * i + 0.5f), (float)(height + 0.5f), (float)(0));
@@ -1517,7 +1518,7 @@ void Gui::renderGraph(int dataLength, int dataPos, __int64 *dataA, float dataASc
                 t->color(0xff808080 + cc / 2 * 256);
             }
 
-            __int64 bVal = dataB[i] / dataBScale;
+            std::int64_t bVal = dataB[i] / dataBScale;
 
             t->vertex((float)(xScale * i + (xScale - 1) + 0.5f), (float)(height - bVal + 0.5f), (float)(0));
             t->vertex((float)(xScale * i + (xScale - 1) + 0.5f), (float)(height + 0.5f), (float)(0));
@@ -1528,7 +1529,7 @@ void Gui::renderGraph(int dataLength, int dataPos, __int64 *dataA, float dataASc
     glEnable(GL_TEXTURE_2D);
 }
 
-void Gui::renderStackedGraph(int dataPos, int dataLength, int dataSources, __int64 (*func)(unsigned int dataPos, unsigned int dataSource))
+void Gui::renderStackedGraph(int dataPos, int dataLength, int dataSources, std::int64_t (*func)(unsigned int dataPos, unsigned int dataSource))
 {
     int height = minecraft->height;
 
@@ -1545,8 +1546,8 @@ void Gui::renderStackedGraph(int dataPos, int dataLength, int dataSources, __int
     Tesselator *t = Tesselator::getInstance();
 
     t->begin(GL_LINES);
-    __int64 thisVal = 0;
-    __int64 topVal = 0;
+    std::int64_t thisVal = 0;
+    std::int64_t topVal = 0;
     for (int i = 0; i < dataLength; i++)
     {
         thisVal = 0;

@@ -165,7 +165,7 @@ class Player : public Mob, public CommandSender
     virtual void completeUsingItem();
 
   public:
-    virtual void handleEntityEvent(byte id);
+    virtual void handleEntityEvent(unsigned char id);
 
   protected:
     bool isImmobile();
@@ -616,7 +616,7 @@ class Player : public Mob, public CommandSender
 #endif
 };
 
-typedef struct
+typedef struct PlayerKeyHash
 {
     int operator()(const shared_ptr<Player> k) const
     {
@@ -625,7 +625,7 @@ typedef struct
 
 } PlayerKeyHash;
 
-typedef struct
+typedef struct PlayerKeyEq
 {
     bool operator()(const shared_ptr<Player> x, const shared_ptr<Player> y) const
     {

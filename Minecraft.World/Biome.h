@@ -53,8 +53,8 @@ class Biome
   public:
     wstring m_name;
     int color;
-    byte topMaterial;
-    byte material;
+    unsigned char topMaterial;
+    unsigned char material;
     int leafColor;
     float depth;
     float scale;

@@ -19,8 +19,8 @@ class ApplySchematicRuleDefinition : public GameRuleDefinition
     ConsoleSchematicFile::ESchematicRotation m_rotation;
     int m_dimension;
 
-    __int64 m_totalBlocksChanged;
-    __int64 m_totalBlocksChangedLighting;
+    std::int64_t m_totalBlocksChanged;
+    std::int64_t m_totalBlocksChangedLighting;
     bool m_completed;
 
     void updateLocationBox();
@@ -29,9 +29,9 @@ class ApplySchematicRuleDefinition : public GameRuleDefinition
     ApplySchematicRuleDefinition(LevelGenerationOptions *levelGenOptions);
     ~ApplySchematicRuleDefinition();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_ApplySchematic;
+        return GameRuleType::ApplySchematic;
     }
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttrs);

@@ -76,7 +76,7 @@ class SonyRemoteStorage
     const char *getLocalFilename();
     const char *getSaveNameUTF8();
     ESavePlatform getSavePlatform();
-    __int64 getSaveSeed();
+    std::int64_t getSaveSeed();
     unsigned int getSaveHostOptions();
     unsigned int getSaveTexturePack();
 
@@ -120,7 +120,7 @@ class SonyRemoteStorage
     unsigned int m_thumbnailDataSize;
     C4JThread *m_SetDataThread;
     PSAVE_INFO m_setDataSaveInfo;
-    __int64 m_startTime;
+    std::int64_t m_startTime;
 
     bool m_bAborting;
     bool m_bTransferStarted;

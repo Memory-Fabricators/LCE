@@ -16,13 +16,13 @@ class XboxStructureActionPlaceContainer : public XboxStructureActionPlaceBlock
     XboxStructureActionPlaceContainer();
     ~XboxStructureActionPlaceContainer();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_PlaceContainer;
+        return GameRuleType::PlaceContainer;
     }
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
 
     // 4J-JEV: Super class handles attr-facing fine.
     // virtual void writeAttributes(DataOutputStream *dos, UINT numAttributes);

@@ -5,6 +5,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "MemoryTracker.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 float Camera::xPlayerOffs = 0.0f;
 float Camera::yPlayerOffs = 0.0f;
@@ -81,8 +82,8 @@ bool Mat4Inverse(const float *m, float *out)
 
 void Camera::prepare(shared_ptr<Player> player, bool mirror)
 {
-    glGetFloat(GL_MODELVIEW_MATRIX, modelview);
-    glGetFloat(GL_PROJECTION_MATRIX, projection);
+    glGetFloatv(GL_MODELVIEW_MATRIX, modelview->_getDataPointer());
+    glGetFloatv(GL_PROJECTION_MATRIX, projection->_getDataPointer());
 
     /* Original java code for reference
     glGetInteger(GL_VIEWPORT, viewport);

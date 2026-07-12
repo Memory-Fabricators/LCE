@@ -147,7 +147,7 @@ void TrackedEntity::tick(EntityTracker *tracker, vector<shared_ptr<Player>> *pla
                     || (e->GetType() == eTYPE_BOAT && teleportDelay > 20 * 20))
                 {
                     teleportDelay = 0;
-                    packet = shared_ptr<TeleportEntityPacket>(new TeleportEntityPacket(e->entityId, xn, yn, zn, (byte)yRotn, (byte)xRotn));
+                    packet = shared_ptr<TeleportEntityPacket>(new TeleportEntityPacket(e->entityId, xn, yn, zn, yRotn, xRotn));
                     //			printf("%d: New teleport rot %d\n",e->entityId,yRotn);
                     yRotp = yRotn;
                     xRotp = xRotn;
@@ -272,7 +272,7 @@ void TrackedEntity::tick(EntityTracker *tracker, vector<shared_ptr<Player>> *pla
                 int yHeadRot = Mth::floor(e->getYHeadRot() * 256 / 360);
                 if (abs(yHeadRot - yHeadRotp) >= TOLERANCE_LEVEL)
                 {
-                    broadcast(shared_ptr<RotateHeadPacket>(new RotateHeadPacket(e->entityId, (byte)yHeadRot)));
+                    broadcast(shared_ptr<RotateHeadPacket>(new RotateHeadPacket(e->entityId, yHeadRot)));
                     yHeadRotp = yHeadRot;
                 }
 

@@ -37,7 +37,7 @@ class HellRandomLevelSource : public ChunkSource
     Level *level;
 
   public:
-    HellRandomLevelSource(Level *level, __int64 seed);
+    HellRandomLevelSource(Level *level, std::int64_t seed);
     ~HellRandomLevelSource();
 
     NetherBridgeFeature *netherBridgeFeature;

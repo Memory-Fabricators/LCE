@@ -37,7 +37,7 @@ void CPlatformNetworkManagerSony::HandleStateChange(SQRNetworkManager::eSQRNetwo
             "SNM_STATE_PLAYING",
             "SNM_STATE_LEAVING",
             "SNM_STATE_ENDING",
-        };
+    };
 
     app.DebugPrintf("Network State: %s ==> %s\n",
                     c_apszStateNames[oldState],

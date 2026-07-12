@@ -13,9 +13,9 @@ class StartFeature : public GameRuleDefinition
   public:
     StartFeature();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_StartFeature;
+        return GameRuleType::StartFeature;
     }
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttrs);

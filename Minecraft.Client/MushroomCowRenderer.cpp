@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "ModelPart.h"
 #include "QuadrupedModel.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 MushroomCowRenderer::MushroomCowRenderer(Model *model, float shadow) : MobRenderer(model, shadow)
 {

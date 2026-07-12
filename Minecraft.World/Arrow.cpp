@@ -121,7 +121,7 @@ Arrow::Arrow(Level *level, shared_ptr<Mob> mob, float power) : Entity(level)
 
 void Arrow::defineSynchedData()
 {
-    entityData->define(ID_FLAGS, (byte)0);
+    entityData->define(ID_FLAGS, (unsigned char)0);
 }
 
 void Arrow::shoot(double xd, double yd, double zd, float pow, float uncertainty)
@@ -451,11 +451,11 @@ void Arrow::addAdditonalSaveData(CompoundTag *tag)
     tag->putShort(L"xTile", (short)xTile);
     tag->putShort(L"yTile", (short)yTile);
     tag->putShort(L"zTile", (short)zTile);
-    tag->putByte(L"inTile", (byte)lastTile);
-    tag->putByte(L"inData", (byte)lastData);
-    tag->putByte(L"shake", (byte)shakeTime);
-    tag->putByte(L"inGround", (byte)(inGround ? 1 : 0));
-    tag->putByte(L"pickup", (byte)pickup);
+    tag->putByte(L"inTile", (unsigned char)lastTile);
+    tag->putByte(L"inData", (unsigned char)lastData);
+    tag->putByte(L"shake", (unsigned char)shakeTime);
+    tag->putByte(L"inGround", (unsigned char)(inGround ? 1 : 0));
+    tag->putByte(L"pickup", (unsigned char)pickup);
     tag->putDouble(L"damage", baseDamage);
 }
 
@@ -535,19 +535,19 @@ bool Arrow::isAttackable()
 
 void Arrow::setCritArrow(bool critArrow)
 {
-    byte flags = entityData->getByte(ID_FLAGS);
+    unsigned char flags = entityData->getByte(ID_FLAGS);
     if (critArrow)
     {
-        entityData->set(ID_FLAGS, (byte)(flags | FLAG_CRIT));
+        entityData->set(ID_FLAGS, (unsigned char)(flags | FLAG_CRIT));
     }
     else
     {
-        entityData->set(ID_FLAGS, (byte)(flags & ~FLAG_CRIT));
+        entityData->set(ID_FLAGS, (unsigned char)(flags & ~FLAG_CRIT));
     }
 }
 
 bool Arrow::isCritArrow()
 {
-    byte flags = entityData->getByte(ID_FLAGS);
+    unsigned char flags = entityData->getByte(ID_FLAGS);
     return (flags & FLAG_CRIT) != 0;
 }

@@ -4,11 +4,11 @@
 class LongTag : public Tag
 {
   public:
-    __int64 data;
+    std::int64_t data;
     LongTag(const wstring &name) : Tag(name)
     {
     }
-    LongTag(const wstring &name, __int64 data) : Tag(name)
+    LongTag(const wstring &name, std::int64_t data) : Tag(name)
     {
         this->data = data;
     }
@@ -22,7 +22,7 @@ class LongTag : public Tag
         data = dis->readLong();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Long;
     }

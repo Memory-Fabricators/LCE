@@ -6,6 +6,7 @@
 #include "MultiPlayerLocalPlayer.h"
 #include "Texture.h"
 #include "stdafx.h"
+#include <cmath>
 
 CompassTexture *CompassTexture::instance = NULL;
 

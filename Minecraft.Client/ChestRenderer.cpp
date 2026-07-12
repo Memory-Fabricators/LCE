@@ -5,6 +5,7 @@
 #include "LargeChestModel.h"
 #include "ModelPart.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 ChestRenderer::ChestRenderer()
 {

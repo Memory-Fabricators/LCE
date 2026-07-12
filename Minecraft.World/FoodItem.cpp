@@ -1,6 +1,7 @@
 #include "FoodItem.h"
 #include "ItemInstance.h"
 #include "SoundTypes.h"
+#include "UseAnim.h"
 #include "net.minecraft.h"
 #include "net.minecraft.world.effect.h"
 #include "net.minecraft.world.entity.player.h"
@@ -58,9 +59,9 @@ int FoodItem::getUseDuration(shared_ptr<ItemInstance> itemInstance)
     return EAT_DURATION;
 }
 
-UseAnim FoodItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation FoodItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_eat;
+    return UseAnimation::eat;
 }
 
 shared_ptr<ItemInstance> FoodItem::use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player)

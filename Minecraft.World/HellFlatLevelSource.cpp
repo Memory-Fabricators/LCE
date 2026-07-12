@@ -4,7 +4,7 @@
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
 
-HellFlatLevelSource::HellFlatLevelSource(Level *level, __int64 seed)
+HellFlatLevelSource::HellFlatLevelSource(Level *level, std::int64_t seed)
 {
     int xzSize = level->getLevelData()->getXZSize();
     int hellScale = level->getLevelData()->getHellScale();
@@ -38,7 +38,7 @@ void HellFlatLevelSource::prepareHeights(int xOffs, int zOffs, byteArray blocks)
                     block = Tile::hellRock_Id;
                 }
 
-                blocks[xc << 11 | zc << 7 | yc] = (byte)block;
+                blocks[xc << 11 | zc << 7 | yc] = block;
             }
         }
     }
@@ -60,7 +60,7 @@ void HellFlatLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks)
                 {
                     if (z - random->nextInt(4) <= 0 || xOffs < -(m_XZSize / 2))
                     {
-                        blocks[offs] = (byte)Tile::unbreakable_Id;
+                        blocks[offs] = Tile::unbreakable_Id;
                         blockSet = true;
                     }
                 }
@@ -68,7 +68,7 @@ void HellFlatLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks)
                 {
                     if (x - random->nextInt(4) <= 0 || zOffs < -(m_XZSize / 2))
                     {
-                        blocks[offs] = (byte)Tile::unbreakable_Id;
+                        blocks[offs] = Tile::unbreakable_Id;
                         blockSet = true;
                     }
                 }
@@ -76,7 +76,7 @@ void HellFlatLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks)
                 {
                     if (z + random->nextInt(4) >= 15 || xOffs > (m_XZSize / 2))
                     {
-                        blocks[offs] = (byte)Tile::unbreakable_Id;
+                        blocks[offs] = Tile::unbreakable_Id;
                         blockSet = true;
                     }
                 }
@@ -84,7 +84,7 @@ void HellFlatLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks)
                 {
                     if (x + random->nextInt(4) >= 15 || zOffs > (m_XZSize / 2))
                     {
-                        blocks[offs] = (byte)Tile::unbreakable_Id;
+                        blocks[offs] = Tile::unbreakable_Id;
                         blockSet = true;
                     }
                 }
@@ -96,11 +96,11 @@ void HellFlatLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks)
 
                 if (y >= Level::genDepthMinusOne - random->nextInt(5))
                 {
-                    blocks[offs] = (byte)Tile::unbreakable_Id;
+                    blocks[offs] = Tile::unbreakable_Id;
                 }
                 else if (y <= 0 + random->nextInt(5))
                 {
-                    blocks[offs] = (byte)Tile::unbreakable_Id;
+                    blocks[offs] = Tile::unbreakable_Id;
                 }
             }
         }
@@ -118,7 +118,7 @@ LevelChunk *HellFlatLevelSource::getChunk(int xOffs, int zOffs)
 
     // 4J - now allocating this with a physical alloc & bypassing general memory management so that it will get cleanly freed
     int chunksSize = Level::genDepth * 16 * 16;
-    byte *tileData = (byte *)XPhysicalAlloc(chunksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
+    auto *tileData = (unsigned char *)XPhysicalAlloc(chunksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
     XMemSet128(tileData, 0, chunksSize);
     byteArray blocks = byteArray(tileData, chunksSize);
     //    byteArray blocks = byteArray(16 * level->depth * 16);
@@ -162,8 +162,8 @@ void HellFlatLevelSource::postProcess(ChunkSource *parent, int xt, int zt)
     // we need to use a separate random - have used the same initialisation code as used in RandomLevelSource::postProcess to make sure this random value
     // is consistent for each world generation. Also changed all uses of random here to pprandom.
     pprandom->setSeed(level->getSeed());
-    __int64 xScale = pprandom->nextLong() / 2 * 2 + 1;
-    __int64 zScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t xScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t zScale = pprandom->nextLong() / 2 * 2 + 1;
     pprandom->setSeed(((xt * xScale) + (zt * zScale)) ^ level->getSeed());
 
     int count = pprandom->nextInt(pprandom->nextInt(10) + 1) + 1;

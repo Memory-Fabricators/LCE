@@ -8,11 +8,11 @@ UpdateGameRuleProgressPacket::UpdateGameRuleProgressPacket()
     m_messageId = L"";
     m_icon = -1;
     m_auxValue = 0;
-    m_definitionType = ConsoleGameRules::eGameRuleType_LevelRules;
+    m_definitionType = GameRuleType::LevelRules;
     m_dataTag = 0;
 }
 
-UpdateGameRuleProgressPacket::UpdateGameRuleProgressPacket(ConsoleGameRules::EGameRuleType definitionType, const wstring &messageId, int icon, int auxValue, int dataTag, void *data, int dataLength)
+UpdateGameRuleProgressPacket::UpdateGameRuleProgressPacket(GameRuleType definitionType, const wstring &messageId, int icon, int auxValue, int dataTag, void *data, int dataLength)
 {
     m_definitionType = definitionType;
     m_messageId = messageId;
@@ -33,7 +33,7 @@ UpdateGameRuleProgressPacket::UpdateGameRuleProgressPacket(ConsoleGameRules::EGa
 
 void UpdateGameRuleProgressPacket::read(DataInputStream *dis) // throws IOException
 {
-    m_definitionType = (ConsoleGameRules::EGameRuleType)dis->readInt();
+    m_definitionType = (GameRuleType)dis->readInt();
     m_messageId = readUtf(dis, 64);
     m_icon = dis->readInt();
     m_auxValue = dis->readByte();
@@ -53,7 +53,7 @@ void UpdateGameRuleProgressPacket::read(DataInputStream *dis) // throws IOExcept
 
 void UpdateGameRuleProgressPacket::write(DataOutputStream *dos) // throws IOException
 {
-    dos->writeInt(m_definitionType);
+    dos->writeInt(static_cast<int>(m_definitionType));
     writeUtf(m_messageId, dos);
     dos->writeInt(m_icon);
     dos->writeByte(m_auxValue);

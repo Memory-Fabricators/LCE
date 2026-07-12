@@ -8,6 +8,7 @@
 #include "Lighting.h"
 #include "MultiPlayerLocalPlayer.h"
 #include "Options.h"
+#include "SDL3_Input.h"
 #include "stdafx.h"
 
 ItemRenderer *AbstractContainerScreen::itemRenderer = new ItemRenderer();

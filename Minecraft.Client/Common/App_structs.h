@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Tutorial/TutorialEnum.h"
+#include "UI/UIEnums.h"
+
 typedef struct
 {
     wchar_t *wchFilename;

@@ -1,7 +1,9 @@
 #pragma once
+
+#include "Textures.h"
+
 class IntBuffer;
 class Options;
-class Textures;
 
 class Font
 {

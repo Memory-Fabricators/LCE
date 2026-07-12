@@ -36,7 +36,7 @@ class ConsoleSaveFile;
 typedef struct _MapDataMappings
 {
     PlayerUID xuids[MAXIMUM_MAP_SAVE_DATA];
-    byte dimensions[MAXIMUM_MAP_SAVE_DATA / 4];
+    unsigned char dimensions[MAXIMUM_MAP_SAVE_DATA / 4];
 
     _MapDataMappings();
     int getDimension(int id);
@@ -47,7 +47,7 @@ typedef struct _MapDataMappings
 typedef struct _MapDataMappings_old
 {
     PlayerUID xuids[MAXIMUM_MAP_SAVE_DATA];
-    byte dimensions[MAXIMUM_MAP_SAVE_DATA / 8];
+    unsigned char dimensions[MAXIMUM_MAP_SAVE_DATA / 8];
 
     _MapDataMappings_old();
     int getDimension(int id);
@@ -65,7 +65,7 @@ class DirectoryLevelStorage : public LevelStorage, public PlayerIO
     const ConsoleSavePath playerDir;
     // const File dataDir;
     const ConsoleSavePath dataDir;
-    const __int64 sessionId;
+    const std::int64_t sessionId;
     const wstring levelId;
 
     static const wstring sc_szPlayerDir;
@@ -76,7 +76,7 @@ class DirectoryLevelStorage : public LevelStorage, public PlayerIO
         friend class DirectoryLevelStorage;
 
       private:
-        unordered_map<__int64, short> m_mappings;
+        unordered_map<std::int64_t, short> m_mappings;
 
       public:
         void addMapping(int id, int centreX, int centreZ, int dimension, int scale);

@@ -235,7 +235,7 @@ void SonyVoiceChat::eventcb(CellSysutilAvc2EventId event_id, CellSysutilAvc2Even
             {CELL_AVC2_EVENT_SYSTEM_SESSION_DISCONNECTED, NULL},
             {CELL_AVC2_EVENT_SYSTEM_VOICE_DETECTED, eventcb_voiceDetected},
 
-        };
+    };
 
     int ret = 0;
     for (unsigned int i = 0; i < sizeof(event_tbl) / sizeof(struct _cb_func_tbl); ++i)
@@ -475,7 +475,7 @@ void SonyVoiceChat::tick()
             {AVC_STATE_CHAT_RESET, AVC_EVENT_ERROR, invoke_epsilon_event, AVC_STATE_CHAT_LEAVE},
             {AVC_STATE_CHAT_RESET, AVC_EVENT_CHAT_FINALIZE_SUCCEEDED, invoke_epsilon_event, AVC_STATE_IDLE},
 
-        };
+    };
     do_state_transition(&tbl[0], sizeof(tbl) / sizeof(state_transition_table));
 
     setBitRate();

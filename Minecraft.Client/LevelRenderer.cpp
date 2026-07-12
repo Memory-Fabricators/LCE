@@ -58,6 +58,7 @@
 #include "Textures.h"
 #include "TileEntityRenderDispatcher.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 #ifdef __PS3__
 #include "C4JSpursJob.h"
@@ -825,6 +826,23 @@ int LevelRenderer::renderChunks(int from, int to, int layer, double alpha)
     int count = 0;
     ClipChunk *pClipChunk = chunks[playerIndex].data;
     unsigned char emptyFlag = LevelRenderer::CHUNK_FLAG_EMPTY0 << layer;
+    {
+        static int s_probe = 0;
+        if (s_probe < 10)
+        {
+            s_probe++;
+            int visibleCount = 0;
+            ClipChunk *p = chunks[playerIndex].data;
+            for (int i = 0; i < chunks[playerIndex].length; i++, p++)
+            {
+                if (p->visible)
+                {
+                    visibleCount++;
+                }
+            }
+            fprintf(stderr, "[RENDERPROBE3] layer=%d total=%d visible=%d\n", layer, (int)chunks[playerIndex].length, visibleCount);
+        }
+    }
     for (int i = 0; i < chunks[playerIndex].length; i++, pClipChunk++)
     {
         if (!pClipChunk->visible)
@@ -1080,7 +1098,7 @@ void LevelRenderer::renderSky(float alpha)
         sb = sbb;
     }
 
-    glColor3f(sr, sg, sb);
+    glColor4f(sr, sg, sb, 1.0F);
 
     Tesselator *t = Tesselator::getInstance();
 
@@ -1295,10 +1313,10 @@ void LevelRenderer::renderHaloRing(float alpha)
     float Y = (sr + sr + sb + sg + sg + sg) / 6;
     float br = 0.6f + (Y * 0.4f);
     // app.DebugPrintf("Luminance = %f, brightness = %f\n", Y, br);
-    glColor3f(br, br, br);
+    glColor4f(br, br, br, 1.0F);
 
     // Fog at the base near the world
-    glFogi(GL_FOG_MODE, GL_LINEAR);
+    glFogf(GL_FOG_MODE, GL_LINEAR);
     glFogf(GL_FOG_START, HALO_RING_RADIUS);
     glFogf(GL_FOG_END, HALO_RING_RADIUS * 0.20f);
 
@@ -1600,7 +1618,7 @@ void LevelRenderer::createCloudMesh()
 void LevelRenderer::renderAdvancedClouds(float alpha)
 {
     // MGH - added, we were getting dark clouds sometimes on PS3, with this being setup incorrectly
-    glMultiTexCoord2f(GL_TEXTURE1, 0, 0);
+    glMultiTexCoord4f(GL_TEXTURE1, 0, 0, 0.0f, 1.0f);
 
     // 4J - most of our viewports are now rendered with no clip planes but using stencilling to limit the area drawn to. Clouds have a relatively large fill area compared to
     // the number of vertices that they have, and so enabling clipping here to try and reduce fill rate cost.
@@ -2217,9 +2235,9 @@ bool LevelRenderer::updateDirtyChunks()
             if (bAtomic || (index == 0))
             {
                 // PIXBeginNamedEvent(0,"Rebuilding near chunk %d %d %d",chunk->x, chunk->y, chunk->z);
-                //		static __int64 totalTime = 0;
-                //		static __int64 countTime = 0;
-                //		__int64 startTime = System::currentTimeMillis();
+                //		static std::int64_t totalTime = 0;
+                //		static std::int64_t countTime = 0;
+                //		std::int64_t startTime = System::currentTimeMillis();
 
                 // app.DebugPrintf("Rebuilding permaChunk %d\n", index);
 
@@ -2230,7 +2248,7 @@ bool LevelRenderer::updateDirtyChunks()
                     s_rebuildCompleteEvents->Set(index - 1); // MGH - this rebuild happening on the main thread instead, mark the thread it should have been running on as complete
                 }
 
-                //		__int64 endTime = System::currentTimeMillis();
+                //		std::int64_t endTime = System::currentTimeMillis();
                 //		totalTime += (endTime - startTime);
                 //		countTime++;
                 //		printf("%d : %f\n", countTime, (float)totalTime / (float)countTime);
@@ -2269,11 +2287,11 @@ bool LevelRenderer::updateDirtyChunks()
         static Chunk permaChunk;
         permaChunk.makeCopyForRebuild(chunk);
         LeaveCriticalSection(&m_csDirtyChunks);
-        //		static __int64 totalTime = 0;
-        //		static __int64 countTime = 0;
-        //		__int64 startTime = System::currentTimeMillis();
+        //		static std::int64_t totalTime = 0;
+        //		static std::int64_t countTime = 0;
+        //		std::int64_t startTime = System::currentTimeMillis();
         permaChunk.rebuild();
-        //		__int64 endTime = System::currentTimeMillis();
+        //		std::int64_t endTime = System::currentTimeMillis();
         //		totalTime += (endTime - startTime);
         //		countTime++;
         //		printf("%d : %f\n", countTime, (float)totalTime / (float)countTime);
@@ -2445,11 +2463,20 @@ void LevelRenderer::renderHitOutline(shared_ptr<Player> player, HitResult *h, in
     }
 }
 
+// 4J - the caller (renderHitOutline) sets colour via the legacy immediate-mode
+// glColor4f(), but Tesselator::end() only keeps a draw's glColor4f() value if
+// t->color() was called on this Tesselator instance - otherwise (hasColor
+// false, exactly the case here) it stomps every vertex to opaque white
+// (0xffffffff; see the "4J - TEMP" fallback in Tesselator::end()). Bake the
+// colour in per Tesselator::begin() (which resets hasColor) so the outline
+// actually draws in its intended translucent colour instead of a solid
+// white box.
 void LevelRenderer::render(AABB *b)
 {
     Tesselator *t = Tesselator::getInstance();
 
     t->begin(GL_LINE_STRIP);
+    t->color(0, 0, 0, 102);
     t->vertex((float)(b->x0), (float)(b->y0), (float)(b->z0));
     t->vertex((float)(b->x1), (float)(b->y0), (float)(b->z0));
     t->vertex((float)(b->x1), (float)(b->y0), (float)(b->z1));
@@ -2458,6 +2485,7 @@ void LevelRenderer::render(AABB *b)
     t->end();
 
     t->begin(GL_LINE_STRIP);
+    t->color(0, 0, 0, 102);
     t->vertex((float)(b->x0), (float)(b->y1), (float)(b->z0));
     t->vertex((float)(b->x1), (float)(b->y1), (float)(b->z0));
     t->vertex((float)(b->x1), (float)(b->y1), (float)(b->z1));
@@ -2466,6 +2494,7 @@ void LevelRenderer::render(AABB *b)
     t->end();
 
     t->begin(GL_LINES);
+    t->color(0, 0, 0, 102);
     t->vertex((float)(b->x0), (float)(b->y0), (float)(b->z0));
     t->vertex((float)(b->x0), (float)(b->y1), (float)(b->z0));
     t->vertex((float)(b->x1), (float)(b->y0), (float)(b->z0));
@@ -3846,7 +3875,6 @@ int LevelRenderer::rebuildChunkThreadProc(LPVOID lpParam)
     IntCache::CreateNewThreadStorage();
     Tesselator::CreateNewThreadStorage(1024 * 1024);
     RenderManager.InitialiseContext();
-    Chunk::CreateNewThreadStorage();
     Tile::CreateNewThreadStorage();
 
     int index = (size_t)lpParam;

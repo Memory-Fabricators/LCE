@@ -358,7 +358,7 @@ void ConsoleSaveFileSplit::RegionFileReference::ReleaseCompressed()
     //	app.DebugPrintf("Releasing compressed data for region file from 0x%.8x\n", fileEntry->data.regionIndex );
     free(dataCompressed);
     dataCompressed = NULL;
-    dataCompressedSize = NULL;
+    dataCompressedSize = 0;
 }
 
 FileEntry *ConsoleSaveFileSplit::GetRegionFileEntry(unsigned int regionIndex)
@@ -1014,7 +1014,7 @@ void ConsoleSaveFileSplit::tick()
     {
         unsigned int totalDirty = 0;
         unsigned int totalDirtyBytes = 0;
-        __int64 oldestDirty = currentTime;
+        std::int64_t oldestDirty = currentTime;
         for (AUTO_VAR(it, regionFiles.begin()); it != regionFiles.end(); it++)
         {
             if (it->second->dirty)
@@ -1445,7 +1445,7 @@ void ConsoleSaveFileSplit::Flush(bool autosave, bool updateThumbnail)
             BYTE bTextMetadata[88];
             ZeroMemory(bTextMetadata, 88);
 
-            __int64 seed = 0;
+            std::int64_t seed = 0;
             bool hasSeed = false;
             if (MinecraftServer::getInstance() != NULL && MinecraftServer::getInstance()->levels[0] != NULL)
             {

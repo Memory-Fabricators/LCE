@@ -37,7 +37,7 @@ void ByteArrayOutputStream::write(unsigned int b)
         buf.resize(buf.length * 2);
     }
 
-    buf[count] = (byte)b;
+    buf[count] = (unsigned char)b;
     count++;
 }
 

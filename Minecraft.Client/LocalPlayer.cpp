@@ -49,6 +49,7 @@
 
 #include "../Minecraft.World/Dimension.h"
 #include "Options.h"
+#include <cmath>
 
 #ifndef _DURANGO
 #include "../Minecraft.World/CommonStats.h"

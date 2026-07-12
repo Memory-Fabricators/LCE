@@ -10,6 +10,7 @@
 #include "Inventory.h"
 #include "JavaMath.h"
 #include "ParticleTypes.h"
+#include "UseAnim.h"
 #include "net.minecraft.h"
 #include "net.minecraft.stats.h"
 #include "net.minecraft.world.damagesource.h"
@@ -38,6 +39,7 @@
 #include "../Minecraft.Client/HumanoidModel.h"
 #include "../Minecraft.Client/LocalPlayer.h"
 #include "SoundTypes.h"
+#include <climits>
 
 void Player::_init()
 {
@@ -173,8 +175,8 @@ void Player::defineSynchedData()
 {
     this->Mob::defineSynchedData();
 
-    entityData->define(DATA_PLAYER_FLAGS_ID, (byte)0);
-    entityData->define(DATA_PLAYER_RUNNING_ID, (byte)0);
+    entityData->define(DATA_PLAYER_FLAGS_ID, 0);
+    entityData->define(DATA_PLAYER_RUNNING_ID, 0);
 }
 
 shared_ptr<ItemInstance> Player::getUseItem()
@@ -228,7 +230,7 @@ void Player::stopUsingItem()
 
 bool Player::isBlocking()
 {
-    return isUsingItem() && Item::items[useItem->id]->getUseAnimation(useItem) == UseAnim_block;
+    return isUsingItem() && Item::items[useItem->id]->getUseAnimation(useItem) == UseAnimation::block;
 }
 
 void Player::tick()
@@ -535,11 +537,11 @@ void Player::tick()
 
 void Player::spawnEatParticles(shared_ptr<ItemInstance> useItem, int count)
 {
-    if (useItem->getUseAnimation() == UseAnim_drink)
+    if (useItem->getUseAnimation() == UseAnimation::drink)
     {
         level->playSound(shared_from_this(), eSoundType_RANDOM_DRINK, 0.5f, level->random->nextFloat() * 0.1f + 0.9f);
     }
-    if (useItem->getUseAnimation() == UseAnim_eat)
+    if (useItem->getUseAnimation() == UseAnimation::eat)
     {
         for (int i = 0; i < count; i++)
         {
@@ -581,7 +583,7 @@ void Player::completeUsingItem()
     }
 }
 
-void Player::handleEntityEvent(byte id)
+void Player::handleEntityEvent(unsigned char id)
 {
     if (id == EntityEvent::USE_ITEM_COMPLETE)
     {
@@ -2025,14 +2027,14 @@ bool Player::getPlayerFlag(int flag)
 
 void Player::setPlayerFlag(int flag, bool value)
 {
-    byte currentValue = entityData->getByte(DATA_PLAYER_FLAGS_ID);
+    auto currentValue = entityData->getByte(DATA_PLAYER_FLAGS_ID);
     if (value)
     {
-        entityData->set(DATA_PLAYER_FLAGS_ID, (byte)(currentValue | (1 << flag)));
+        entityData->set(DATA_PLAYER_FLAGS_ID, (currentValue | (1 << flag)));
     }
     else
     {
-        entityData->set(DATA_PLAYER_FLAGS_ID, (byte)(currentValue & ~(1 << flag)));
+        entityData->set(DATA_PLAYER_FLAGS_ID, (currentValue & ~(1 << flag)));
     }
 }
 

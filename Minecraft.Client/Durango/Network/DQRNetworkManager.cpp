@@ -1155,7 +1155,7 @@ void DQRNetworkManager::Tick_StateMachine()
         break;
     case DNM_INT_STATE_JOINING_SENDING_UNRELIABLE:
         {
-            __int64 timeNow = System::currentTimeMillis();
+            std::int64_t timeNow = System::currentTimeMillis();
             // m_firstUnreliableSendTime of 0 indicates that we haven't tried sending an unreliable packet yet so need to send one and initialise things
             if (m_firstUnreliableSendTime == 0)
             {
@@ -1189,7 +1189,7 @@ void DQRNetworkManager::Tick_StateMachine()
         {
             // Timeout if we've been waiting for reserved slots for our joining players for too long. This is most likely because the host doesn't have room for all the slots we wanted, and we weren't able to determine this
             // when we went to join the game (ie someone else was joining at the same time). At this point we need to remove any local players that did already join, from both the session and the party.
-            __int64 timeNow = System::currentTimeMillis();
+            std::int64_t timeNow = System::currentTimeMillis();
             if ((timeNow - m_startedWaitingForReservationsTime) > JOIN_RESERVATION_WAIT_TIME)
             {
                 SetState(DNM_INT_STATE_JOINING_FAILED_TIDY_UP);
@@ -2753,7 +2753,7 @@ bool DQRNetworkManager::JoinPartyFromSearchResult(SessionSearchResult *searchRes
     if (sessionRef != nullptr)
     {
         // Allow 2 seconds before we let the player cancel
-        __int64 allowCancelTime = System::currentTimeMillis() + (1000 * 2);
+        std::int64_t allowCancelTime = System::currentTimeMillis() + (1000 * 2);
 
         // Now leave the game session. We need to do this for each player in turn, writing each time. Consider that any of the joining
         // members *may* have a slot (reserved or active) depending on how far progressed the joining got.
@@ -2824,7 +2824,7 @@ bool DQRNetworkManager::JoinPartyFromSearchResult(SessionSearchResult *searchRes
                         break;
                     }
 
-                    __int64 currentTime = System::currentTimeMillis();
+                    std::int64_t currentTime = System::currentTimeMillis();
                     if (currentTime > allowCancelTime)
                     {
                         shownCancelScreen = true;

@@ -1,5 +1,7 @@
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
+#include <climits>
 #include <unordered_set>
 
 #include "../../../Minecraft.World/Pos.h"
@@ -147,25 +149,25 @@ LevelGenerationOptions::~LevelGenerationOptions()
     }
 }
 
-ConsoleGameRules::EGameRuleType LevelGenerationOptions::getActionType()
+GameRuleType LevelGenerationOptions::getActionType()
 {
-    return ConsoleGameRules::eGameRuleType_LevelGenerationOptions;
+    return GameRuleType::LevelGenerationOptions;
 }
 
 void LevelGenerationOptions::writeAttributes(DataOutputStream *dos, UINT numAttrs)
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnX);
+    ::write(dos, GameRuleAttribute::spawnX);
     dos->writeUTF(_toString(m_spawnPos->x));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnY);
+    ::write(dos, GameRuleAttribute::spawnY);
     dos->writeUTF(_toString(m_spawnPos->y));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnZ);
+    ::write(dos, GameRuleAttribute::spawnZ);
     dos->writeUTF(_toString(m_spawnPos->z));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_seed);
+    ::write(dos, GameRuleAttribute::seed);
     dos->writeUTF(_toString(m_seed));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_flatworld);
+    ::write(dos, GameRuleAttribute::flatworld);
     dos->writeUTF(_toString(m_useFlatWorld));
 }
 
@@ -200,25 +202,25 @@ void LevelGenerationOptions::getChildren(vector<GameRuleDefinition *> *children)
     }
 }
 
-GameRuleDefinition *LevelGenerationOptions::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *LevelGenerationOptions::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_ApplySchematic)
+    if (ruleType == GameRuleType::ApplySchematic)
     {
         rule = new ApplySchematicRuleDefinition(this);
         m_schematicRules.push_back((ApplySchematicRuleDefinition *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_GenerateStructure)
+    else if (ruleType == GameRuleType::GenerateStructure)
     {
         rule = new ConsoleGenerateStructure();
         m_structureRules.push_back((ConsoleGenerateStructure *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_BiomeOverride)
+    else if (ruleType == GameRuleType::BiomeOverride)
     {
         rule = new BiomeOverride();
         m_biomeOverrides.push_back((BiomeOverride *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_StartFeature)
+    else if (ruleType == GameRuleType::StartFeature)
     {
         rule = new StartFeature();
         m_features.push_back((StartFeature *)rule);
@@ -236,7 +238,7 @@ void LevelGenerationOptions::addAttribute(const wstring &attributeName, const ws
 {
     if (attributeName.compare(L"seed") == 0)
     {
-        m_seed = _fromString<__int64>(attributeValue);
+        m_seed = _fromString<std::int64_t>(attributeValue);
         app.DebugPrintf("LevelGenerationOptions: Adding parameter m_seed=%I64d\n", m_seed);
     }
     else if (attributeName.compare(L"spawnX") == 0)
@@ -725,7 +727,7 @@ void LevelGenerationOptions::setLoadedData()
     m_hasLoadedData = true;
 }
 
-__int64 LevelGenerationOptions::getLevelSeed()
+std::int64_t LevelGenerationOptions::getLevelSeed()
 {
     return m_seed;
 }

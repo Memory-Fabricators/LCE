@@ -14,7 +14,7 @@ class EndTag : public Tag
     void load(DataInput *dis) {};
     void write(DataOutput *dos) {};
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_End;
     }

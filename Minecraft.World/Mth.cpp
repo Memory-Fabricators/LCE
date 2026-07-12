@@ -56,9 +56,9 @@ int Mth::floor(float v)
     return v < i ? i - 1 : i;
 }
 
-__int64 Mth::lfloor(double v)
+std::int64_t Mth::lfloor(double v)
 {
-    __int64 i = (__int64)v;
+    std::int64_t i = (std::int64_t)v;
     return v < i ? i - 1 : i;
 }
 

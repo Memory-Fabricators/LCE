@@ -7,6 +7,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 Font::Font(Options *options, const wstring &name, Textures *textures, bool enforceUnicode, TEXTURE_NAME textureName, int cols, int rows, int charWidth, int charHeight, unsigned short charMap[] /* = nullptr */) : textures(textures)
 {
@@ -248,7 +249,7 @@ void Font::draw(const wstring &str, bool dropShadow)
                 }
 
                 int color = colors[colorN];
-                glColor3f((color >> 16) / 255.0F, ((color >> 8) & 255) / 255.0F, (color & 255) / 255.0F);
+                glColor4f((color >> 16) / 255.0F, ((color >> 8) & 255) / 255.0F, (color & 255) / 255.0F, 1.0F);
             }
 
             i += 1;

@@ -1,14 +1,14 @@
 #include "LevelSummary.h"
 #include "stdafx.h"
 
-LevelSummary::LevelSummary(const wstring &levelId, const wstring &levelName, __int64 lastPlayed, __int64 sizeOnDisk, GameType *gameMode, bool requiresConversion, bool hardcore, bool hasCheats) : levelId(levelId),
-                                                                                                                                                                                                   levelName(levelName),
-                                                                                                                                                                                                   lastPlayed(lastPlayed),
-                                                                                                                                                                                                   sizeOnDisk(sizeOnDisk),
-                                                                                                                                                                                                   gameMode(gameMode),
-                                                                                                                                                                                                   requiresConversion(requiresConversion),
-                                                                                                                                                                                                   hardcore(hardcore),
-                                                                                                                                                                                                   _hasCheats(hasCheats)
+LevelSummary::LevelSummary(const wstring &levelId, const wstring &levelName, std::int64_t lastPlayed, std::int64_t sizeOnDisk, GameType *gameMode, bool requiresConversion, bool hardcore, bool hasCheats) : levelId(levelId),
+                                                                                                                                                                                                             levelName(levelName),
+                                                                                                                                                                                                             lastPlayed(lastPlayed),
+                                                                                                                                                                                                             sizeOnDisk(sizeOnDisk),
+                                                                                                                                                                                                             gameMode(gameMode),
+                                                                                                                                                                                                             requiresConversion(requiresConversion),
+                                                                                                                                                                                                             hardcore(hardcore),
+                                                                                                                                                                                                             _hasCheats(hasCheats)
 {
 }
 
@@ -22,7 +22,7 @@ wstring LevelSummary::getLevelName()
     return levelName;
 }
 
-__int64 LevelSummary::getSizeOnDisk()
+std::int64_t LevelSummary::getSizeOnDisk()
 {
     return sizeOnDisk;
 }
@@ -32,7 +32,7 @@ bool LevelSummary::isRequiresConversion()
     return requiresConversion;
 }
 
-__int64 LevelSummary::getLastPlayed()
+std::int64_t LevelSummary::getLastPlayed()
 {
     return lastPlayed;
 }

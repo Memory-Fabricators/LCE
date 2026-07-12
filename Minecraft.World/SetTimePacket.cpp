@@ -9,7 +9,7 @@ SetTimePacket::SetTimePacket()
     time = 0;
 }
 
-SetTimePacket::SetTimePacket(__int64 time)
+SetTimePacket::SetTimePacket(std::int64_t time)
 {
     this->time = time;
 }

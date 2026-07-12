@@ -146,7 +146,7 @@ class Minecraft
     GameRenderer *gameRenderer;
 
   private:
-    BackgroundDownloader *bgLoader;
+    // BackgroundDownloader *bgLoader;
 
     int ticks;
     // 4J-PB - moved to per player
@@ -183,11 +183,11 @@ class Minecraft
 
   public:
     static const int frameTimes_length = 512;
-    static __int64 frameTimes[frameTimes_length];
+    static std::int64_t frameTimes[frameTimes_length];
     static const int tickTimes_length = 512;
-    static __int64 tickTimes[tickTimes_length];
+    static std::int64_t tickTimes[tickTimes_length];
     static int frameTimePos;
-    static __int64 warezTime;
+    static std::int64_t warezTime;
 
   private:
     int rightClickDelay;
@@ -250,9 +250,9 @@ class Minecraft
     //    String grabHugeScreenshot(File workDir2, int width, int height, int ssWidth, int ssHeight);	// 4J - removed
 
     // 4J - per player thing?
-    __int64 lastTimer;
+    std::int64_t lastTimer;
 
-    void renderFpsMeter(__int64 tickTime);
+    void renderFpsMeter(std::int64_t tickTime);
 
   public:
     void stop();
@@ -274,7 +274,7 @@ class Minecraft
     // bool isRaining ;
 
     // 4J - Moved to per player
-    //__int64 lastTickTime;
+    // std::int64_t lastTickTime;
 
   private:
     // 4J- per player?
@@ -324,7 +324,7 @@ class Minecraft
 
     static int maxSupportedTextureSize();
     void delayTextureReload();
-    static __int64 currentTimeMillis();
+    static std::int64_t currentTimeMillis();
 
 #ifdef _DURANGO
     static void inGameSignInCheckAllPrivilegesCallback(LPVOID lpParam, bool hasPrivileges, int iPad);

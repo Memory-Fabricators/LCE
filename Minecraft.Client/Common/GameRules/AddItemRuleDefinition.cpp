@@ -16,19 +16,19 @@ void AddItemRuleDefinition::writeAttributes(DataOutputStream *dos, UINT numAttrs
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_itemId);
+    ::write(dos, GameRuleAttribute::itemId);
     dos->writeUTF(_toString(m_itemId));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_quantity);
+    ::write(dos, GameRuleAttribute::quantity);
     dos->writeUTF(_toString(m_quantity));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_auxValue);
+    ::write(dos, GameRuleAttribute::auxValue);
     dos->writeUTF(_toString(m_auxValue));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_dataTag);
+    ::write(dos, GameRuleAttribute::dataTag);
     dos->writeUTF(_toString(m_dataTag));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_slot);
+    ::write(dos, GameRuleAttribute::slot);
     dos->writeUTF(_toString(m_slot));
 }
 
@@ -41,10 +41,10 @@ void AddItemRuleDefinition::getChildren(vector<GameRuleDefinition *> *children)
     }
 }
 
-GameRuleDefinition *AddItemRuleDefinition::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *AddItemRuleDefinition::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_AddEnchantment)
+    if (ruleType == GameRuleType::AddEnchantment)
     {
         rule = new AddEnchantmentRuleDefinition();
         m_enchantments.push_back((AddEnchantmentRuleDefinition *)rule);

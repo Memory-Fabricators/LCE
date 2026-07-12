@@ -4,7 +4,7 @@
 #include "Recipes.h"
 #include "Recipy.h"
 #include "Tile.h"
-#include "net.minecraft.world.Item.h"
+#include "net.minecraft.world.item.h"
 #include "stdafx.h"
 
 void ClothDyeRecipes::addRecipes(Recipes *r)

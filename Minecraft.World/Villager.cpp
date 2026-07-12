@@ -15,6 +15,7 @@
 #include "net.minecraft.world.level.h"
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
+#include <random>
 
 unordered_map<int, pair<int, int>> Villager::MIN_MAX_VALUES;
 unordered_map<int, pair<int, int>> Villager::MIN_MAX_PRICES;
@@ -531,7 +532,8 @@ void Villager::addOffers(int addCount)
     }
 
     // shuffle the list to make it more interesting
-    std::random_shuffle(newOffers->begin(), newOffers->end());
+    static thread_local std::mt19937 engine{std::random_device{}()};
+    std::shuffle(newOffers->begin(), newOffers->end(), engine);
 
     if (offers == NULL)
     {
@@ -702,7 +704,7 @@ int Villager::getPurchaseCost(int itemId, Random *random)
     return minMax.first + random->nextInt(minMax.second - minMax.first);
 }
 
-void Villager::handleEntityEvent(byte id)
+void Villager::handleEntityEvent(unsigned char id)
 {
     if (id == EntityEvent::LOVE_HEARTS)
     {

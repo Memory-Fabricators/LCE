@@ -4,6 +4,7 @@
 #include "../../../Minecraft.World/net.minecraft.network.packet.h"
 #include "../../../Minecraft.World/net.minecraft.world.item.h"
 #include "../../WstringLookup.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 CollectItemRuleDefinition::CollectItemRuleDefinition()
@@ -21,13 +22,13 @@ void CollectItemRuleDefinition::writeAttributes(DataOutputStream *dos, UINT numA
 {
     GameRuleDefinition::writeAttributes(dos, numAttributes + 3);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_itemId);
+    ::write(dos, GameRuleAttribute::itemId);
     dos->writeUTF(_toString(m_itemId));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_auxValue);
+    ::write(dos, GameRuleAttribute::auxValue);
     dos->writeUTF(_toString(m_auxValue));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_quantity);
+    ::write(dos, GameRuleAttribute::quantity);
     dos->writeUTF(_toString(m_quantity));
 }
 

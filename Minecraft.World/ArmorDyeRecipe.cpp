@@ -158,11 +158,13 @@ const int ArmorDyeRecipe::getGroup()
 }
 
 // 4J-PB
-bool ArmorDyeRecipe::requires(int iRecipe) {
+bool ArmorDyeRecipe::requirement(int iRecipe)
+{
     return false;
 }
 
-void ArmorDyeRecipe::requires(INGREDIENTS_REQUIRED *pIngReq) {
+void ArmorDyeRecipe::requirement(INGREDIENTS_REQUIRED *pIngReq)
+{
     // int iCount=0;
     // bool bFound;
     // int j;

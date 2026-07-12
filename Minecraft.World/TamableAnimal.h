@@ -27,7 +27,7 @@ class TamableAnimal : public Animal
     virtual void spawnTamingParticles(bool success);
 
   public:
-    virtual void handleEntityEvent(byte id);
+    virtual void handleEntityEvent(unsigned char id);
     virtual bool isTame();
     virtual void setTame(bool value);
     virtual bool isSitting();

@@ -3,7 +3,8 @@
 #include "DragonModel.h"
 #include "Lighting.h"
 #include "Tesselator.h"
-#include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 shared_ptr<EnderDragon> EnderDragonRenderer::bossInstance;
 int EnderDragonRenderer::currentModel;
@@ -261,7 +262,7 @@ int EnderDragonRenderer::prepareArmor(shared_ptr<Mob> _mob, int layer, float a)
         int u = col % 65536;
         int v = col / 65536;
 
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
 

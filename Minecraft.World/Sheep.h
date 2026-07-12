@@ -62,7 +62,7 @@ class Sheep : public Animal
     virtual int getDeathLoot();
 
   public:
-    virtual void handleEntityEvent(byte id);
+    virtual void handleEntityEvent(unsigned char id);
 
   public:
     float getHeadEatPositionScale(float a);

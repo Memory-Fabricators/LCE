@@ -111,10 +111,10 @@ extern "C"
     {
 #if 0
 	static int throttle = 0;
-	static __int64 lasttime = 0;
+	static std::int64_t lasttime = 0;
 	if( ( throttle % 100 ) == 0 )
 	{
-		__int64 nowtime = System::currentTimeMillis();
+		std::int64_t nowtime = System::currentTimeMillis();
 		if( ( nowtime - lasttime ) > 20000 )
 		{
 			lasttime = nowtime;

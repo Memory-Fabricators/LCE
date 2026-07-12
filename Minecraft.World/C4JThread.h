@@ -208,7 +208,7 @@ class C4JThread
     bool m_isRunning;
     bool m_hasStarted;
     int m_exitCode;
-    __int64 m_lastSleepTime;
+    std::int64_t m_lastSleepTime;
     static std::vector<C4JThread *> ms_threadList;
     static CRITICAL_SECTION ms_threadListCS;
 

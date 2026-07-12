@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Recipy.h"
+
 class ShapelessRecipy : public Recipy
 {
   private:
@@ -18,7 +20,7 @@ class ShapelessRecipy : public Recipy
 
     // 4J-PB - to return the items required to make a recipe
     virtual bool
-        requires(int iRecipe);
+    requirement(int iRecipe);
     virtual void
-        requires(INGREDIENTS_REQUIRED *pIngReq);
+    requirement(INGREDIENTS_REQUIRED *pIngReq);
 };

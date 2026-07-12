@@ -62,7 +62,7 @@ FileInputStream::~FileInputStream()
 // the next byte of data, or -1 if the end of the file is reached.
 int FileInputStream::read()
 {
-    byte byteRead = 0;
+    unsigned char byteRead = 0;
     DWORD numberOfBytesRead;
 
     BOOL bSuccess = ReadFile(
@@ -186,7 +186,7 @@ void FileInputStream::close()
 // n - the number of bytes to be skipped.
 // Returns:
 // the actual number of bytes skipped.
-__int64 FileInputStream::skip(__int64 n)
+std::int64_t FileInputStream::skip(std::int64_t n)
 {
 #ifdef _XBOX
     LARGE_INTEGER li;

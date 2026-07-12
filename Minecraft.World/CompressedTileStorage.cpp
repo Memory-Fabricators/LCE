@@ -174,18 +174,18 @@ bool CompressedTileStorage::isSameAs(CompressedTileStorage *other)
 
     // Attempt to compare as much as we can in 64-byte chunks (8 groups of 8 bytes)
     int quickCount = allocatedSize / 64;
-    __int64 *pOld = (__int64 *)indicesAndData;
-    __int64 *pNew = (__int64 *)other->indicesAndData;
+    std::int64_t *pOld = (std::int64_t *)indicesAndData;
+    std::int64_t *pNew = (std::int64_t *)other->indicesAndData;
     for (int i = 0; i < quickCount; i++)
     {
-        __int64 d0 = pOld[0] ^ pNew[0];
-        __int64 d1 = pOld[1] ^ pNew[1];
-        __int64 d2 = pOld[2] ^ pNew[2];
-        __int64 d3 = pOld[3] ^ pNew[3];
-        __int64 d4 = pOld[4] ^ pNew[4];
-        __int64 d5 = pOld[5] ^ pNew[5];
-        __int64 d6 = pOld[6] ^ pNew[6];
-        __int64 d7 = pOld[7] ^ pNew[7];
+        std::int64_t d0 = pOld[0] ^ pNew[0];
+        std::int64_t d1 = pOld[1] ^ pNew[1];
+        std::int64_t d2 = pOld[2] ^ pNew[2];
+        std::int64_t d3 = pOld[3] ^ pNew[3];
+        std::int64_t d4 = pOld[4] ^ pNew[4];
+        std::int64_t d5 = pOld[5] ^ pNew[5];
+        std::int64_t d6 = pOld[6] ^ pNew[6];
+        std::int64_t d7 = pOld[7] ^ pNew[7];
         d0 |= d1;
         d2 |= d3;
         d4 |= d5;
@@ -347,7 +347,7 @@ void CompressedTileStorage::setData(byteArray dataIn, unsigned int inOffset)
         }
 #else
         __uint64 usedFlags[4] = {0, 0, 0, 0};
-        __int64 i64_1 = 1;           // MGH - instead of 1i64, which is MS specific
+        std::int64_t i64_1 = 1;      // MGH - instead of 1i64, which is MS specific
         for (int j = 0; j < 64; j++) // This loop of 64 is to go round the 4 x 4 tiles in the block
         {
             int tile = data[getIndex(i, j)];
@@ -973,7 +973,7 @@ void CompressedTileStorage::compress(int upgradeBlock /*=-1*/)
 #else
 
                 __uint64 usedFlags[4] = {0, 0, 0, 0};
-                __int64 i64_1 = 1;           // MGH - instead of 1i64, which is MS specific
+                std::int64_t i64_1 = 1;      // MGH - instead of 1i64, which is MS specific
                 for (int j = 0; j < 64; j++) // This loop of 64 is to go round the 4x4x4 tiles in the block
                 {
                     int tiletype = unpacked_data[j];

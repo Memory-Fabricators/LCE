@@ -3,6 +3,7 @@
 #include "../Minecraft.World/StringHelpers.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 AbstractTexturePack::AbstractTexturePack(DWORD id, File *file, const wstring &name, TexturePack *fallback) : id(id), name(name)
 {
@@ -254,7 +255,21 @@ void AbstractTexturePack::loadDefaultColourTable()
     // Load the file
     File coloursFile(AbstractTexturePack::getPath(true).append(L"res/colours.col"));
 
-    if (coloursFile.exists())
+#if defined _SDL3
+    // stat() on this path has been observed to spuriously fail once on startup
+    // when the working tree lives on a mounted volume (e.g. a network share) -
+    // retry a couple of times before treating it as genuinely missing.
+    bool bExists = coloursFile.exists();
+    for (int attempt = 0; !bExists && attempt < 3; attempt++)
+    {
+        SDL_Delay(50);
+        bExists = coloursFile.exists();
+    }
+#else
+    bool bExists = coloursFile.exists();
+#endif
+
+    if (bExists)
     {
         DWORD dwLength = coloursFile.length();
         byteArray data(dwLength);

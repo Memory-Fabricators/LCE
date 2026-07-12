@@ -61,7 +61,7 @@ class UIScene_LoadMenu : public IUIScene_StartGame
     bool m_bRequestQuadrantSignin;
     bool m_bIsCorrupt;
     bool m_bThumbnailGetFailed;
-    __int64 m_seed;
+    std::int64_t m_seed;
 
 #ifdef __PS3__
     std::vector<SonyCommerce::ProductInfo> *m_pvProductInfo;

@@ -5,6 +5,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.h"
 #include "EntityRenderDispatcher.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 PaintingRenderer::PaintingRenderer()
 {
@@ -139,6 +140,6 @@ void PaintingRenderer::setBrightness(shared_ptr<Painting> painting, float ss, fl
     int col = this->entityRenderDispatcher->level->getLightColor(x, y, z, 0);
     int u = col % 65536;
     int v = col / 65536;
-    glMultiTexCoord2f(0, u, v);
+    glMultiTexCoord4f(0, u, v, 0.0f, 1.0f);
     glColor3f(1, 1, 1);
 }

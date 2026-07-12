@@ -32,10 +32,10 @@ void XboxStructureActionPlaceContainer::getChildren(vector<GameRuleDefinition *>
     }
 }
 
-GameRuleDefinition *XboxStructureActionPlaceContainer::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *XboxStructureActionPlaceContainer::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_AddItem)
+    if (ruleType == GameRuleType::AddItem)
     {
         rule = new AddItemRuleDefinition();
         m_items.push_back((AddItemRuleDefinition *)rule);

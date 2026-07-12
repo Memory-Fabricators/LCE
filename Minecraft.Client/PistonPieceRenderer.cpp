@@ -6,6 +6,7 @@
 #include "Tesselator.h"
 #include "TileRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 PistonPieceRenderer::PistonPieceRenderer()
 {

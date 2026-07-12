@@ -14,7 +14,7 @@ AwardStatPacket::AwardStatPacket(int statId, int count)
 {
     this->statId = statId;
 
-    this->m_paramData.data = (byte *)new int(count);
+    this->m_paramData.data = (unsigned char *)new int(count);
     this->m_paramData.length = sizeof(int);
 }
 

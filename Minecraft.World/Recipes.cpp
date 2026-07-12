@@ -978,7 +978,7 @@ ShapedRecipy *Recipes::addShapedRecipy(ItemInstance *result, ...)
 
             break;
         case L'c':
-            wchFrom = va_arg(vl, wchar_t);
+            wchFrom = va_arg(vl, int);
             break;
         case L'z':
             pItemInstance = va_arg(vl, ItemInstance *);
@@ -995,7 +995,7 @@ ShapedRecipy *Recipes::addShapedRecipy(ItemInstance *result, ...)
             mappings->insert(myMap::value_type(wchFrom, pItemInstance));
             break;
         case L'g':
-            wchFrom = va_arg(vl, wchar_t);
+            wchFrom = va_arg(vl, int);
             switch (wchFrom)
             {
                 // 			case L'W':
@@ -1090,7 +1090,7 @@ void Recipes::addShapelessRecipy(ItemInstance *result, ...)
             ingredients->push_back(new ItemInstance(pTile));
             break;
         case L'g':
-            wchFrom = va_arg(vl, wchar_t);
+            wchFrom = va_arg(vl, int);
             switch (wchFrom)
             {
 
@@ -1198,7 +1198,7 @@ void Recipes::buildRecipeIngredientsArray(void)
     {
         Recipy *recipe = *it;
         // wprintf(L"RECIPE - [%d] is %w\n",iCount,recipe->getResultItem()->getItem()->getName());
-        recipe->requires(&m_pRecipeIngredientsRequired[iCount++]);
+        recipe->requirement(&m_pRecipeIngredientsRequired[iCount++]);
     }
 
     // printf("Total recipes in buildRecipeIngredientsArray - %d",iCount);

@@ -3,7 +3,7 @@
 #include "Button.h"
 #include "EditBox.h"
 #include "Options.h"
-#include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 JoinMultiplayerScreen::JoinMultiplayerScreen(Screen *lastScreen)
 {

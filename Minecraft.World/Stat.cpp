@@ -44,7 +44,7 @@ Stat *Stat::postConstruct()
 #ifdef __PS3__
     Stats::statsById->emplace(id1); //	assert(0); // MGH - TODO - FIX - find out where this move function comes from
 #else
-    Stats::statsById->emplace(move(id1));
+    Stats::statsById->emplace(std::move(id1));
 #endif // __PS3__
 
     return this;

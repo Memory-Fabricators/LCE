@@ -2,6 +2,7 @@
 #include "../Minecraft.World/Mth.h"
 #include "../Minecraft.World/net.minecraft.world.item.h"
 #include "stdafx.h"
+#include <cmath>
 
 RemotePlayer::RemotePlayer(Level *level, const wstring &name) : Player(level)
 {

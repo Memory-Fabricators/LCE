@@ -10,7 +10,7 @@ class BiomeCache
     static const int ZONE_SIZE_MASK = ZONE_SIZE - 1;
 
     const BiomeSource *source;
-    __int64 lastUpdateTime;
+    std::int64_t lastUpdateTime;
 
   public:
     class Block
@@ -22,7 +22,7 @@ class BiomeCache
         // 		BiomeArray biomes;
         byteArray biomeIndices;
         int x, z;
-        __int64 lastUse;
+        std::int64_t lastUse;
 
         Block(int x, int z, BiomeCache *parent);
         ~Block();
@@ -32,8 +32,8 @@ class BiomeCache
     };
 
   private:
-    unordered_map<__int64, Block *, LongKeyHash, LongKeyEq> cached; // 4J - was LongHashMap
-    vector<Block *> all;                                            // was ArrayList<Block>
+    unordered_map<std::int64_t, Block *, LongKeyHash, LongKeyEq> cached; // 4J - was LongHashMap
+    vector<Block *> all;                                                 // was ArrayList<Block>
 
   public:
     BiomeCache(BiomeSource *source);

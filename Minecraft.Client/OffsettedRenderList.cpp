@@ -1,6 +1,6 @@
 #include "OffsettedRenderList.h"
 #include "../Minecraft.World/IntBuffer.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 // 4J added
 OffsettedRenderList::OffsettedRenderList()
@@ -62,7 +62,7 @@ void OffsettedRenderList::render()
     {
         glPushMatrix();
         glTranslatef(x - xOff, y - yOff, z - zOff);
-        glCallLists(lists);
+        // FIXME: glCallLists(lists);
         glPopMatrix();
     }
 }

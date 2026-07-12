@@ -6,6 +6,7 @@
 #include "ModelPart.h"
 #include "SignModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 SignRenderer::SignRenderer()
 {

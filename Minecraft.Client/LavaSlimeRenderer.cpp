@@ -1,7 +1,7 @@
 #include "LavaSlimeRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
 #include "LavaSlimeModel.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 LavaSlimeRenderer::LavaSlimeRenderer() : MobRenderer(new LavaSlimeModel(), .25f)
 {

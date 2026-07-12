@@ -12,6 +12,6 @@ class MilkBucketItem : public Item
 
     virtual shared_ptr<ItemInstance> useTimeDepleted(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual int getUseDuration(shared_ptr<ItemInstance> itemInstance);
-    virtual UseAnim getUseAnimation(shared_ptr<ItemInstance> itemInstance);
+    virtual UseAnimation getUseAnimation(shared_ptr<ItemInstance> itemInstance);
     virtual shared_ptr<ItemInstance> use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
 };

@@ -8,10 +8,10 @@ class ChunkStorageProfilerDecorator : public ChunkStorage
   private:
     ChunkStorage *capsulated;
 
-    __int64 timeSpentLoading;
-    __int64 loadCount;
-    __int64 timeSpentSaving;
-    __int64 saveCount;
+    std::int64_t timeSpentLoading;
+    std::int64_t loadCount;
+    std::int64_t timeSpentSaving;
+    std::int64_t saveCount;
 
     int counter;
 

@@ -184,9 +184,9 @@ void FallingTile::causeFallDamage(float distance)
 
 void FallingTile::addAdditonalSaveData(CompoundTag *tag)
 {
-    tag->putByte(L"Tile", (byte)tile);
-    tag->putByte(L"Data", (byte)data);
-    tag->putByte(L"Time", (byte)time);
+    tag->putByte(L"Tile", (unsigned char)tile);
+    tag->putByte(L"Data", (unsigned char)data);
+    tag->putByte(L"Time", (unsigned char)time);
     tag->putBoolean(L"DropItem", dropItem);
     tag->putBoolean(L"HurtEntities", hurtEntities);
     tag->putFloat(L"FallHurtAmount", fallDamageAmount);

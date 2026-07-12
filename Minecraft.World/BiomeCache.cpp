@@ -80,7 +80,7 @@ BiomeCache::Block *BiomeCache::getBlockAt(int x, int z)
     EnterCriticalSection(&m_CS);
     x >>= ZONE_SIZE_BITS;
     z >>= ZONE_SIZE_BITS;
-    __int64 slot = (((__int64)x) & 0xffffffffl) | ((((__int64)z) & 0xffffffffl) << 32l);
+    std::int64_t slot = (((std::int64_t)x) & 0xffffffffl) | ((((std::int64_t)z) & 0xffffffffl) << 32l);
     AUTO_VAR(it, cached.find(slot));
     Block *block = NULL;
     if (it == cached.end())
@@ -118,8 +118,8 @@ float BiomeCache::getDownfall(int x, int z)
 void BiomeCache::update()
 {
     EnterCriticalSection(&m_CS);
-    __int64 now = app.getAppTime();
-    __int64 utime = now - lastUpdateTime;
+    std::int64_t now = app.getAppTime();
+    std::int64_t utime = now - lastUpdateTime;
     if (utime > DECAY_TIME / 4 || utime < 0)
     {
         lastUpdateTime = now;
@@ -127,11 +127,11 @@ void BiomeCache::update()
         for (AUTO_VAR(it, all.begin()); it != all.end();)
         {
             Block *block = *it;
-            __int64 time = now - block->lastUse;
+            std::int64_t time = now - block->lastUse;
             if (time > DECAY_TIME || time < 0)
             {
                 it = all.erase(it);
-                __int64 slot = (((__int64)block->x) & 0xffffffffl) | ((((__int64)block->z) & 0xffffffffl) << 32l);
+                std::int64_t slot = (((std::int64_t)block->x) & 0xffffffffl) | ((((std::int64_t)block->z) & 0xffffffffl) << 32l);
                 cached.erase(slot);
                 delete block;
             }

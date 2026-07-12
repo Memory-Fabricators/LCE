@@ -10,7 +10,7 @@
 
 // FlatLevelSource::villageFeature = new VillageFeature(1);
 
-FlatLevelSource::FlatLevelSource(Level *level, __int64 seed, bool generateStructures)
+FlatLevelSource::FlatLevelSource(Level *level, std::int64_t seed, bool generateStructures)
 {
     m_XZSize = level->getLevelData()->getXZSize();
 
@@ -52,7 +52,7 @@ void FlatLevelSource::prepareHeights(byteArray blocks)
                 {
                     block = Tile::grass_Id;
                 }
-                blocks[xc << 11 | zc << 7 | yc] = (byte)block;
+                blocks[xc << 11 | zc << 7 | yc] = (unsigned char)block;
             }
         }
     }
@@ -67,7 +67,7 @@ LevelChunk *FlatLevelSource::getChunk(int xOffs, int zOffs)
 {
     // 4J - now allocating this with a physical alloc & bypassing general memory management so that it will get cleanly freed
     int chunksSize = Level::genDepth * 16 * 16;
-    byte *tileData = (byte *)XPhysicalAlloc(chunksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
+    unsigned char *tileData = (unsigned char *)XPhysicalAlloc(chunksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
     XMemSet128(tileData, 0, chunksSize);
     byteArray blocks = byteArray(tileData, chunksSize);
     //	byteArray blocks = byteArray(16 * level->depth * 16);
@@ -100,8 +100,8 @@ void FlatLevelSource::postProcess(ChunkSource *parent, int xt, int zt)
 {
     // 4J - changed from random to pprandom so we can run in parallel with getChunk etc.
     pprandom->setSeed(level->getSeed());
-    __int64 xScale = pprandom->nextLong() / 2 * 2 + 1;
-    __int64 zScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t xScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t zScale = pprandom->nextLong() / 2 * 2 + 1;
     pprandom->setSeed(((xt * xScale) + (zt * zScale)) ^ level->getSeed());
 
     if (generateStructures)

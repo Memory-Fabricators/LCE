@@ -370,12 +370,12 @@ void Textures::bindTexture(const wstring &resourceName)
 }
 
 // 4J Added
-void Textures::bindTexture(int resourceId)
+void Textures::bindTexture(GLuint resourceId)
 {
     bind(loadTexture(resourceId));
 }
 
-void Textures::bind(int id)
+void Textures::bind(GLuint id)
 {
     // if (id != lastBoundId)
     {
@@ -567,10 +567,10 @@ void Textures::loadTexture(BufferedImage *img, int id, bool blur, bool clamp)
         newPixels[i * 4 + 2] = (byte)g;
         newPixels[i * 4 + 3] = (byte)b;
 #else
-        newPixels[i * 4 + 0] = (byte)r;
-        newPixels[i * 4 + 1] = (byte)g;
-        newPixels[i * 4 + 2] = (byte)b;
-        newPixels[i * 4 + 3] = (byte)a;
+        newPixels[i * 4 + 0] = r;
+        newPixels[i * 4 + 1] = g;
+        newPixels[i * 4 + 2] = b;
+        newPixels[i * 4 + 3] = a;
 #endif
     }
     // 4J - now creating a buffer of the size we require dynamically
@@ -584,25 +584,26 @@ void Textures::loadTexture(BufferedImage *img, int id, bool blur, bool clamp)
 
     if (MIPMAP)
     {
-        // 4J-PB - In the new XDK, the CreateTexture will fail if the number of mipmaps is higher than the width & height passed in will allow!
-        int iWidthMips = 1;
-        int iHeightMips = 1;
-        while ((8 << iWidthMips) < w)
+        int tempW = w;
+        int tempH = h;
+        iMipLevels = 1;
+        while (tempW > 1 || tempH > 1)
         {
-            iWidthMips++;
+            iMipLevels++;
+            if (tempW > 1)
+            {
+                tempW /= 2;
+            }
+            if (tempH > 1)
+            {
+                tempH /= 2;
+            }
         }
-        while ((8 << iHeightMips) < h)
+        if (iMipLevels > 10)
         {
-            iHeightMips++;
+            iMipLevels = 10;
         }
-
-        iMipLevels = (iWidthMips < iHeightMips) ? iWidthMips : iHeightMips;
-        // RenderManager.TextureSetTextureLevels(5);	// 4J added
-        if (iMipLevels > 5)
-        {
-            iMipLevels = 5;
-        }
-        RenderManager.TextureSetTextureLevels(iMipLevels); // 4J added
+        RenderManager.TextureSetTextureLevels(iMipLevels);
     }
     RenderManager.TextureData(w, h, pixels->getBuffer(), 0, TEXTURE_FORMAT);
     // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL12.GL_BGRA, GL12.GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
@@ -750,10 +751,10 @@ void Textures::replaceTexture(intArray rawPixels, int w, int h, int id)
             b = bb;
         }
 
-        newPixels[i * 4 + 0] = (byte)r;
-        newPixels[i * 4 + 1] = (byte)g;
-        newPixels[i * 4 + 2] = (byte)b;
-        newPixels[i * 4 + 3] = (byte)a;
+        newPixels[i * 4 + 0] = (unsigned char)r;
+        newPixels[i * 4 + 1] = (unsigned char)g;
+        newPixels[i * 4 + 2] = (unsigned char)b;
+        newPixels[i * 4 + 3] = (unsigned char)a;
     }
     ByteBuffer *pixels = MemoryTracker::createByteBuffer(w * h * 4); // 4J - now creating dynamically
     pixels->put(newPixels);
@@ -844,10 +845,10 @@ void Textures::replaceTextureDirect(shortArray rawPixels, int w, int h, int id)
 #endif
 }
 
-void Textures::releaseTexture(int id)
+void Textures::releaseTexture(GLuint id)
 {
     loadedImages.erase(id);
-    glDeleteTextures(id);
+    glDeleteTextures(1, &id);
 }
 
 int Textures::loadHttpTexture(const wstring &url, const wstring &backup)

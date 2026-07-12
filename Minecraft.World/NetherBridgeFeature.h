@@ -1,7 +1,7 @@
 #pragma once
+#include "Biome.h"
 #include "StructureFeature.h"
 #include "StructureStart.h"
-#include "biome.h"
 class Random;
 
 class NetherBridgeFeature : public StructureFeature

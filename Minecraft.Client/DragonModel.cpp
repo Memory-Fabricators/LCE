@@ -2,6 +2,7 @@
 #include "../Minecraft.World/EnderDragon.h"
 #include "../Minecraft.World/Mth.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 DragonModel::DragonModel(float g) : Model()
 {

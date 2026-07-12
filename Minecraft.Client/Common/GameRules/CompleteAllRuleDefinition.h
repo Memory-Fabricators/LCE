@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CompoundGameRuleDefinition.h"
+#include "ConsoleGameRulesConstants.h"
 
 class CompleteAllRuleDefinition : public CompoundGameRuleDefinition
 {
@@ -12,9 +13,9 @@ class CompleteAllRuleDefinition : public CompoundGameRuleDefinition
     } PacketData;
 
   public:
-    ConsoleGameRules::EGameRuleType getActionType()
+    GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_CompleteAllRule;
+        return GameRuleType::CompleteAllRule;
     }
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);

@@ -1,5 +1,9 @@
 #pragma once
+#include "ArrayWithLength.h"
+#include "BinaryHeap.h"
 #include "JavaIntHash.h"
+#include "Node.h"
+#include "Path.h"
 using namespace std;
 
 class LevelSource;

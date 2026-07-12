@@ -13,7 +13,7 @@ class AchievementPopup : public GuiComponent
     wstring title;
     wstring desc;
     Achievement *ach;
-    __int64 startTime;
+    std::int64_t startTime;
     ItemRenderer *ir;
     bool isHelper;
 

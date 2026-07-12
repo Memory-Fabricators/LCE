@@ -14,6 +14,7 @@
 #include "LevelRenderer.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 // 4J - the Option sub-class used to be an java enumerated type, trying to emulate that functionality here
 const Options::Option Options::Option::options[17] =

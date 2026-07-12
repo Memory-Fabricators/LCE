@@ -7,6 +7,8 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 #ifdef __ORBIS__
 short Minimap::LUT[256]; // 4J added
@@ -52,6 +54,13 @@ Minimap::Minimap(Font *font, Options *options, Textures *textures, bool optimise
 void Minimap::reloadColours()
 {
     ColourTable *colourTable = Minecraft::GetInstance()->getColourTable();
+    if (colourTable == NULL)
+    {
+        // Genuinely missing colour data (failed load) - skip populating the LUT
+        // from it rather than crashing; minimap colours degrade to whatever the
+        // zero-initialised LUT already holds instead of taking the whole client down.
+        return;
+    }
     // 4J note that this code has been extracted pretty much as it was in Minimap::render, although with some byte order changes
     for (int i = 0; i < (14 * 4); i++) // 14 material colours currently, 4 brightnesses of each
     {

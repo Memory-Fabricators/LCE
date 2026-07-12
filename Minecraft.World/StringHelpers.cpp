@@ -62,7 +62,7 @@ const char *wstringtofilename(const wstring &name)
     for (unsigned int i = 0; i < name.length(); i++)
     {
         wchar_t c = name[i];
-#if defined __PS3__ || defined __ORBIS__
+#if defined __PS3__ || defined __ORBIS__ || defined _SDL3
         if (c == '\\')
         {
             c = '/';

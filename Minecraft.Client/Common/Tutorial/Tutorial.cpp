@@ -1604,7 +1604,7 @@ void Tutorial::tick()
     }
     else if (m_freezeTime && m_timeFrozen && m_fullTutorialComplete)
     {
-        __int64 currentTime = pMinecraft->level->getTime();
+        std::int64_t currentTime = pMinecraft->level->getTime();
         int currentDayTime = (currentTime % Level::TICKS_PER_DAY);
         int timeToAdd = 0;
         if (currentDayTime > m_iTutorialFreezeTimeValue)
@@ -1615,7 +1615,7 @@ void Tutorial::tick()
         {
             timeToAdd = m_iTutorialFreezeTimeValue - currentDayTime;
         }
-        __int64 targetTime = currentTime + timeToAdd;
+        std::int64_t targetTime = currentTime + timeToAdd;
         MinecraftServer::SetTimeOfDay(-1);
         MinecraftServer::SetTime(targetTime);
         pMinecraft->level->setOverrideTimeOfDay(-1);

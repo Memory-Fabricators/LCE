@@ -15,7 +15,7 @@ class UIControl;
 class UIController : public IUIController
 {
   public:
-    static __int64 iggyAllocCount;
+    static std::int64_t iggyAllocCount;
 
     // MGH - added to prevent crash loading Iggy movies while the skins were being reloaded
     static CRITICAL_SECTION ms_reloadSkinCS;
@@ -117,7 +117,7 @@ class UIController : public IUIController
     typedef struct _CachedMovieData
     {
         byteArray m_ba;
-        __int64 m_expiry;
+        std::int64_t m_expiry;
     } CachedMovieData;
     unordered_map<wstring, CachedMovieData> m_cachedMovieData;
 

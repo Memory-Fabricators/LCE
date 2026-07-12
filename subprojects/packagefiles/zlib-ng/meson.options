@@ -1,0 +1,164 @@
+option(
+    'gzfileop',
+    description: 'Compile with support for gzFile related functions',
+    type: 'boolean',
+)
+option(
+    'tests',
+    description: 'Compile tests',
+    type: 'feature',
+)
+# example usage:
+# dependency('zlib', fallback: 'zlib-ng', default_options: ['zlib-compat=true'])
+option(
+    'zlib-compat',
+    description: 'Compile with zlib compatible API',
+    type: 'boolean',
+    value: false,
+)
+
+# advanced options
+# generic
+option(
+    'inflate-strict',
+    description: 'Build with strict inflate distance checking',
+    type: 'boolean',
+    value: false,
+)
+option(
+    'inflate-allow-invalid-dist',
+    description: 'Build with zero fill for inflate invalid distances',
+    type: 'boolean',
+    value: false,
+)
+option(
+    'crc32-chorba',
+    description: 'Enable Chorba optimized CRC32',
+    type: 'boolean',
+)
+# ARM
+option(
+    'armv6',
+    description: 'Build with ARMv6 SIMD',
+    type: 'feature',
+)
+option(
+    'armv8',
+    description: 'Build with ARMv8 CRC32 intrinsics',
+    type: 'feature',
+)
+option(
+    'neon',
+    description: 'Build with NEON intrinsics',
+    type: 'feature',
+)
+# LoongArch
+option(
+    'crc32-la',
+    description: 'Build with vectorized CRC32 on LoongArch',
+    type: 'feature',
+)
+option(
+    'lsx',
+    description: 'Build with vectorized LSX on LoongArch',
+    type: 'feature',
+)
+option(
+    'lasx',
+    description: 'Build with vectorized LASX on LoongArch',
+    type: 'feature',
+)
+# Power
+option(
+    'altivec',
+    description: 'Build with AltiVec (VMX) intrinsics',
+    type: 'feature',
+)
+option(
+    'power8',
+    description: 'Build with POWER8 intrinsics',
+    type: 'feature',
+)
+option(
+    'power9',
+    description: 'Build with POWER9 intrinsics',
+    type: 'feature',
+)
+# RISC-V
+option(
+    'rvv',
+    description: 'Build with RVV intrinsics',
+    type: 'feature',
+)
+option(
+    'riscv-zbc',
+    description: 'Build with RISCV Zbc',
+    type: 'feature',
+)
+# S390
+option(
+    'crc32-vx',
+    description: 'Build with vectorized CRC32 on IBM Z',
+    type: 'feature',
+)
+option(
+    'dfltcc-deflate',
+    description: 'Build with DFLTCC intrinsics for compression on IBM Z (off by default)',
+    type: 'feature',
+)
+option(
+    'dfltcc-inflate',
+    description: 'Build with DFLTCC intrinsics for decompression on IBM Z (off by default)',
+    type: 'feature',
+)
+# x86
+option(
+    'sse2',
+    description: 'Build with SSE2',
+    type: 'feature',
+)
+option(
+    'ssse3',
+    description: 'Build with SSSE3',
+    type: 'feature',
+)
+option(
+    'sse41',
+    description: 'Build with SSE4.1',
+    type: 'feature',
+)
+option(
+    'sse42',
+    description: 'Build with SSE4.2',
+    type: 'feature',
+)
+option(
+    'pclmulqdq',
+    description: 'Build with PCLMULQDQ',
+    type: 'feature',
+)
+option(
+    'avx2',
+    description: 'Build with AVX2',
+    type: 'feature',
+)
+option(
+    'avx2vnni',
+    description: 'Build with AVX VNNI extensions',
+    type: 'feature',
+)
+option(
+    'avx512',
+    description: 'Build with AVX512',
+    type: 'feature',
+)
+option(
+    'avx512vnni',
+    description: 'Build with AVX512 VNNI extensions',
+    type: 'feature',
+)
+option(
+    'vpclmulqdq',
+    description: 'Build with VPCLMULQDQ',
+    type: 'feature',
+)

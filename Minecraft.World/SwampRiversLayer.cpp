@@ -3,7 +3,7 @@
 #include "net.minecraft.world.level.biome.h"
 #include "stdafx.h"
 
-SwampRiversLayer::SwampRiversLayer(__int64 seed, shared_ptr<Layer> parent) : Layer(seed)
+SwampRiversLayer::SwampRiversLayer(std::int64_t seed, shared_ptr<Layer> parent) : Layer(seed)
 {
     this->parent = parent;
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../StringTable.h"
+#include "AABB.h"
 #include "CompoundGameRuleDefinition.h"
 
 class NamedAreaRuleDefinition;
@@ -15,11 +17,11 @@ class LevelRuleset : public CompoundGameRuleDefinition
     ~LevelRuleset();
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_LevelRules;
+        return GameRuleType::LevelRules;
     }
 
     void loadStringTable(StringTable *table);

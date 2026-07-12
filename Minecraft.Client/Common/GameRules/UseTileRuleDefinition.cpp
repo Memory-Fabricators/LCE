@@ -1,5 +1,6 @@
 #include "UseTileRuleDefinition.h"
 #include "../../../Minecraft.World/StringHelpers.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 UseTileRuleDefinition::UseTileRuleDefinition()
@@ -12,19 +13,19 @@ void UseTileRuleDefinition::writeAttributes(DataOutputStream *dos, UINT numAttri
 {
     GameRuleDefinition::writeAttributes(dos, numAttributes + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_tileId);
+    ::write(dos, GameRuleAttribute::tileId);
     dos->writeUTF(_toString(m_tileId));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_useCoords);
+    ::write(dos, GameRuleAttribute::useCoords);
     dos->writeUTF(_toString(m_useCoords));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x);
+    ::write(dos, GameRuleAttribute::x);
     dos->writeUTF(_toString(m_coordinates.x));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y);
+    ::write(dos, GameRuleAttribute::y);
     dos->writeUTF(_toString(m_coordinates.y));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z);
+    ::write(dos, GameRuleAttribute::z);
     dos->writeUTF(_toString(m_coordinates.z));
 }
 

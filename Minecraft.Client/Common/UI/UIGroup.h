@@ -127,7 +127,7 @@ class UIGroup
 
     void handleUnlockFullVersion();
 
-    void PrintTotalMemoryUsage(__int64 &totalStatic, __int64 &totalDynamic);
+    void PrintTotalMemoryUsage(std::int64_t &totalStatic, std::int64_t &totalDynamic);
 
     unsigned int GetLayerIndex(UILayer *layerPtr);
 

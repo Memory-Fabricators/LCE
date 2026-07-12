@@ -12,6 +12,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "TileRenderer.h"
+#include <GL/gl.h>
 
 bool TileRenderer::fancy = true;
 
@@ -2646,9 +2647,9 @@ bool TileRenderer::tesselateDustInWorld(Tile *tt, int x, int y, int z)
         unsigned int minColour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Tile_RedstoneDustLitMin);
         unsigned int maxColour = Minecraft::GetInstance()->getColourTable()->getColor(eMinecraftColour_Tile_RedstoneDustLitMax);
 
-        byte redComponent = ((minColour >> 16) & 0xFF) + (((maxColour >> 16) & 0xFF - (minColour >> 16) & 0xFF) * ((data - 1) / 14.0f));
-        byte greenComponent = ((minColour >> 8) & 0xFF) + (((maxColour >> 8) & 0xFF - (minColour >> 8) & 0xFF) * ((data - 1) / 14.0f));
-        byte blueComponent = ((minColour) & 0xFF) + (((maxColour) & 0xFF - (minColour) & 0xFF) * ((data - 1) / 14.0f));
+        unsigned char redComponent = ((minColour >> 16) & 0xFF) + (((maxColour >> 16) & 0xFF - (minColour >> 16) & 0xFF) * ((data - 1) / 14.0f));
+        unsigned char greenComponent = ((minColour >> 8) & 0xFF) + (((maxColour >> 8) & 0xFF - (minColour >> 8) & 0xFF) * ((data - 1) / 14.0f));
+        unsigned char blueComponent = ((minColour) & 0xFF) + (((maxColour) & 0xFF - (minColour) & 0xFF) * ((data - 1) / 14.0f));
 
         colour = redComponent << 16 | greenComponent << 8 | blueComponent;
     }
@@ -3647,7 +3648,7 @@ bool TileRenderer::tesselateCrossInWorld(Tile *tt, int x, int y, int z)
 
     if (tt == Tile::tallgrass)
     {
-        __int64 seed = (x * 3129871) ^ (z * 116129781l) ^ (y);
+        std::int64_t seed = (x * 3129871) ^ (z * 116129781l) ^ (y);
         seed = seed * seed * 42317861 + seed * 11;
 
         xt += ((((seed >> 16) & 0xf) / 15.0f) - 0.5f) * 0.5f;
@@ -3889,7 +3890,7 @@ bool TileRenderer::tesselateLilypadInWorld(Tile *tt, int x, int y, int z)
     float u1 = tex->getU1(true);
     float v1 = tex->getV1(true);
 
-    __int64 seed = (x * 3129871) ^ (z * 116129781l) ^ (y);
+    std::int64_t seed = (x * 3129871) ^ (z * 116129781l) ^ (y);
     seed = seed * seed * 42317861 + seed * 11;
 
     int dir = (int)((seed >> 16) & 0x3);

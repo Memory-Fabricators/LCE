@@ -12,7 +12,7 @@
 const double CustomLevelSource::SNOW_SCALE = 0.3;
 const double CustomLevelSource::SNOW_CUTOFF = 0.5;
 
-CustomLevelSource::CustomLevelSource(Level *level, __int64 seed, bool generateStructures) : generateStructures(generateStructures)
+CustomLevelSource::CustomLevelSource(Level *level, std::int64_t seed, bool generateStructures) : generateStructures(generateStructures)
 {
 #ifdef _OVERRIDE_HEIGHTMAP
     m_XZSize = level->getLevelData()->getXZSize();
@@ -223,11 +223,11 @@ void CustomLevelSource::prepareHeights(int xOffs, int zOffs, byteArray blocks)
                             // 4J - this comparison used to just be with 0.0f but is now varied by block above
                             if (yc * CHUNK_HEIGHT + y < mapHeight)
                             {
-                                tileId = (byte)Tile::rock_Id;
+                                tileId = (unsigned char)Tile::rock_Id;
                             }
                             else if (yc * CHUNK_HEIGHT + y < waterHeight)
                             {
-                                tileId = (byte)Tile::calmWater_Id;
+                                tileId = (unsigned char)Tile::calmWater_Id;
                             }
 
                             // 4J - more extra code to make sure that the column at the edge of the world is just water & rock, to match the infinite sea that
@@ -290,8 +290,8 @@ void CustomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks, Bi
 
             int run = -1;
 
-            byte top = b->topMaterial;
-            byte material = b->material;
+            unsigned char top = b->topMaterial;
+            unsigned char material = b->material;
 
             LevelGenerationOptions *lgo = app.getLevelGenerationOptions();
             if (lgo != NULL)
@@ -314,7 +314,7 @@ void CustomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks, Bi
                 if (y <= 1 + random->nextInt(2)) // 4J - changed to make the bedrock not have bits you can get stuck in
                                                  //                if (y <= 0 + random->nextInt(5))
                 {
-                    blocks[offs] = (byte)Tile::unbreakable_Id;
+                    blocks[offs] = (unsigned char)Tile::unbreakable_Id;
                 }
                 else
                 {
@@ -331,7 +331,7 @@ void CustomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks, Bi
                             if (runDepth <= 0)
                             {
                                 top = 0;
-                                material = (byte)Tile::rock_Id;
+                                material = (unsigned char)Tile::rock_Id;
                             }
                             else if (y >= waterHeight - 4 && y <= waterHeight + 1)
                             {
@@ -347,11 +347,11 @@ void CustomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks, Bi
                             {
                                 if (temp < 0.15f)
                                 {
-                                    top = (byte)Tile::ice_Id;
+                                    top = (unsigned char)Tile::ice_Id;
                                 }
                                 else
                                 {
-                                    top = (byte)Tile::calmWater_Id;
+                                    top = (unsigned char)Tile::calmWater_Id;
                                 }
                             }
 
@@ -375,7 +375,7 @@ void CustomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray blocks, Bi
                             if (run == 0 && material == Tile::sand_Id)
                             {
                                 run = random->nextInt(4);
-                                material = (byte)Tile::sandStone_Id;
+                                material = (unsigned char)Tile::sandStone_Id;
                             }
                         }
                     }
@@ -404,7 +404,7 @@ LevelChunk *CustomLevelSource::getChunk(int xOffs, int zOffs)
 
     // 4J - now allocating this with a physical alloc & bypassing general memory management so that it will get cleanly freed
     int blocksSize = Level::maxBuildHeight * 16 * 16;
-    byte *tileData = (byte *)XPhysicalAlloc(blocksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
+    unsigned char *tileData = (unsigned char *)XPhysicalAlloc(blocksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
     XMemSet128(tileData, 0, blocksSize);
     byteArray blocks = byteArray(tileData, blocksSize);
     //    byteArray blocks = byteArray(16 * level->depth * 16);
@@ -554,8 +554,8 @@ void CustomLevelSource::postProcess(ChunkSource *parent, int xt, int zt)
     }
 
     pprandom->setSeed(level->getSeed());
-    __int64 xScale = pprandom->nextLong() / 2 * 2 + 1;
-    __int64 zScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t xScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t zScale = pprandom->nextLong() / 2 * 2 + 1;
     pprandom->setSeed(((xt * xScale) + (zt * zScale)) ^ level->getSeed());
 
     bool hasVillage = false;

@@ -13,9 +13,9 @@ class BiomeOverride : public GameRuleDefinition
   public:
     BiomeOverride();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_BiomeOverride;
+        return GameRuleType::BiomeOverride;
     }
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttrs);

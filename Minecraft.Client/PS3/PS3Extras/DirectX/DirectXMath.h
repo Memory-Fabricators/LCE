@@ -1668,7 +1668,7 @@ struct PermuteHelper
                 WhichY ? 0xFFFFFFFF : 0,
                 WhichZ ? 0xFFFFFFFF : 0,
                 WhichW ? 0xFFFFFFFF : 0,
-            };
+        };
 
         XMVECTOR shuffled1 = XM_PERMUTE_PS(v1, Shuffle);
         XMVECTOR shuffled2 = XM_PERMUTE_PS(v2, Shuffle);

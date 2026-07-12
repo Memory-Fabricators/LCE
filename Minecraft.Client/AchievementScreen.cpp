@@ -8,10 +8,12 @@
 #include "KeyMapping.h"
 #include "Lighting.h"
 #include "Options.h"
+#include "SDL3_Input.h"
 #include "SmallButton.h"
 #include "StatsCounter.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 AchievementScreen::AchievementScreen(StatsCounter *statsCounter)
 {

@@ -232,7 +232,7 @@ void IUIScene_AbstractContainerMenu::UpdateTooltips()
             IDS_TOOLTIPS_QUICK_MOVE_WEAPON,     // eToolTipQuickMoveTool
             IDS_TOOLTIPS_DYE,                   // eToolTipDye
             IDS_TOOLTIPS_REPAIR,                // eToolTipRepair
-        };
+    };
 
     BYTE focusUser = getPad();
 

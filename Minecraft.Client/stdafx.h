@@ -5,6 +5,26 @@
 
 #pragma once
 
+// When LCE_SKIP_STDAFX_ENTIRELY is defined (e.g. for 4J_RenderMetal.mm, which
+// needs Apple's own BOOL/Component types from QuartzCore/CoreServices and has
+// no use for any project types at all - not even the Windows-compat shim),
+// skip this header completely; the force-included -include stdafx.h still
+// resolves, it just expands to nothing.
+#ifdef LCE_SKIP_STDAFX_ENTIRELY
+// Intentionally empty.
+#elif defined(LCE_SKIP_STDAFX)
+// When LCE_SKIP_STDAFX is defined (e.g. for 4J_Render.cpp which needs
+// C++20 for Dawn but must avoid World headers with 'using namespace std;'),
+// only pull in the minimal Windows-compat types.
+#Include "GLES/gl.h"
+#include "SDL3/WindowsTypes.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <string>
+#include <wchar.h>
+#else
+
 // #include <xtl.h>
 // #include <xboxmath.h>
 
@@ -73,7 +93,7 @@ typedef unsigned long long __uint64;
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-typedef unsigned __int64 __uint64;
+typedef unsigned std::int64_t __uint64;
 #endif
 
 #ifdef _WINDOWS64
@@ -214,7 +234,6 @@ typedef XUID GameSessionUID;
 #include "Screen.h"
 #include "ScreenSizeCalculator.h"
 #include "Textures.h"
-#include "stubs.h"
 
 #include "Common/Network/GameNetworkManager.h"
 
@@ -368,3 +387,5 @@ typedef XUID GameSessionUID;
 #endif
 
 void MemSect(int sect);
+
+#endif // !LCE_SKIP_STDAFX

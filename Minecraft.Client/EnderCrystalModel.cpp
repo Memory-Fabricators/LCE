@@ -1,5 +1,6 @@
 #include "EnderCrystalModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 EnderCrystalModel::EnderCrystalModel(float g)
 {

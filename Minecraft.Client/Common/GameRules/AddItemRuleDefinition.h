@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ConsoleGameRulesConstants.h"
+#include "GameRule.h"
 #include "GameRuleDefinition.h"
 
 class Container;
@@ -21,12 +23,12 @@ class AddItemRuleDefinition : public GameRuleDefinition
     virtual void writeAttributes(DataOutputStream *, UINT numAttributes);
     virtual void getChildren(vector<GameRuleDefinition *> *children);
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_AddItem;
+        return GameRuleType::AddItem;
     }
 
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
     virtual void addAttribute(const wstring &attributeName, const wstring &attributeValue);
 
     bool addItemToContainer(shared_ptr<Container> container, int slotId);

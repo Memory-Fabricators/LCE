@@ -769,7 +769,7 @@ void ConsoleSaveFileOriginal::Flush(bool autosave, bool updateThumbnail)
         BYTE bTextMetadata[88];
         ZeroMemory(bTextMetadata, 88);
 
-        __int64 seed = 0;
+        std::int64_t seed = 0;
         bool hasSeed = false;
         if (MinecraftServer::getInstance() != NULL && MinecraftServer::getInstance()->levels[0] != NULL)
         {

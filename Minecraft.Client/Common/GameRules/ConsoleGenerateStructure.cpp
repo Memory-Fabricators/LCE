@@ -5,6 +5,7 @@
 #include "../../../Minecraft.World/net.minecraft.world.level.h"
 #include "../../../Minecraft.World/net.minecraft.world.level.levelgen.structure.h"
 #include "ConsoleGameRules.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 ConsoleGenerateStructure::ConsoleGenerateStructure() : StructurePiece(0)
@@ -25,25 +26,25 @@ void ConsoleGenerateStructure::getChildren(vector<GameRuleDefinition *> *childre
     }
 }
 
-GameRuleDefinition *ConsoleGenerateStructure::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *ConsoleGenerateStructure::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_GenerateBox)
+    if (ruleType == GameRuleType::GenerateBox)
     {
         rule = new XboxStructureActionGenerateBox();
         m_actions.push_back((XboxStructureActionGenerateBox *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_PlaceBlock)
+    else if (ruleType == GameRuleType::PlaceBlock)
     {
         rule = new XboxStructureActionPlaceBlock();
         m_actions.push_back((XboxStructureActionPlaceBlock *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_PlaceContainer)
+    else if (ruleType == GameRuleType::PlaceContainer)
     {
         rule = new XboxStructureActionPlaceContainer();
         m_actions.push_back((XboxStructureActionPlaceContainer *)rule);
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_PlaceSpawner)
+    else if (ruleType == GameRuleType::PlaceSpawner)
     {
         rule = new XboxStructureActionPlaceSpawner();
         m_actions.push_back((XboxStructureActionPlaceSpawner *)rule);
@@ -61,16 +62,16 @@ void ConsoleGenerateStructure::writeAttributes(DataOutputStream *dos, UINT numAt
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x);
+    ::write(dos, GameRuleAttribute::x);
     dos->writeUTF(_toString(m_x));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y);
+    ::write(dos, GameRuleAttribute::y);
     dos->writeUTF(_toString(m_y));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z);
+    ::write(dos, GameRuleAttribute::z);
     dos->writeUTF(_toString(m_z));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_orientation);
+    ::write(dos, GameRuleAttribute::orientation);
     dos->writeUTF(_toString(orientation));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_dimension);
+    ::write(dos, GameRuleAttribute::dimension);
     dos->writeUTF(_toString(m_dimension));
 }
 
@@ -148,25 +149,25 @@ bool ConsoleGenerateStructure::postProcess(Level *level, Random *random, Boundin
 
         switch (action->getActionType())
         {
-        case ConsoleGameRules::eGameRuleType_GenerateBox:
+        case GameRuleType::GenerateBox:
             {
                 XboxStructureActionGenerateBox *genBox = (XboxStructureActionGenerateBox *)action;
                 genBox->generateBoxInLevel(this, level, chunkBB);
             }
             break;
-        case ConsoleGameRules::eGameRuleType_PlaceBlock:
+        case GameRuleType::PlaceBlock:
             {
                 XboxStructureActionPlaceBlock *pPlaceBlock = (XboxStructureActionPlaceBlock *)action;
                 pPlaceBlock->placeBlockInLevel(this, level, chunkBB);
             }
             break;
-        case ConsoleGameRules::eGameRuleType_PlaceContainer:
+        case GameRuleType::PlaceContainer:
             {
                 XboxStructureActionPlaceContainer *pPlaceContainer = (XboxStructureActionPlaceContainer *)action;
                 pPlaceContainer->placeContainerInLevel(this, level, chunkBB);
             }
             break;
-        case ConsoleGameRules::eGameRuleType_PlaceSpawner:
+        case GameRuleType::PlaceSpawner:
             {
                 XboxStructureActionPlaceSpawner *pPlaceSpawner = (XboxStructureActionPlaceSpawner *)action;
                 pPlaceSpawner->placeSpawnerInLevel(this, level, chunkBB);

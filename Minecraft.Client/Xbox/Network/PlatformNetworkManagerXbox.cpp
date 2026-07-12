@@ -24,7 +24,7 @@ VOID CPlatformNetworkManagerXbox::NotifyStateChanged(
             "QNET_STATE_SESSION_ENDING",
             "QNET_STATE_SESSION_LEAVING",
             "QNET_STATE_SESSION_DELETING",
-        };
+    };
 
     app.DebugPrintf("State: %s ==> %s, result 0x%08x.\n",
                     c_apszStateNames[OldState],

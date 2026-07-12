@@ -109,7 +109,7 @@ GameType *GameType::byName(const wstring &name)
     return SURVIVAL;
 }
 
-void LevelSettings::_init(__int64 seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale)
+void LevelSettings::_init(std::int64_t seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale)
 {
     this->seed = seed;
     this->gameType = gameType;
@@ -123,13 +123,13 @@ void LevelSettings::_init(__int64 seed, GameType *gameType, bool generateMapFeat
     m_hellScale = hellScale;
 }
 
-LevelSettings::LevelSettings(__int64 seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale) : seed(seed),
-                                                                                                                                                                             gameType(gameType),
-                                                                                                                                                                             hardcore(hardcore),
-                                                                                                                                                                             generateMapFeatures(generateMapFeatures),
-                                                                                                                                                                             newSeaLevel(newSeaLevel),
-                                                                                                                                                                             levelType(levelType),
-                                                                                                                                                                             startingBonusItems(false)
+LevelSettings::LevelSettings(std::int64_t seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale) : seed(seed),
+                                                                                                                                                                                  gameType(gameType),
+                                                                                                                                                                                  hardcore(hardcore),
+                                                                                                                                                                                  generateMapFeatures(generateMapFeatures),
+                                                                                                                                                                                  newSeaLevel(newSeaLevel),
+                                                                                                                                                                                  levelType(levelType),
+                                                                                                                                                                                  startingBonusItems(false)
 {
     _init(seed, gameType, generateMapFeatures, hardcore, newSeaLevel, levelType, xzSize, hellScale);
 }
@@ -156,7 +156,7 @@ bool LevelSettings::hasStartingBonusItems()
     return startingBonusItems;
 }
 
-__int64 LevelSettings::getSeed()
+std::int64_t LevelSettings::getSeed()
 {
     return seed;
 }

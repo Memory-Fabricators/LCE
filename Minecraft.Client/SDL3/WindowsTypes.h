@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
@@ -19,7 +19,6 @@ typedef uint32_t UINT;
 typedef int32_t LONG;
 typedef uint32_t ULONG;
 typedef int32_t __int32;
-typedef int64_t __int64;
 typedef int64_t LONGLONG;
 typedef int64_t LONG64;
 typedef uint64_t ULONGLONG;
@@ -259,9 +258,9 @@ inline void OutputDebugStringA(const char *)
 #define CONTEXT_PRESENCE_MULTIPLAYER_1P 4
 #define CONTEXT_PRESENCE_MULTIPLAYER_1POFFLINE 5
 
-static inline __int64 InterlockedCompareExchangeRelease64(volatile __int64 *dest, __int64 exchange, __int64 comparand)
+static inline std::int64_t InterlockedCompareExchangeRelease64(volatile std::int64_t *dest, std::int64_t exchange, std::int64_t comparand)
 {
-    __int64 expected = comparand;
+    std::int64_t expected = comparand;
     __atomic_compare_exchange_n(dest, &expected, exchange, false, __ATOMIC_RELEASE, __ATOMIC_ACQUIRE);
     return expected;
 }
@@ -371,7 +370,11 @@ static inline wchar_t *_itow(int value, wchar_t *buffer, int radix)
 
 struct CRITICAL_SECTION
 {
-    void *debug;
+    // Real backing storage (an opaque pthread_mutex_t, sized to fit on every
+    // platform this ships on) - nothing outside WindowsTypes.cpp reads these
+    // fields by name, so there's no compatibility reason to match the real
+    // Win32 layout here.
+    void *debug; // pthread_mutex_t*, allocated in InitializeCriticalSection
     LONG lockCount;
     LONG recursionCount;
     HANDLE owningThread;

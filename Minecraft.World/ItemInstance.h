@@ -1,5 +1,4 @@
 #pragma once
-using namespace std;
 
 #include "UseAnim.h"
 #include "com.mojang.nbt.h"
@@ -131,7 +130,7 @@ class ItemInstance : public enable_shared_from_this<ItemInstance>
     bool equals(shared_ptr<ItemInstance> ii);
 
     int getUseDuration();
-    UseAnim getUseAnimation();
+    UseAnimation getUseAnimation();
     void releaseUsing(Level *level, shared_ptr<Player> player, int durationLeft);
 
     // 4J Stu - Brought forward these functions for enchanting/game rules

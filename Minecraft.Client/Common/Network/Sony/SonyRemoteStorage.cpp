@@ -154,7 +154,7 @@ ESavePlatform SonyRemoteStorage::getSavePlatform()
     return (ESavePlatform)MAKE_FOURCC(pDescData->m_platform[0], pDescData->m_platform[1], pDescData->m_platform[2], pDescData->m_platform[3]);
 }
 
-__int64 SonyRemoteStorage::getSaveSeed()
+std::int64_t SonyRemoteStorage::getSaveSeed()
 {
     if (m_getInfoStatus != e_infoFound)
     {
@@ -296,7 +296,7 @@ bool SonyRemoteStorage::saveIsAvailable()
 
 int SonyRemoteStorage::getDataProgress()
 {
-    __int64 time = System::currentTimeMillis();
+    std::int64_t time = System::currentTimeMillis();
     int elapsedSecs = (time - m_startTime) / 1000;
     int progVal = m_dataProgress + (elapsedSecs / 3);
     if (progVal > 95)

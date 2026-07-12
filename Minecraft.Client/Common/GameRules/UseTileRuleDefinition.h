@@ -15,9 +15,9 @@ class UseTileRuleDefinition : public GameRuleDefinition
   public:
     UseTileRuleDefinition();
 
-    ConsoleGameRules::EGameRuleType getActionType()
+    GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_UseTileRule;
+        return GameRuleType::UseTileRule;
     }
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttributes);

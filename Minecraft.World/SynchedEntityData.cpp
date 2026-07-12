@@ -24,7 +24,7 @@ void SynchedEntityData::define(int id, int value)
     m_isEmpty = false;
 }
 
-void SynchedEntityData::define(int id, byte value)
+void SynchedEntityData::define(int id, unsigned char value)
 {
     MemSect(17);
     checkId(id);
@@ -82,7 +82,7 @@ void SynchedEntityData::checkId(int id)
 #endif
 }
 
-byte SynchedEntityData::getByte(int id)
+unsigned char SynchedEntityData::getByte(int id)
 {
     return itemsById[id]->getValue_byte();
 }
@@ -133,7 +133,7 @@ void SynchedEntityData::set(int id, int value)
     }
 }
 
-void SynchedEntityData::set(int id, byte value)
+void SynchedEntityData::set(int id, unsigned char value)
 {
     shared_ptr<DataItem> dataItem = itemsById[id];
 
@@ -330,7 +330,7 @@ vector<shared_ptr<SynchedEntityData::DataItem>> *SynchedEntityData::unpack(DataI
         {
         case TYPE_BYTE:
             {
-                byte dataRead = input->readByte();
+                auto dataRead = input->readByte();
                 item = shared_ptr<DataItem>(new DataItem(itemType, itemId, dataRead));
             }
             break;
@@ -460,7 +460,7 @@ SynchedEntityData::DataItem::DataItem(int type, int id, int value) : type(type),
     this->dirty = true;
 }
 
-SynchedEntityData::DataItem::DataItem(int type, int id, byte value) : type(type), id(id)
+SynchedEntityData::DataItem::DataItem(int type, int id, unsigned char value) : type(type), id(id)
 {
     this->value_byte = value;
     this->dirty = true;
@@ -494,7 +494,7 @@ void SynchedEntityData::DataItem::setValue(int value)
     this->value_int = value;
 }
 
-void SynchedEntityData::DataItem::setValue(byte value)
+void SynchedEntityData::DataItem::setValue(unsigned char value)
 {
     this->value_byte = value;
 }
@@ -524,7 +524,7 @@ short SynchedEntityData::DataItem::getValue_short()
     return value_short;
 }
 
-byte SynchedEntityData::DataItem::getValue_byte()
+unsigned char SynchedEntityData::DataItem::getValue_byte()
 {
     return value_byte;
 }

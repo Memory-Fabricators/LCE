@@ -23,7 +23,7 @@ class DoubleTag : public Tag
         data = dis->readDouble();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Double;
     }

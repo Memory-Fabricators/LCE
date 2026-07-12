@@ -1077,6 +1077,15 @@ void ClientConnection::handleBlockRegionUpdate(shared_ptr<BlockRegionUpdatePacke
     {
         PIXBeginNamedEvent(0, "Handle block region update");
 
+        // A malformed/undersized region packet (see BlockRegionUpdatePacket::read)
+        // leaves an empty buffer; applying it would walk setBlocksAndData /
+        // testSetDataRegion past the end of that empty allocation.
+        if (packet->decodeFailed)
+        {
+            app.DebugPrintf("Dropping block region update with no decoded data\n");
+            return;
+        }
+
         int y1 = packet->y + packet->ys;
         if (packet->bIsFullChunk)
         {
@@ -1308,7 +1317,6 @@ void ClientConnection::handleTakeItemEntity(shared_ptr<TakeItemEntityPacket> pac
 void ClientConnection::handleChat(shared_ptr<ChatPacket> packet)
 {
     wstring message;
-    int iPos;
     bool displayOnGui = true;
 
     wstring playerDisplayName = L"";
@@ -1340,26 +1348,22 @@ void ClientConnection::handleChat(shared_ptr<ChatPacket> packet)
         break;
     case ChatPacket::e_ChatBedPlayerSleep:
         message = app.GetString(IDS_TILE_BED_PLAYERSLEEP);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
     case ChatPacket::e_ChatBedMeSleep:
         message = app.GetString(IDS_TILE_BED_MESLEEP);
         break;
     case ChatPacket::e_ChatPlayerJoinedGame:
         message = app.GetString(IDS_PLAYER_JOINED);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
     case ChatPacket::e_ChatPlayerLeftGame:
         message = app.GetString(IDS_PLAYER_LEFT);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
     case ChatPacket::e_ChatPlayerKickedFromGame:
         message = app.GetString(IDS_PLAYER_KICKED);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
     case ChatPacket::e_ChatCannotPlaceLava:
         displayOnGui = false;
@@ -1497,13 +1501,11 @@ void ClientConnection::handleChat(shared_ptr<ChatPacket> packet)
         break;
     case ChatPacket::e_ChatPlayerEnteredEnd:
         message = app.GetString(IDS_PLAYER_ENTERED_END);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
     case ChatPacket::e_ChatPlayerLeftEnd:
         message = app.GetString(IDS_PLAYER_LEFT_END);
-        iPos = message.find(L"%s");
-        message.replace(iPos, 2, playerDisplayName);
+        message = replaceAll(message, L"%s", playerDisplayName);
         break;
 
     case ChatPacket::e_ChatPlayerMaxEnemies:

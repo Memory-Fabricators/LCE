@@ -41,7 +41,7 @@ class IntArrayTag : public Tag
         }
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Int_Array;
     }

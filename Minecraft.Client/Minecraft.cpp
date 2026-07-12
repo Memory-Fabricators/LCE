@@ -33,6 +33,8 @@
 #include "TitleScreen.h"
 #include "User.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <SDL3/SDL3_Input.h>
 
 #include "../Minecraft.World/ByteBuffer.h"
 #include "../Minecraft.World/Difficulty.h"
@@ -82,10 +84,10 @@
 #define DISABLE_LEVELTICK_THREAD
 
 Minecraft *Minecraft::m_instance = NULL;
-__int64 Minecraft::frameTimes[512];
-__int64 Minecraft::tickTimes[512];
+std::int64_t Minecraft::frameTimes[512];
+std::int64_t Minecraft::tickTimes[512];
 int Minecraft::frameTimePos = 0;
-__int64 Minecraft::warezTime = 0;
+std::int64_t Minecraft::warezTime = 0;
 File Minecraft::workDir = File(L"");
 
 #ifdef __PSVITA__
@@ -133,7 +135,7 @@ Minecraft::Minecraft(Component *mouseComponent, Canvas *parent, MinecraftApplet 
 
     progressRenderer = NULL;
     gameRenderer = NULL;
-    bgLoader = NULL;
+    // bgLoader = NULL;
 
     ticks = 0;
     // 4J-PB - moved into the local player
@@ -354,7 +356,7 @@ void Minecraft::init()
     // 4J-PB - We'll do this in a xui intro
     // renderLoadingScreen();
 
-    // Keyboard::create();
+    Keyboard::create();
     Mouse::create();
 #if 0 // 4J - removed
 	mouseHandler = new MouseHandler(parent);
@@ -374,7 +376,7 @@ void Minecraft::init()
 
     glEnable(GL_TEXTURE_2D);
     glShadeModel(GL_SMOOTH);
-    glClearDepth(1.0);
+    // glClearDepth(1.0);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_ALPHA_TEST);
@@ -397,8 +399,8 @@ void Minecraft::init()
 
     particleEngine = new ParticleEngine(level, textures);
     //    try {	// 4J - removed try/catch
-    bgLoader = new BackgroundDownloader(workingDirectory, this);
-    bgLoader->start();
+    // bgLoader = new BackgroundDownloader(workingDirectory, this);
+    // bgLoader->start();
     //    } catch (Exception e) {
     //    }
 
@@ -640,10 +642,10 @@ void Minecraft::destroy()
 
     // 4J - all try/catch/finally things in here removed
     //    try {
-    if (this->bgLoader != NULL)
-    {
-        bgLoader->halt();
-    }
+    // if (this->bgLoader != NULL)
+    // {
+    //     bgLoader->halt();
+    // }
     //    } catch (Exception e) {
     //    }
 
@@ -661,7 +663,7 @@ void Minecraft::destroy()
     Mouse::destroy();
     Keyboard::destroy();
     //} finally {
-    Display::destroy();
+    // Display::destroy();
     //    if (!hasCrashed) System.exit(0);	//4J - removed
     //}
     // System.gc();	// 4J - removed
@@ -687,7 +689,7 @@ void Minecraft::run()
 		return;
 	}
 
-	__int64 lastTime = System::currentTimeMillis();
+	std::int64_t lastTime = System::currentTimeMillis();
 	int frames = 0;
 
 	while (running)
@@ -712,7 +714,7 @@ void Minecraft::run()
 			timer->advanceTime();
 		}
 
-		__int64 beforeTickTime = System::nanoTime();
+		std::int64_t beforeTickTime = System::nanoTime();
 		for (int i = 0; i < timer->ticks; i++)
 		{
 			ticks++;
@@ -724,7 +726,7 @@ void Minecraft::run()
 			//                setScreen(new LevelConflictScreen());
 			//            }
 		}
-		__int64 tickDuraction = System::nanoTime() - beforeTickTime;
+		std::int64_t tickDuraction = System::nanoTime() - beforeTickTime;
 		checkGlError(L"Pre render");
 
 		TileRenderer::fancy = options->fancyGraphics;
@@ -1259,7 +1261,7 @@ void Minecraft::createPrimaryLocalPlayer(int iPad)
 
 void Minecraft::run_middle()
 {
-    static __int64 lastTime = 0;
+    static std::int64_t lastTime = 0;
     static bool bFirstTimeIntoGame = true;
     static bool bAutosaveTimerSet = false;
     static unsigned int uiAutosaveTimer = 0;
@@ -1814,7 +1816,7 @@ void Minecraft::run_middle()
                 timer->advanceTime();
             }
 
-            //__int64 beforeTickTime = System::nanoTime();
+            // std::int64_t beforeTickTime = System::nanoTime();
             for (int i = 0; i < timer->ticks; i++)
             {
                 bool bLastTimerTick = (i == (timer->ticks - 1));
@@ -1900,7 +1902,7 @@ void Minecraft::run_middle()
                 // 				CompressedTileStorage::tick();	// 4J added
                 // 				SparseDataStorage::tick();		// 4J added
             }
-            //__int64 tickDuraction = System::nanoTime() - beforeTickTime;
+            // std::int64_t tickDuraction = System::nanoTime() - beforeTickTime;
             MemSect(31);
             checkGlError(L"Pre render");
             MemSect(0);
@@ -1932,6 +1934,15 @@ void Minecraft::run_middle()
                 player->SetThirdPersonView(0);
             }
 
+            {
+                static int s_renderProbeCount = 0;
+                if (s_renderProbeCount < 5)
+                {
+                    s_renderProbeCount++;
+                    fprintf(stderr, "[RENDERPROBE] noRender=%d level=%p localplayers[0]=%p localgameModes[0]=%p\n",
+                            (int)noRender, (void *)level, (void *)localplayers[0].get(), (void *)localgameModes[0]);
+                }
+            }
             if (!noRender)
             {
                 bool bFirst = true;
@@ -2030,7 +2041,7 @@ void Minecraft::run_middle()
 
             //        if (Keyboard::isKeyDown(Keyboard::KEY_F7)) Display.update();	// 4J - removed condition
             PIXBeginNamedEvent(0, "Display update");
-            Display::update();
+            // Display::update();
             PIXEndNamedEvent();
 
             //        checkScreenshot();	// 4J - removed
@@ -2108,14 +2119,14 @@ void Minecraft::emergencySave()
     setLevel(NULL);
 }
 
-void Minecraft::renderFpsMeter(__int64 tickTime)
+void Minecraft::renderFpsMeter(std::int64_t tickTime)
 {
     int nsPer60Fps = 1000000000l / 60;
     if (lastTimer == -1)
     {
         lastTimer = System::nanoTime();
     }
-    __int64 now = System::nanoTime();
+    std::int64_t now = System::nanoTime();
     Minecraft::tickTimes[(Minecraft::frameTimePos) & (Minecraft::frameTimes_length - 1)] = tickTime;
     Minecraft::frameTimes[(Minecraft::frameTimePos++) & (Minecraft::frameTimes_length - 1)] = now - lastTimer;
     lastTimer = now;
@@ -2131,6 +2142,7 @@ void Minecraft::renderFpsMeter(__int64 tickTime)
 
     glLineWidth(1);
     glDisable(GL_TEXTURE_2D);
+    // FIXME: replace quad rendering with triangles
     Tesselator *t = Tesselator::getInstance();
     t->begin(GL_QUADS);
     int hh1 = (int)(nsPer60Fps / 200000);
@@ -2147,7 +2159,7 @@ void Minecraft::renderFpsMeter(__int64 tickTime)
     t->vertex((float)(Minecraft::frameTimes_length), (float)(height - hh1 * 2), (float)(0));
 
     t->end();
-    __int64 totalTime = 0;
+    std::int64_t totalTime = 0;
     for (int i = 0; i < Minecraft::frameTimes_length; i++)
     {
         totalTime += Minecraft::frameTimes[i];
@@ -2177,8 +2189,8 @@ void Minecraft::renderFpsMeter(__int64 tickTime)
             t->color(0xff000000 + cc * 256);
         }
 
-        __int64 time = Minecraft::frameTimes[i] / 200000;
-        __int64 time2 = Minecraft::tickTimes[i] / 200000;
+        std::int64_t time = Minecraft::frameTimes[i] / 200000;
+        std::int64_t time2 = Minecraft::tickTimes[i] / 200000;
 
         t->vertex((float)(i + 0.5f), (float)(height - time + 0.5f), (float)(0));
         t->vertex((float)(i + 0.5f), (float)(height + 0.5f), (float)(0));
@@ -4019,7 +4031,7 @@ void Minecraft::reloadSound()
     //    System.out.println("FORCING RELOAD!");		// 4J - removed
     soundEngine = new SoundEngine();
     soundEngine->init(options);
-    bgLoader->forceReload();
+    // bgLoader->forceReload();
 }
 
 bool Minecraft::isClientSide()
@@ -4718,7 +4730,7 @@ void Minecraft::main()
     // 4J-PB - Can't call this for the first 5 seconds of a game - MS rule
     // if (ProfileManager.IsFullVersion())
     {
-        name = L"Player" + _toString<__int64>(System::currentTimeMillis() % 1000);
+        name = L"Player" + _toString<std::int64_t>(System::currentTimeMillis() % 1000);
         sessionId = L"-";
         /* 4J - TODO - get a session ID from somewhere?
         if (args.length > 0) name = args[0];
@@ -4823,7 +4835,7 @@ void Minecraft::delayTextureReload()
     reloadTextures = true;
 }
 
-__int64 Minecraft::currentTimeMillis()
+std::int64_t Minecraft::currentTimeMillis()
 {
     return System::currentTimeMillis(); //(Sys.getTime() * 1000) / Sys.getTimerResolution();
 }
@@ -5186,7 +5198,37 @@ ColourTable *Minecraft::getColourTable()
 
     if (colours == NULL)
     {
-        colours = skins->getDefault()->getColourTable();
+        TexturePack *def = skins->getDefault();
+        colours = def->getColourTable();
+        if (colours == NULL)
+        {
+            // Every caller of getColourTable() across ~30 call sites assumes
+            // this is never null, same as on every other platform - true there
+            // because the default pack's colour table is guaranteed loaded by
+            // the time anything else runs. On this platform a background
+            // worker thread has occasionally observed it still null (the
+            // colours.col read can be flaky this early on a mounted dev
+            // volume - see AbstractTexturePack::loadDefaultColourTable). Rather
+            // than crash every caller, force a synchronous (re)load here once.
+            // Multiple worker threads can race into this fallback at once, so
+            // serialize the reload rather than letting them stomp on
+            // AbstractTexturePack's non-atomic delete-then-new.
+            static CRITICAL_SECTION s_colourTableReloadCS;
+            static bool s_csInit = false;
+            if (!s_csInit)
+            {
+                InitializeCriticalSection(&s_colourTableReloadCS);
+                s_csInit = true;
+            }
+            EnterCriticalSection(&s_colourTableReloadCS);
+            colours = def->getColourTable();
+            if (colours == NULL)
+            {
+                def->loadColourTable();
+                colours = def->getColourTable();
+            }
+            LeaveCriticalSection(&s_colourTableReloadCS);
+        }
     }
 
     return colours;

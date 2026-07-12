@@ -4,12 +4,12 @@
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
 
-void LargeCaveFeature::addRoom(__int64 seed, int xOffs, int zOffs, byteArray blocks, double xRoom, double yRoom, double zRoom)
+void LargeCaveFeature::addRoom(std::int64_t seed, int xOffs, int zOffs, byteArray blocks, double xRoom, double yRoom, double zRoom)
 {
     addTunnel(seed, xOffs, zOffs, blocks, xRoom, yRoom, zRoom, 1 + random->nextFloat() * 6, 0, 0, -1, -1, 0.5);
 }
 
-void LargeCaveFeature::addTunnel(__int64 seed, int xOffs, int zOffs, byteArray blocks, double xCave, double yCave, double zCave, float thickness, float yRot, float xRot, int step, int dist, double yScale)
+void LargeCaveFeature::addTunnel(std::int64_t seed, int xOffs, int zOffs, byteArray blocks, double xCave, double yCave, double zCave, float thickness, float yRot, float xRot, int step, int dist, double yScale)
 {
     double xMid = xOffs * 16 + 8;
     double zMid = zOffs * 16 + 8;
@@ -175,14 +175,14 @@ void LargeCaveFeature::addTunnel(__int64 seed, int xOffs, int zOffs, byteArray b
                             {
                                 if (yy < 10)
                                 {
-                                    blocks[p] = (byte)Tile::lava_Id;
+                                    blocks[p] = Tile::lava_Id;
                                 }
                                 else
                                 {
-                                    blocks[p] = (byte)0;
+                                    blocks[p] = 0;
                                     if (hasGrass && blocks[p - 1] == Tile::dirt_Id)
                                     {
-                                        blocks[p - 1] = (byte)level->getBiome(xx + xOffs * 16, zz + zOffs * 16)->topMaterial;
+                                        blocks[p - 1] = level->getBiome(xx + xOffs * 16, zz + zOffs * 16)->topMaterial;
                                     }
                                 }
                             }

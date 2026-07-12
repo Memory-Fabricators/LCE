@@ -17,18 +17,18 @@ class ZoneFile
     short slotCount;
 
   public:
-    __int64 lastUse;
+    std::int64_t lastUse;
 
   private:
     HANDLE channel;
 
   public:
-    __int64 key;
+    std::int64_t key;
     File file;
 
     NbtSlotFile *entityFile;
 
-    ZoneFile(__int64 key, File file, File entityFile);
+    ZoneFile(std::int64_t key, File file, File entityFile);
     ~ZoneFile();
 
     void readHeader();

@@ -115,17 +115,26 @@ void BlockRegionUpdatePacket::read(DataInputStream *dis) // throws IOException
 
         if (success)
         {
-            Compression::getCompression()->DecompressLZXRLE(buffer.data, &outputSize, compressedBuffer.data, size);
+            if (FAILED(Compression::getCompression()->DecompressLZXRLE(
+                    buffer.data, &outputSize, compressedBuffer.data, size)) ||
+                outputSize != buffer.length)
+            {
+                app.DebugPrintf("Discarding malformed block-region update (%d compressed bytes, %d expected bytes, %d decoded bytes)\n",
+                                size, buffer.length, outputSize);
+                buffer = byteArray();
+                decodeFailed = true;
+            }
         }
         else
         {
             app.DebugPrintf("Not decompressing packet that wasn't fully read\n");
+            decodeFailed = true;
         }
 
         //	printf("Block (%d %d %d), (%d %d %d) coming in decomp from %d to %d\n",x,y,z,xs,ys,zs,size,outputSize);
 
         delete[] compressedBuffer.data;
-        assert(buffer.length == outputSize);
+        assert(buffer.length == 0 || buffer.length == outputSize);
     }
 }
 

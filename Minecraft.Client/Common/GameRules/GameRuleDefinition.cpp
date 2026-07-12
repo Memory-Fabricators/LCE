@@ -1,6 +1,7 @@
 #include "../../../Minecraft.World/StringHelpers.h"
 #include "../../WstringLookup.h"
 #include "ConsoleGameRules.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 GameRuleDefinition::GameRuleDefinition()
@@ -13,9 +14,9 @@ GameRuleDefinition::GameRuleDefinition()
 void GameRuleDefinition::write(DataOutputStream *dos)
 {
     // Write EGameRuleType.
-    ConsoleGameRules::EGameRuleType eType = getActionType();
-    assert(eType != ConsoleGameRules::eGameRuleType_Invalid);
-    ConsoleGameRules::write(dos, eType); // stringID
+    GameRuleType eType = getActionType();
+    assert(eType != GameRuleType::Invalid);
+    ::write(dos, eType); // stringID
 
     writeAttributes(dos, 0);
 
@@ -35,13 +36,13 @@ void GameRuleDefinition::writeAttributes(DataOutputStream *dos, UINT numAttribut
 {
     dos->writeInt(numAttributes + 3);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_descriptionName);
+    ::write(dos, GameRuleAttribute::descriptionName);
     dos->writeUTF(m_descriptionId);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_promptName);
+    ::write(dos, GameRuleAttribute::promptName);
     dos->writeUTF(m_promptId);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_dataTag);
+    ::write(dos, GameRuleAttribute::dataTag);
     dos->writeUTF(_toString(m_4JDataValue));
 }
 
@@ -49,7 +50,7 @@ void GameRuleDefinition::getChildren(vector<GameRuleDefinition *> *children)
 {
 }
 
-GameRuleDefinition *GameRuleDefinition::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *GameRuleDefinition::addChild(GameRuleType ruleType)
 {
 #ifndef _CONTENT_PACKAGE
     wprintf(L"GameRuleDefinition: Attempted to add invalid child rule - %d\n", ruleType);
@@ -141,12 +142,12 @@ GameRulesInstance *GameRuleDefinition::generateNewGameRulesInstance(GameRulesIns
     return manager;
 }
 
-wstring GameRuleDefinition::generateDescriptionString(ConsoleGameRules::EGameRuleType defType, const wstring &description, void *data, int dataLength)
+wstring GameRuleDefinition::generateDescriptionString(GameRuleType defType, const wstring &description, void *data, int dataLength)
 {
     wstring formatted = description;
     switch (defType)
     {
-    case ConsoleGameRules::eGameRuleType_CompleteAllRule:
+    case GameRuleType::CompleteAllRule:
         formatted = CompleteAllRuleDefinition::generateDescriptionString(description, data, dataLength);
         break;
     default:

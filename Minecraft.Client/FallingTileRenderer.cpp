@@ -5,6 +5,7 @@
 #include "EntityRenderDispatcher.h"
 #include "TileRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 FallingTileRenderer::FallingTileRenderer() : EntityRenderer()
 {

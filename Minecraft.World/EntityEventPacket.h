@@ -7,10 +7,10 @@ class EntityEventPacket : public Packet, public enable_shared_from_this<EntityEv
 {
   public:
     int entityId;
-    byte eventId;
+    unsigned char eventId;
 
     EntityEventPacket();
-    EntityEventPacket(int entityId, byte eventId);
+    EntityEventPacket(int entityId, unsigned char eventId);
 
     virtual void read(DataInputStream *dis);
     virtual void write(DataOutputStream *dos);

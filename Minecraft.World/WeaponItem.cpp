@@ -1,4 +1,5 @@
 #include "WeaponItem.h"
+#include "UseAnim.h"
 #include "net.minecraft.world.entity.h"
 #include "net.minecraft.world.entity.player.h"
 #include "net.minecraft.world.item.h"
@@ -49,9 +50,9 @@ bool WeaponItem::isHandEquipped()
     return true;
 }
 
-UseAnim WeaponItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation WeaponItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_block;
+    return UseAnimation::block;
 }
 
 int WeaponItem::getUseDuration(shared_ptr<ItemInstance> itemInstance)

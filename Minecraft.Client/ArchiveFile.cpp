@@ -168,7 +168,11 @@ byteArray ArchiveFile::getFile(const wstring &filename)
                 {
                     app.FatalLoadError();
                 }
-                assert(bytesRead == data->filesize);
+                if (bytesRead != data->filesize)
+                {
+                    printf("ArchiveFile::read: Short read! read %u bytes, expected %u bytes\n", (unsigned)bytesRead, (unsigned)data->filesize);
+                    app.FatalLoadError();
+                }
                 out = byteArray(pbData, data->filesize);
             }
             else

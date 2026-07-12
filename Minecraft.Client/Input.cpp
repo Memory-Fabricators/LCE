@@ -114,7 +114,7 @@ void Input::tick(LocalPlayer *player)
         }
         tx = ty = 0.0f;
     }
-    player->interpolateTurn(tx * abs(tx) * turnSpeed, ty * abs(ty) * turnSpeed);
+    player->interpolateTurn(tx * turnSpeed, ty * turnSpeed);
 
     // jumping = controller.isButtonPressed(0);
 

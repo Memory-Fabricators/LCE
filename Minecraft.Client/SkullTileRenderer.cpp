@@ -4,6 +4,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "SkeletonHeadModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 SkullTileRenderer *SkullTileRenderer::instance = NULL;
 

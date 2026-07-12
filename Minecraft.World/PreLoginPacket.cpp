@@ -93,7 +93,7 @@ void PreLoginPacket::write(DataOutputStream *dos) // throws IOException
 
     dos->writeByte(m_friendsOnlyBits);
     dos->writeInt(m_ugcPlayersVersion);
-    dos->writeByte((byte)m_dwPlayerCount);
+    dos->writeByte(m_dwPlayerCount);
     for (DWORD i = 0; i < m_dwPlayerCount; ++i)
     {
         dos->writePlayerUID(m_playerXuids[i]);

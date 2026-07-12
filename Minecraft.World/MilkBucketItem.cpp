@@ -1,4 +1,5 @@
 #include "MilkBucketItem.h"
+#include "UseAnim.h"
 #include "net.minecraft.world.entity.player.h"
 #include "net.minecraft.world.level.h"
 #include "stdafx.h"
@@ -32,9 +33,9 @@ int MilkBucketItem::getUseDuration(shared_ptr<ItemInstance> itemInstance)
     return DRINK_DURATION;
 }
 
-UseAnim MilkBucketItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation MilkBucketItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_drink;
+    return UseAnimation::drink;
 }
 
 shared_ptr<ItemInstance> MilkBucketItem::use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player)

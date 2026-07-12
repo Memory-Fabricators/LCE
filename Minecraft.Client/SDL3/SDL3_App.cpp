@@ -26,6 +26,8 @@ void CMinecraftApp::ExitGame()
 
 void CMinecraftApp::FatalLoadError()
 {
+    printf("CMinecraftApp::FatalLoadError: Exiting due to fatal load error.\n");
+    exit(1);
 }
 
 CConsoleMinecraftApp::CConsoleMinecraftApp() : CMinecraftApp()
@@ -46,6 +48,8 @@ void CConsoleMinecraftApp::ExitGame()
 
 void CConsoleMinecraftApp::FatalLoadError()
 {
+    printf("CConsoleMinecraftApp::FatalLoadError: Exiting due to fatal load error.\n");
+    exit(1);
 }
 
 void CConsoleMinecraftApp::CaptureSaveThumbnail()
@@ -86,7 +90,7 @@ void CConsoleMinecraftApp::TemporaryCreateGameStart()
     StorageManager.SetSaveTitle(wWorldName.c_str());
 
     bool isFlat = false;
-    __int64 seedValue = 0;
+    std::int64_t seedValue = 0;
 
     NetworkGameInitData *param = new NetworkGameInitData();
     param->seed = seedValue;
@@ -107,6 +111,13 @@ void CConsoleMinecraftApp::TemporaryCreateGameStart()
     app.SetGameHostOption(eGameHostOption_HostCanFly, 1);
     app.SetGameHostOption(eGameHostOption_HostCanChangeHunger, 1);
     app.SetGameHostOption(eGameHostOption_HostCanBeInvisible, 1);
+
+    // Every real "start a game" menu path (UIScene_CreateWorldMenu etc.) calls
+    // HostGame before spawning the network thread - it's what takes QNet out of
+    // QNET_STATE_IDLE, which StartNetworkGame requires (IsInSession()) before
+    // the server will actually start ticking. Without this the server thread
+    // runs initServer() and immediately stops again.
+    g_NetworkManager.HostGame(0, false, true, MINECRAFT_NET_MAX_PLAYERS, 0);
 
     param->settings = app.GetGameHostOption(eGameHostOption_All);
     g_NetworkManager.FakeLocalPlayerJoined();

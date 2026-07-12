@@ -3,6 +3,8 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.entity.h"
 #include "BookModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 EnchantTableRenderer::EnchantTableRenderer()
 {

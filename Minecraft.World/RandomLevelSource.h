@@ -47,7 +47,7 @@ class RandomLevelSource : public ChunkSource
     floatArray pows;
 
   public:
-    RandomLevelSource(Level *level, __int64 seed, bool generateStructures);
+    RandomLevelSource(Level *level, std::int64_t seed, bool generateStructures);
     ~RandomLevelSource();
 
   public:

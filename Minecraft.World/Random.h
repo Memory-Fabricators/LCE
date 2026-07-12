@@ -3,7 +3,7 @@
 class Random
 {
   private:
-    __int64 seed;
+    std::int64_t seed;
     bool haveNextNextGaussian;
     double nextNextGaussian;
 
@@ -12,14 +12,14 @@ class Random
 
   public:
     Random();
-    Random(__int64 seed);
-    void setSeed(__int64 s);
-    void nextBytes(byte *bytes, unsigned int count);
+    Random(std::int64_t seed);
+    void setSeed(std::int64_t s);
+    void nextBytes(unsigned char *bytes, unsigned int count);
     double nextDouble();
     double nextGaussian();
     int nextInt();
     int nextInt(int to);
     float nextFloat();
-    __int64 nextLong();
+    std::int64_t nextLong();
     bool nextBoolean();
 };

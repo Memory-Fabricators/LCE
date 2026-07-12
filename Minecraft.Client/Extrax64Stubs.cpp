@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <tracy/Tracy.hpp>
 #ifndef __PS3__
 // #include <compressapi.h>
 #endif // __PS3__
@@ -125,10 +126,10 @@ DWORD XBackgroundDownloadSetMode(XBACKGROUND_DOWNLOAD_MODE Mode)
 }
 
 #ifndef _DURANGO
-void PIXAddNamedCounter(int a, char *b, ...)
+void PIXAddNamedCounter(int a, const char *b, ...)
 {
 }
-void PIXBeginNamedEvent(int a, char *b, ...)
+void PIXBeginNamedEvent(int a, const char *b, ...)
 {
 #ifdef PS4_USE_PIX_EVENTS
     char buf[512];
@@ -180,7 +181,7 @@ void PIXEndNamedEvent()
 	PixDepth -= 1;
 #endif
 }
-void PIXSetMarkerDeprecated(int a, char *b, ...)
+void PIXSetMarkerDeprecated(int a, const char *b, ...)
 {
 }
 #else
@@ -306,8 +307,7 @@ PlayerUID IQNetPlayer::GetXuid()
 }
 LPCWSTR IQNetPlayer::GetGamertag()
 {
-    static const wchar_t *test = L"stub";
-    return test;
+    return L"Steve";
 }
 int IQNetPlayer::GetSessionIndex()
 {
@@ -943,8 +943,76 @@ C4JStorage::ETMSStatus				C4JStorage::TMSPP_ReadFile(int iPad,C4JStorage::eGloba
 /////////////////////////////////////////////// Profile library - SDL3 stubs
 #if defined(_SDL3)
 
+static void *profileDataA[XUSER_MAX_COUNT];
+
+// Nothing calls C_4JProfile::Initialise on this platform (no profile system is
+// wired up yet), but ActionGameSettings/GetGameSettings (CMinecraftApp.cpp)
+// assume GetGameDefinedProfileData never returns null - true on every other
+// platform, where Initialise always runs first and seeds real backing storage.
+// Lazily allocate the same GAME_SETTINGS block with the same sane defaults
+// Windows64's real Initialise uses, instead of leaving these null forever.
+static void *GetOrCreateProfileData(int iQuadrant)
+{
+    if (iQuadrant < 0 || iQuadrant >= XUSER_MAX_COUNT)
+    {
+        return nullptr;
+    }
+
+    if (profileDataA[iQuadrant] == NULL)
+    {
+        profileDataA[iQuadrant] = new byte[CMinecraftApp::GAME_DEFINED_PROFILE_DATA_BYTES];
+        ZeroMemory(profileDataA[iQuadrant], CMinecraftApp::GAME_DEFINED_PROFILE_DATA_BYTES);
+
+        GAME_SETTINGS *pGameSettings = (GAME_SETTINGS *)profileDataA[iQuadrant];
+        pGameSettings->ucMenuSensitivity = 100;
+        pGameSettings->ucInterfaceOpacity = 80;
+        pGameSettings->usBitmaskValues |= 0x0200; // eGameSetting_DisplaySplitscreenGamertags - on
+        pGameSettings->usBitmaskValues |= 0x0400; // eGameSetting_Hints - on
+        pGameSettings->usBitmaskValues |= 0x1000; // eGameSetting_Autosave - 2
+        pGameSettings->usBitmaskValues |= 0x8000; // eGameSetting_Tooltips - on
+        pGameSettings->uiBitmaskValues = 0L;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_CLOUDS;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_ONLINE;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_FRIENDSOFFRIENDS;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_DISPLAYUPDATEMSG;
+        pGameSettings->uiBitmaskValues &= ~GAMESETTING_BEDROCKFOG;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_DISPLAYHUD;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_DISPLAYHAND;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_CUSTOMSKINANIM;
+        pGameSettings->uiBitmaskValues |= GAMESETTING_DEATHMESSAGES;
+        pGameSettings->uiBitmaskValues |= (GAMESETTING_UISIZE & 0x00000800);
+        pGameSettings->uiBitmaskValues |= (GAMESETTING_UISIZE_SPLITSCREEN & 0x00004000);
+        pGameSettings->uiBitmaskValues |= GAMESETTING_ANIMATEDCHARACTER;
+
+        for (int i = 0; i < MAX_FAVORITE_SKINS; i++)
+        {
+            pGameSettings->uiFavoriteSkinA[i] = 0xFFFFFFFF;
+        }
+        pGameSettings->ucCurrentFavoriteSkinPos = 0;
+        pGameSettings->uiMashUpPackWorldsDisplay = 0xFFFFFFFF;
+        pGameSettings->uiBitmaskValues &= ~GAMESETTING_PS3EULAREAD;
+        pGameSettings->ucLanguage = MINECRAFT_LANGUAGE_DEFAULT;
+        pGameSettings->uiBitmaskValues &= ~GAMESETTING_PSVITANETWORKMODEADHOC;
+
+        pGameSettings->ucMusicVolume = 100;
+        pGameSettings->ucSoundFXVolume = 100;
+        pGameSettings->ucGamma = 50;
+
+        pGameSettings->ucTutorialCompletion[0] = 0xFF;
+        pGameSettings->ucTutorialCompletion[1] = 0xFF;
+        pGameSettings->ucTutorialCompletion[2] = 0xF;
+        pGameSettings->ucTutorialCompletion[28] |= 1 << 0;
+    }
+
+    return profileDataA[iQuadrant];
+}
+
 void C_4JProfile::Initialise(DWORD, DWORD, unsigned short, UINT, UINT, DWORD *, int, unsigned int *)
 {
+    for (int i = 0; i < XUSER_MAX_COUNT; i++)
+    {
+        GetOrCreateProfileData(i);
+    }
 }
 
 void C_4JProfile::SetTrialTextStringTable(CXuiStringTable *, int, int)
@@ -1111,9 +1179,9 @@ void C_4JProfile::WriteToProfile(int, bool, bool)
 {
 }
 
-void *C_4JProfile::GetGameDefinedProfileData(int)
+void *C_4JProfile::GetGameDefinedProfileData(int iQuadrant)
 {
-    return nullptr;
+    return GetOrCreateProfileData(iQuadrant);
 }
 
 void C_4JProfile::SetPrimaryPad(int)

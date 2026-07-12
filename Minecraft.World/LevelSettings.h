@@ -35,7 +35,7 @@ class GameType
 class LevelSettings
 {
   private:
-    __int64 seed;
+    std::int64_t seed;
     GameType *gameType;
     bool generateMapFeatures;
     bool hardcore;
@@ -46,15 +46,15 @@ class LevelSettings
     int m_xzSize;            // 4J Added
     int m_hellScale;
 
-    void _init(__int64 seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale); // 4J Added xzSize and hellScale param
+    void _init(std::int64_t seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale); // 4J Added xzSize and hellScale param
 
   public:
-    LevelSettings(__int64 seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale); // 4J Added xzSize and hellScale param
+    LevelSettings(std::int64_t seed, GameType *gameType, bool generateMapFeatures, bool hardcore, bool newSeaLevel, LevelType *levelType, int xzSize, int hellScale); // 4J Added xzSize and hellScale param
     LevelSettings(LevelData *levelData);
     LevelSettings *enableStartingBonusItems(); // 4J - brought forward from 1.3.2
     LevelSettings *enableSinglePlayerCommands();
     bool hasStartingBonusItems(); // 4J - brought forward from 1.3.2
-    __int64 getSeed();
+    std::int64_t getSeed();
     GameType *getGameType();
     bool isHardcore();
     LevelType *getLevelType();

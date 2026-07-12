@@ -71,6 +71,7 @@
 #include "WolfRenderer.h"
 #include "ZombieRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 double EntityRenderDispatcher::xOff = 0.0;
 double EntityRenderDispatcher::yOff = 0.0;
@@ -239,7 +240,7 @@ void EntityRenderDispatcher::render(shared_ptr<Entity> entity, float a)
     }
     int u = col % 65536;
     int v = col / 65536;
-    glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+    glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
     glColor4f(1, 1, 1, 1);
 
     render(entity, x - xOff, y - yOff, z - zOff, r, a);

@@ -1,5 +1,7 @@
 #pragma once
 
+class Village;
+
 class VillageSiege
 {
   private:

@@ -10,10 +10,9 @@
 #endif
 
 #if defined(_XBOX) || defined(_WINDOWS64) || defined(_DURANGO)
-typedef unsigned __int64 __uint64;
+typedef unsigned std::int64_t __uint64;
 #elif defined(_SDL3)
 typedef int __int32;
-typedef signed long long __int64;
 typedef unsigned long long __uint64;
 #endif
 
@@ -262,3 +261,4 @@ void MemSect(int sect);
 #include "../Minecraft.Client/Common/GameRules/ConsoleGameRulesConstants.h"
 #include "../Minecraft.Client/Common/Potion_Macros.h"
 #include "../Minecraft.Client/Common/Telemetry/TelemetryManager.h"
+// Force PCH rebuild 4

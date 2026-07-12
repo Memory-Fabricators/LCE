@@ -29,18 +29,6 @@ class Chunk
     Level *level;
     static LevelRenderer *levelRenderer;
 
-  private:
-#ifndef _LARGE_WORLDS
-    static Tesselator *t;
-#else
-    static DWORD tlsIdx;
-
-  public:
-    static void CreateNewThreadStorage();
-    static void ReleaseThreadStorage();
-    static unsigned char *GetTileIdsStorage();
-#endif
-
   public:
     static int updates;
 
@@ -73,9 +61,6 @@ class Chunk
   public:
     void makeCopyForRebuild(Chunk *source);
     void rebuild();
-#ifdef __PS3__
-    void rebuild_SPU();
-#endif // __PS3__
     float distanceToSqr(shared_ptr<Entity> player) const;
     float squishedDistanceToSqr(shared_ptr<Entity> player);
     void reset();

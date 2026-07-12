@@ -23,7 +23,7 @@ class FloatTag : public Tag
         data = dis->readFloat();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Float;
     }

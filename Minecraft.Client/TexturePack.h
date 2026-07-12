@@ -1,11 +1,13 @@
 #pragma once
 using namespace std;
 
+#include "BufferedImage.h"
 #include "Common/App_enums.h"
 
 class InputStream;
 class Minecraft;
 class ArchiveFile;
+class Textures;
 
 class TexturePack
 {

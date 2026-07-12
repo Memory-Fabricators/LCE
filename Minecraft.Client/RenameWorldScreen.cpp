@@ -5,6 +5,7 @@
 #include "Button.h"
 #include "EditBox.h"
 #include "stdafx.h"
+#include <SDL3/SDL3_Input.h>
 
 RenameWorldScreen::RenameWorldScreen(Screen *lastScreen, const wstring &levelId)
 {

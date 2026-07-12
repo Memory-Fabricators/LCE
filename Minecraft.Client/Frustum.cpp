@@ -1,6 +1,8 @@
 #include "Frustum.h"
 #include "../Minecraft.World/FloatBuffer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 Frustum *Frustum::frustum = new Frustum();
 
@@ -51,17 +53,16 @@ void Frustum::calculateFrustum()
     // glGetFloatv() is used to extract information about our OpenGL world.
     // Below, we pass in GL_PROJECTION_MATRIX to abstract our projection matrix.
     // It then stores the matrix into an array of [16].
-    glGetFloat(GL_PROJECTION_MATRIX, _proj);
+    glGetFloatv(GL_PROJECTION_MATRIX, _proj->_getDataPointer());
 
     // By passing in GL_MODELVIEW_MATRIX, we can abstract our model view matrix.
     // This also stores it in an array of [16].
-    glGetFloat(GL_MODELVIEW_MATRIX, _modl);
+    glGetFloatv(GL_MODELVIEW_MATRIX, _modl->_getDataPointer());
 
     _proj->flip()->limit(16);
     _proj->get(&proj);
     _modl->flip()->limit(16);
     _modl->get(&modl);
-
     // Now that we have our modelview and projection matrix, if we combine these 2 matrices,
     // it will give us our clipping planes.  To combine 2 matrices, we multiply them.
 

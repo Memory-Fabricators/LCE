@@ -26,22 +26,22 @@ void CompoundGameRuleDefinition::getChildren(vector<GameRuleDefinition *> *child
     }
 }
 
-GameRuleDefinition *CompoundGameRuleDefinition::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *CompoundGameRuleDefinition::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_CompleteAllRule)
+    if (ruleType == GameRuleType::CompleteAllRule)
     {
         rule = new CompleteAllRuleDefinition();
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_CollectItemRule)
+    else if (ruleType == GameRuleType::CollectItemRule)
     {
         rule = new CollectItemRuleDefinition();
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_UseTileRule)
+    else if (ruleType == GameRuleType::UseTileRule)
     {
         rule = new UseTileRuleDefinition();
     }
-    else if (ruleType == ConsoleGameRules::eGameRuleType_UpdatePlayerRule)
+    else if (ruleType == GameRuleType::UpdatePlayerRule)
     {
         rule = new UpdatePlayerRuleDefinition();
     }

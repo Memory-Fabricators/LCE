@@ -24,5 +24,7 @@ class IOException : public std::exception
 class RuntimeException : public std::exception
 {
   public:
+    wstring information;
+
     RuntimeException(const wstring &information);
 };

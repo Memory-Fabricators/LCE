@@ -1,6 +1,6 @@
 #include "SquidRenderer.h"
-#include "../Minecraft.World/net.minecraft.world.entity.animal.h"
-#include "stdafx.h"
+#include "Squid.h"
+#include <GL/gl.h>
 
 SquidRenderer::SquidRenderer(Model *model, float shadow) : MobRenderer(model, shadow)
 {

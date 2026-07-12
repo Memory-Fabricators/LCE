@@ -2,6 +2,7 @@
 // 4J Stu - Represents Java standard library class
 
 #include "InputStream.h"
+#include <cstdint>
 
 class FileInputStream : public InputStream
 {
@@ -12,7 +13,7 @@ class FileInputStream : public InputStream
     virtual int read(byteArray b);
     virtual int read(byteArray b, unsigned int offset, unsigned int length);
     virtual void close();
-    virtual __int64 skip(__int64 n);
+    virtual std::int64_t skip(std::int64_t n);
 
   private:
     HANDLE m_fileHandle;

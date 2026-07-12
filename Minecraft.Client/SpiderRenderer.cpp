@@ -2,6 +2,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
 #include "SpiderModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 SpiderRenderer::SpiderRenderer() : MobRenderer(new SpiderModel(), 1.0f)
 {
@@ -53,7 +54,7 @@ int SpiderRenderer::prepareArmor(shared_ptr<Mob> _spider, int layer, float a)
         int u = col % 65536;
         int v = col / 65536;
 
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
     // 4J - this doesn't seem right - surely there should be an else in here?
