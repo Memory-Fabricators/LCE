@@ -4,7 +4,6 @@
 #include "Vec3.h"
 
 class HitResult;
-using namespace std;
 
 class AABB
 {

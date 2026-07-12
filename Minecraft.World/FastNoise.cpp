@@ -15,10 +15,10 @@ FastNoise::FastNoise(Random *random, int levels)
 void FastNoise::init(Random *random, int levels)
 {
     this->levels = levels;
-    noiseMaps = new byte *[levels];
+    noiseMaps = new unsigned char *[levels];
     for (int i = 0; i < levels; i++)
     {
-        noiseMaps[i] = new byte[0x100000];
+        noiseMaps[i] = new unsigned char[0x100000];
         random->nextBytes(noiseMaps[i], 0x100000);
     }
 }
@@ -51,7 +51,7 @@ doubleArray FastNoise::getRegion(doubleArray buffer, double x, double y, double 
     int BB = 21771;
     for (int i = 0; i < levels; i++)
     {
-        byte *map = noiseMaps[i];
+        unsigned char *map = noiseMaps[i];
         int pp = 0;
 
         for (int zp = 0; zp < zSize; zp++)

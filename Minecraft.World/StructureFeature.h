@@ -16,7 +16,7 @@ class StructureFeature : public LargeFeature
     };
 
   protected:
-    unordered_map<__int64, StructureStart *> cachedStructures;
+    unordered_map<std::int64_t, StructureStart *> cachedStructures;
 
   public:
     ~StructureFeature();

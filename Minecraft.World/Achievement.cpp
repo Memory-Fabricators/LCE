@@ -27,20 +27,22 @@ void Achievement::_init()
     }
 }
 
-Achievement::Achievement(int id, const wstring &name, int x, int y, Item *icon, Achievement *requires)
-    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(new ItemInstance(icon)), x(x), y(y), requires(requires) {
-      }
+Achievement::Achievement(int id, const wstring &name, int x, int y, Item *icon, Achievement *requirement)
+    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(new ItemInstance(icon)), x(x), y(y), requirement(requirement)
+{
+}
 
-      Achievement::Achievement(int id, const wstring &name, int x, int y, Tile *icon, Achievement *requires)
-    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(new ItemInstance(icon)), x(x), y(y), requires(requires) {
-      }
+Achievement::Achievement(int id, const wstring &name, int x, int y, Tile *icon, Achievement *requirement)
+    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(new ItemInstance(icon)), x(x), y(y), requirement(requirement)
+{
+}
 
-      Achievement::Achievement(int id, const wstring &name, int x, int y, shared_ptr<ItemInstance> icon, Achievement *requires)
-    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(icon), x(x), y(y), requires(requires) {
-      }
+Achievement::Achievement(int id, const wstring &name, int x, int y, shared_ptr<ItemInstance> icon, Achievement *requirement)
+    : Stat(Achievements::ACHIEVEMENT_OFFSET + id, I18n::get(wstring(L"achievement.").append(name))), desc(I18n::get(wstring(L"achievement.").append(name).append(L".desc"))), icon(icon), x(x), y(y), requirement(requirement)
+{
+}
 
-                                                                                                                                                                                                          Achievement
-                                                                                                                                                                                                          * Achievement::setAwardLocallyOnly()
+Achievement *Achievement::setAwardLocallyOnly()
 {
     awardLocallyOnly = true;
     return this;

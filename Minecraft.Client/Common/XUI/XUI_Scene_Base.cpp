@@ -859,7 +859,7 @@ HRESULT CXuiSceneBase::_ShowBackground(unsigned int iPad, BOOL bShow)
 
         if (bShow && pMinecraft->level != NULL)
         {
-            __int64 i64TimeOfDay = 0;
+            std::int64_t i64TimeOfDay = 0;
             // are we in the Nether? - Leave the time as 0 if we are, so we show daylight
             if (pMinecraft->level->dimension->id == 0)
             {

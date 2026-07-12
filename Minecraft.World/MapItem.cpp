@@ -74,7 +74,7 @@ shared_ptr<MapItemSavedData> MapItem::getSavedData(shared_ptr<ItemInstance> item
         mapItemSavedData->x = Math::round((float)level->getLevelData()->getXSpawn() / scale) * scale;
         mapItemSavedData->z = Math::round(level->getLevelData()->getZSpawn() / scale) * scale;
 #endif
-        mapItemSavedData->dimension = (byte)level->dimension->id;
+        mapItemSavedData->dimension = level->dimension->id;
 
         mapItemSavedData->setDirty();
 
@@ -281,8 +281,8 @@ void MapItem::update(Level *level, shared_ptr<Entity> player, shared_ptr<MapItem
             {
                 continue;
             }
-            byte oldColor = data->colors[x + z * w];
-            byte newColor = (byte)(col * 4 + br);
+            unsigned char oldColor = data->colors[x + z * w];
+            unsigned char newColor = (col * 4 + br);
             if (oldColor != newColor)
             {
                 if (yd0 > z)
@@ -378,7 +378,7 @@ void MapItem::onCraftedBy(shared_ptr<ItemInstance> itemInstance, Level *level, s
     // 4J-PB - for Xbox maps, we'll centre them on the origin of the world, since we can fit the whole world in our map
     data->x = centreXC;
     data->z = centreZC;
-    data->dimension = (byte)level->dimension->id;
+    data->dimension = (unsigned char)level->dimension->id;
     data->setDirty();
 }
 

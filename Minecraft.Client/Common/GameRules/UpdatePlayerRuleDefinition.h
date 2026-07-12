@@ -21,13 +21,13 @@ class UpdatePlayerRuleDefinition : public GameRuleDefinition
     UpdatePlayerRuleDefinition();
     ~UpdatePlayerRuleDefinition();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_UpdatePlayerRule;
+        return GameRuleType::UpdatePlayerRule;
     }
 
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttributes);
     virtual void addAttribute(const wstring &attributeName, const wstring &attributeValue);

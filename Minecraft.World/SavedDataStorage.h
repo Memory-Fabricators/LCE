@@ -2,6 +2,7 @@
 using namespace std;
 
 class ConsoleSaveFile;
+class LevelStorage;
 #include "SavedData.h"
 
 class SavedDataStorage

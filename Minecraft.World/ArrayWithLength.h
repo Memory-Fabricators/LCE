@@ -123,7 +123,7 @@ class Enchantment;
 class ClipChunk;
 
 typedef arrayWithLength<double> doubleArray;
-typedef arrayWithLength<byte> byteArray;
+typedef arrayWithLength<unsigned char> byteArray;
 typedef arrayWithLength<char> charArray;
 typedef arrayWithLength<short> shortArray;
 typedef arrayWithLength<int> intArray;

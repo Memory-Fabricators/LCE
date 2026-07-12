@@ -27,7 +27,7 @@ AddMobPacket::AddMobPacket(shared_ptr<Mob> mob, int yRotp, int xRotp, int xp, in
 {
     id = mob->entityId;
 
-    type = (byte)EntityIO::getId(mob);
+    type = (unsigned char)EntityIO::getId(mob);
     // 4J Stu - We should add entities at their "last sent" position so that the relative update packets
     // put them in the correct place
     x = xp; // Mth::floor(mob->x * 32);

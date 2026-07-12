@@ -78,7 +78,7 @@ class Zombie : public Monster
     void startConverting(int time);
 
   public:
-    void handleEntityEvent(byte id);
+    void handleEntityEvent(unsigned char id);
     bool isConverting();
 
   protected:

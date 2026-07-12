@@ -106,7 +106,7 @@ void ByteArrayInputStream::close()
 // n - the number of bytes to be skipped.
 // Returns:
 // the actual number of bytes skipped.
-__int64 ByteArrayInputStream::skip(__int64 n)
+std::int64_t ByteArrayInputStream::skip(std::int64_t n)
 {
     int newPos = pos + n;
 

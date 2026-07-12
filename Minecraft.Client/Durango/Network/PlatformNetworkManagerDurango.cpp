@@ -19,7 +19,7 @@ void CPlatformNetworkManagerDurango::HandleStateChange(DQRNetworkManager::eDQRNe
             "DNM_STATE_PLAYING",
             "DNM_STATE_LEAVING",
             "DNM_STATE_ENDING",
-        };
+    };
 
     app.DebugPrintf("Network State: %s ==> %s\n",
                     c_apszStateNames[oldState],

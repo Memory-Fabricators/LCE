@@ -17,7 +17,7 @@ class WeaponItem : public Item
     virtual bool mineBlock(shared_ptr<ItemInstance> itemInstance, Level *level, int tile, int x, int y, int z, shared_ptr<Mob> owner);
     virtual int getAttackDamage(shared_ptr<Entity> entity);
     virtual bool isHandEquipped();
-    virtual UseAnim getUseAnimation(shared_ptr<ItemInstance> itemInstance);
+    virtual UseAnimation getUseAnimation(shared_ptr<ItemInstance> itemInstance);
     virtual int getUseDuration(shared_ptr<ItemInstance> itemInstance);
     virtual shared_ptr<ItemInstance> use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual bool canDestroySpecial(Tile *tile);

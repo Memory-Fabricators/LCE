@@ -2,7 +2,7 @@
 #include "net.minecraft.world.level.newbiome.layer.h"
 #include "stdafx.h"
 
-GrowMushroomIslandLayer::GrowMushroomIslandLayer(__int64 seedMixup, shared_ptr<Layer> parent) : Layer(seedMixup)
+GrowMushroomIslandLayer::GrowMushroomIslandLayer(std::int64_t seedMixup, shared_ptr<Layer> parent) : Layer(seedMixup)
 {
     this->parent = parent;
 }

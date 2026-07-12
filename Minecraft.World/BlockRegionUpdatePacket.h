@@ -13,6 +13,9 @@ class BlockRegionUpdatePacket : public Packet, public enable_shared_from_this<Bl
     byteArray buffer;
     int levelIdx;
     bool bIsFullChunk; // 4J Added
+    // Set by read() when the compressed payload failed to decode; buffer is
+    // left empty in that case and callers must not apply it as "no change".
+    bool decodeFailed = false;
 
   private:
     int size;

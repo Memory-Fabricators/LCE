@@ -1,5 +1,6 @@
 #pragma once
 #include "Definitions.h"
+#include "Entity.h"
 #include "Material.h"
 #include "SoundTypes.h"
 #include "Vec3.h"
@@ -654,7 +655,7 @@ class Tile
     virtual void playerWillDestroy(Level *level, int x, int y, int z, int data, shared_ptr<Player> player);
     virtual void onRemoving(Level *level, int x, int y, int z, int data);
     virtual void handleRain(Level *level, int x, int y, int z);
-    virtual void levelTimeChanged(Level *level, __int64 delta, __int64 newTime);
+    virtual void levelTimeChanged(Level *level, std::int64_t delta, std::int64_t newTime);
     virtual void registerIcons(IconRegister *iconRegister);
     virtual wstring getTileItemIconName();
     // 4J Using per-item textures now

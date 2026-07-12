@@ -1,5 +1,4 @@
 #include "MobSkinMemTextureProcessor.h"
-#include "stdafx.h"
 
 BufferedImage *MobSkinMemTextureProcessor::process(BufferedImage *in)
 {
@@ -12,9 +11,9 @@ BufferedImage *MobSkinMemTextureProcessor::process(BufferedImage *in)
     height = 32;
 
     BufferedImage *out = new BufferedImage(width, height, BufferedImage::TYPE_INT_ARGB);
-    Graphics *g = out->getGraphics();
-    g->drawImage(in, 0, 0, NULL);
-    g->dispose();
+    // FIXME: Graphics *g = out->getGraphics();
+    // g->drawImage(in, 0, 0, NULL);
+    // g->dispose();
 
     pixels = out->getData();
 

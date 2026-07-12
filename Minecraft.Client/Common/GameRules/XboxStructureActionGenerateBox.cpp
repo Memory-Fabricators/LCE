@@ -1,6 +1,7 @@
 #include "XboxStructureActionGenerateBox.h"
 #include "../../../Minecraft.World/StringHelpers.h"
 #include "../../../Minecraft.World/net.minecraft.world.level.levelgen.structure.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 XboxStructureActionGenerateBox::XboxStructureActionGenerateBox()
@@ -13,25 +14,25 @@ void XboxStructureActionGenerateBox::writeAttributes(DataOutputStream *dos, UINT
 {
     ConsoleGenerateStructureAction::writeAttributes(dos, numAttrs + 9);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x0);
+    ::write(dos, GameRuleAttribute::x0);
     dos->writeUTF(_toString(m_x0));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y0);
+    ::write(dos, GameRuleAttribute::y0);
     dos->writeUTF(_toString(m_y0));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z0);
+    ::write(dos, GameRuleAttribute::z0);
     dos->writeUTF(_toString(m_z0));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x1);
+    ::write(dos, GameRuleAttribute::x1);
     dos->writeUTF(_toString(m_x1));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y1);
+    ::write(dos, GameRuleAttribute::y1);
     dos->writeUTF(_toString(m_y1));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z1);
+    ::write(dos, GameRuleAttribute::z1);
     dos->writeUTF(_toString(m_z1));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_edgeTile);
+    ::write(dos, GameRuleAttribute::edgeTile);
     dos->writeUTF(_toString(m_edgeTile));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_fillTile);
+    ::write(dos, GameRuleAttribute::fillTile);
     dos->writeUTF(_toString(m_fillTile));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_skipAir);
+    ::write(dos, GameRuleAttribute::skipAir);
     dos->writeUTF(_toString(m_skipAir));
 }
 

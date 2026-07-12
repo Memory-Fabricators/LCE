@@ -21,7 +21,7 @@ class BowItem : public Item
     virtual void releaseUsing(shared_ptr<ItemInstance> itemInstance, Level *level, shared_ptr<Player> player, int durationLeft);
     virtual shared_ptr<ItemInstance> useTimeDepleted(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual int getUseDuration(shared_ptr<ItemInstance> itemInstance);
-    virtual UseAnim getUseAnimation(shared_ptr<ItemInstance> itemInstance);
+    virtual UseAnimation getUseAnimation(shared_ptr<ItemInstance> itemInstance);
     virtual shared_ptr<ItemInstance> use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual int getEnchantmentValue();
 

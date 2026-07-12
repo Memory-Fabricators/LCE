@@ -2,6 +2,7 @@
 #include "../../../Minecraft.World/StringHelpers.h"
 #include "../../../Minecraft.World/net.minecraft.world.item.enchantment.h"
 #include "../../../Minecraft.World/net.minecraft.world.item.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 AddEnchantmentRuleDefinition::AddEnchantmentRuleDefinition()
@@ -13,10 +14,10 @@ void AddEnchantmentRuleDefinition::writeAttributes(DataOutputStream *dos, UINT n
 {
     GameRuleDefinition::writeAttributes(dos, numAttributes + 2);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_enchantmentId);
+    ::write(dos, GameRuleAttribute::enchantmentId);
     dos->writeUTF(_toString(m_enchantmentId));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_enchantmentLevel);
+    ::write(dos, GameRuleAttribute::enchantmentLevel);
     dos->writeUTF(_toString(m_enchantmentLevel));
 }
 

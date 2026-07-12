@@ -120,7 +120,8 @@ int ShapedRecipy::size()
 }
 
 // 4J-PB
-bool ShapedRecipy::requires(int iRecipe) {
+bool ShapedRecipy::requirement(int iRecipe)
+{
     app.DebugPrintf("ShapedRecipy %d\n", iRecipe);
     int iCount = 0;
     for (int x = 0; x < 3; x++)
@@ -141,7 +142,8 @@ bool ShapedRecipy::requires(int iRecipe) {
     return false;
 }
 
-void ShapedRecipy::requires(INGREDIENTS_REQUIRED *pIngReq) {
+void ShapedRecipy::requirement(INGREDIENTS_REQUIRED *pIngReq)
+{
     // printf("ShapedRecipy %d\n",iRecipe);
 
     int iCount = 0;

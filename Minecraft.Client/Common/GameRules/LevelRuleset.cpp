@@ -26,10 +26,10 @@ void LevelRuleset::getChildren(vector<GameRuleDefinition *> *children)
     }
 }
 
-GameRuleDefinition *LevelRuleset::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *LevelRuleset::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_NamedArea)
+    if (ruleType == GameRuleType::NamedArea)
     {
         rule = new NamedAreaRuleDefinition();
         m_areas.push_back((NamedAreaRuleDefinition *)rule);

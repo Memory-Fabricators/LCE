@@ -30,9 +30,9 @@ class PlayerConnection : public PacketListener, public ConsoleInputSource
 
     bool didTick;
     int lastKeepAliveId;
-    __int64 lastKeepAliveTime;
+    std::int64_t lastKeepAliveTime;
     static Random random;
-    __int64 lastKeepAliveTick;
+    std::int64_t lastKeepAliveTick;
     int chatSpamTickCount;
     int dropSpamTickCount;
 

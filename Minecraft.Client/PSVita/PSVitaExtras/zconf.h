@@ -485,7 +485,7 @@ typedef unsigned long z_crc_t;
 #define z_off64_t off64_t
 #else
 #if defined(_WIN32) && !defined(__GNUC__) && !defined(Z_SOLO)
-#define z_off64_t __int64
+#define z_off64_t std::int64_t
 #else
 #define z_off64_t z_off_t
 #endif

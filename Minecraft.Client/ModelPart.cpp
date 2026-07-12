@@ -1,7 +1,7 @@
 #include "ModelPart.h"
 #include "Cube.h"
 #include "TexOffs.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 const float ModelPart::RAD = (180.0f / PI);
 

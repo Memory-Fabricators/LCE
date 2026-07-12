@@ -349,9 +349,9 @@ class DQRNetworkManager
     static const eDQRNetworkManagerState m_INTtoEXTStateMappings[DNM_INT_STATE_COUNT];
     eDQRNetworkManagerInternalState m_state;
     eDQRNetworkManagerState m_stateExternal;
-    __int64 m_lastUnreliableSendTime;
-    __int64 m_firstUnreliableSendTime;
-    __int64 m_startedWaitingForReservationsTime;
+    std::int64_t m_lastUnreliableSendTime;
+    std::int64_t m_firstUnreliableSendTime;
+    std::int64_t m_startedWaitingForReservationsTime;
     unsigned char *m_customSessionData;
     unsigned int m_customSessionDataSize;
     int m_customDataDirtyUpdateTicks;
@@ -504,7 +504,7 @@ class DQRNetworkManager
     void SetDisplayName(PlayerUID xuid, wstring displayName);
 
   private:
-    __int64 m_playersLeftPartyTime;
+    std::int64_t m_playersLeftPartyTime;
     int m_playersLeftParty;
 
     bool GetBestPartyUserIndex();

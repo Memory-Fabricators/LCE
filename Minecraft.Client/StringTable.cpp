@@ -29,7 +29,7 @@ StringTable::StringTable(PBYTE pbData, DWORD dwSize)
     app.getLocale(locales);
 
     bool foundLang = false;
-    __int64 bytesToSkip = 0;
+    std::int64_t bytesToSkip = 0;
     int dataSize = 0;
 
     //
@@ -106,10 +106,20 @@ StringTable::StringTable(PBYTE pbData, DWORD dwSize)
     }
     else
     {
-        app.DebugPrintf("Failed to get language\n");
-#ifdef _DEBUG
-        __debugbreak();
-#endif
+        // No locale in getLocale()'s list (see CMinecraftApp::getLocale())
+        // matched an entry actually present in this archive's
+        // languages.loc. That list always ends with the eMCLang_enUS/
+        // eMCLang_null ("en-EN") universal fallbacks, so reaching here means
+        // the archive itself is missing even those - a corrupt or unexpected
+        // media archive, not something the game can recover string data
+        // from. __debugbreak() used to fire unconditionally in debug
+        // builds, turning this into a hard SIGILL crash the moment it
+        // happened; log clearly and keep running with no translated
+        // strings instead (getString() below already returns L"" when
+        // m_stringsMap/m_stringsVec is empty via isStatic's dispatch), the
+        // same way a release build has always handled this case.
+        app.DebugPrintf("StringTable:: Failed to find any usable language in the archive; "
+                        "no strings will be available.\n");
 
         isStatic = false;
     }
@@ -134,7 +144,14 @@ LPCWSTR StringTable::getString(const wstring &id)
 #ifndef _CONTENT_PACKAGE
     if (isStatic)
     {
-        __debugbreak();
+        // This table was loaded in "static" mode (integer string ids, see
+        // the isStatic branch in the constructor above) - the caller should
+        // have used getString(int) instead. This is a caller bug, not a
+        // runtime data problem, but it's still not worth an
+        // illegal-instruction crash over: log once and fall through to the
+        // normal empty-string miss below.
+        app.DebugPrintf("StringTable::getString(wstring): called on a static-mode table; "
+                        "use getString(int) instead.\n");
         return L"";
     }
 #endif
@@ -153,13 +170,9 @@ LPCWSTR StringTable::getString(const wstring &id)
 
 LPCWSTR StringTable::getString(int id)
 {
-#ifndef _CONTENT_PACKAGE
-    if (!isStatic)
-    {
-        __debugbreak();
-        return L"";
-    }
-#endif
+    // The SDL port can load DLC before its locale table has been selected.
+    // A missing localized string must not turn into an illegal-instruction
+    // debug trap; return the normal empty-string fallback below instead.
 
     if (id < m_stringsVec.size())
     {

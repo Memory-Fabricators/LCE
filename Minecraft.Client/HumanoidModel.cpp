@@ -2,7 +2,8 @@
 #include "../Minecraft.World/Entity.h"
 #include "../Minecraft.World/Mth.h"
 #include "ModelPart.h"
-#include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 // 4J added
 

@@ -6,21 +6,21 @@
 class TickNextTickData
 {
   private:
-    static __int64 C;
+    static std::int64_t C;
 
   public:
     int x, y, z, tileId;
-    __int64 m_delay;
+    std::int64_t m_delay;
 
   private:
-    __int64 c;
+    std::int64_t c;
 
   public:
     TickNextTickData(int x, int y, int z, int tileId);
 
     bool equals(const void *o) const;
     int hashCode() const;
-    TickNextTickData *delay(__int64 l);
+    TickNextTickData *delay(std::int64_t l);
     int compareTo(const TickNextTickData *tnd) const;
 
     static bool compare_fnct(const TickNextTickData &x, const TickNextTickData &y);
@@ -28,7 +28,7 @@ class TickNextTickData
     static bool eq_test(const TickNextTickData &x, const TickNextTickData &y);
 };
 
-typedef struct
+typedef struct TickNextTickDataKeyHash
 {
     int operator()(const TickNextTickData &k) const
     {
@@ -37,7 +37,7 @@ typedef struct
 
 } TickNextTickDataKeyHash;
 
-typedef struct
+typedef struct TickNextTickDataKeyEq
 {
     bool operator()(const TickNextTickData &x, const TickNextTickData &y) const
     {
@@ -45,7 +45,7 @@ typedef struct
     }
 } TickNextTickDataKeyEq;
 
-typedef struct
+typedef struct TickNextTickDataKeyCompare
 {
     bool operator()(const TickNextTickData &x, const TickNextTickData &y) const
     {

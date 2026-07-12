@@ -3,7 +3,7 @@
 #include "net.minecraft.world.level.biome.h"
 #include "stdafx.h"
 
-RegionHillsLayer::RegionHillsLayer(__int64 seed, shared_ptr<Layer> parent) : Layer(seed)
+RegionHillsLayer::RegionHillsLayer(std::int64_t seed, shared_ptr<Layer> parent) : Layer(seed)
 {
     this->parent = parent;
 }

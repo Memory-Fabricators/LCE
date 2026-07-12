@@ -1,6 +1,14 @@
 #pragma once
 
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
+#include <cstddef>
+#include <cstdint>
+#include <expected>
+#include <string>
+
+class FloatBuffer;
+class IntBuffer;
 
 class ImageFileBuffer
 {
@@ -36,18 +44,12 @@ class ImageFileBuffer
     }
 };
 
-typedef struct
-{
-    int Width;
-    int Height;
-} D3DXIMAGE_INFO;
-
 typedef struct _XSOCIAL_PREVIEWIMAGE
 {
-    BYTE *pBytes;
-    DWORD Pitch;
-    DWORD Width;
-    DWORD Height;
+    std::uint8_t *pBytes;
+    std::uint32_t Pitch;
+    std::uint32_t Width;
+    std::uint32_t Height;
 } XSOCIAL_PREVIEWIMAGE, *PXSOCIAL_PREVIEWIMAGE;
 
 class C4JRender
@@ -69,7 +71,7 @@ class C4JRender
     const float *MatrixGet(int type);
     void Set_matrixDirty();
 
-    void Initialise(void *window);
+    void Initialise(SDL_Window *window);
     void InitialiseContext();
     void StartFrame();
     void DoScreenGrabOnNextPresent();
@@ -159,9 +161,9 @@ class C4JRender
     void TextureDynamicUpdateStart();
     void TextureDynamicUpdateEnd();
 
-    HRESULT LoadTextureData(const char *szFilename, D3DXIMAGE_INFO *pSrcInfo, int **ppDataOut);
-    HRESULT LoadTextureData(BYTE *pbData, DWORD dwBytes, D3DXIMAGE_INFO *pSrcInfo, int **ppDataOut);
-    HRESULT SaveTextureData(const char *szFilename, D3DXIMAGE_INFO *pSrcInfo, int *ppDataOut);
+    std::expected<SDL_Surface *, std::string> LoadTextureData(const char *szFilename);
+    std::expected<SDL_Surface *, std::string> LoadTextureData(const void *data, std::size_t size);
+    std::expected<void, std::string> SaveTextureData(const char *szFilename, SDL_Surface *surface);
     void TextureGetStats();
     void *TextureGetTexture(int idx);
 
@@ -204,93 +206,5 @@ class C4JRender
     bool Suspended();
     void Resume();
 };
-
-const int GL_MODELVIEW_MATRIX = 0;
-const int GL_PROJECTION_MATRIX = 1;
-const int GL_MODELVIEW = 0;
-const int GL_PROJECTION = 1;
-const int GL_TEXTURE = 2;
-
-const int GL_S = 0;
-const int GL_T = 1;
-const int GL_R = 2;
-const int GL_Q = 3;
-
-const int GL_TEXTURE_GEN_S = 0;
-const int GL_TEXTURE_GEN_T = 1;
-const int GL_TEXTURE_GEN_Q = 2;
-const int GL_TEXTURE_GEN_R = 3;
-
-const int GL_TEXTURE_GEN_MODE = 0;
-const int GL_OBJECT_LINEAR = 0;
-const int GL_EYE_LINEAR = 1;
-const int GL_OBJECT_PLANE = 0;
-const int GL_EYE_PLANE = 1;
-
-const int GL_TEXTURE_2D = 1;
-const int GL_BLEND = 2;
-const int GL_CULL_FACE = 3;
-const int GL_ALPHA_TEST = 4;
-const int GL_DEPTH_TEST = 5;
-const int GL_FOG = 6;
-const int GL_LIGHTING = 7;
-const int GL_LIGHT0 = 8;
-const int GL_LIGHT1 = 9;
-
-const int CLEAR_DEPTH_FLAG = 1;
-const int CLEAR_COLOUR_FLAG = 2;
-
-const int GL_DEPTH_BUFFER_BIT = CLEAR_DEPTH_FLAG;
-const int GL_COLOR_BUFFER_BIT = CLEAR_COLOUR_FLAG;
-
-const int GL_SRC_ALPHA = 0;
-const int GL_ONE_MINUS_SRC_ALPHA = 1;
-const int GL_ONE = 2;
-const int GL_ZERO = 3;
-const int GL_DST_ALPHA = 4;
-const int GL_SRC_COLOR = 5;
-const int GL_DST_COLOR = 6;
-const int GL_ONE_MINUS_DST_COLOR = 7;
-const int GL_ONE_MINUS_SRC_COLOR = 8;
-const int GL_CONSTANT_ALPHA = 9;
-const int GL_ONE_MINUS_CONSTANT_ALPHA = 10;
-
-const int GL_GREATER = 1;
-const int GL_EQUAL = 2;
-const int GL_LEQUAL = 3;
-const int GL_GEQUAL = 4;
-const int GL_ALWAYS = 5;
-
-const int GL_TEXTURE_MIN_FILTER = 1;
-const int GL_TEXTURE_MAG_FILTER = 2;
-const int GL_TEXTURE_WRAP_S = 3;
-const int GL_TEXTURE_WRAP_T = 4;
-
-const int GL_NEAREST = 0;
-const int GL_LINEAR = 1;
-const int GL_EXP = 2;
-const int GL_NEAREST_MIPMAP_LINEAR = 0;
-
-const int GL_CLAMP = 0;
-const int GL_REPEAT = 1;
-
-const int GL_FOG_START = 1;
-const int GL_FOG_END = 2;
-const int GL_FOG_MODE = 3;
-const int GL_FOG_DENSITY = 4;
-const int GL_FOG_COLOR = 5;
-
-const int GL_POSITION = 1;
-const int GL_AMBIENT = 2;
-const int GL_DIFFUSE = 3;
-const int GL_SPECULAR = 4;
-
-const int GL_LIGHT_MODEL_AMBIENT = 1;
-
-const int GL_LINES = C4JRender::PRIMITIVE_TYPE_LINE_LIST;
-const int GL_LINE_STRIP = C4JRender::PRIMITIVE_TYPE_LINE_STRIP;
-const int GL_QUADS = C4JRender::PRIMITIVE_TYPE_QUAD_LIST;
-const int GL_TRIANGLE_FAN = C4JRender::PRIMITIVE_TYPE_TRIANGLE_FAN;
-const int GL_TRIANGLE_STRIP = C4JRender::PRIMITIVE_TYPE_TRIANGLE_STRIP;
 
 extern C4JRender RenderManager;

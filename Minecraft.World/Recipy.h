@@ -50,9 +50,7 @@ class Recipy
 
     // 4J-PB
     virtual bool
-        requires(int iRecipe)
-    = 0;
+    requirement(int iRecipe) = 0;
     virtual void
-        requires(INGREDIENTS_REQUIRED *pIngReq)
-    = 0;
+    requirement(INGREDIENTS_REQUIRED *pIngReq) = 0;
 };

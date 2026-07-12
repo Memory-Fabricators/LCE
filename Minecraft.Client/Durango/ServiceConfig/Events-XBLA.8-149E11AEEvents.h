@@ -262,7 +262,7 @@ Remarks:
     // Entry point to log the event BlockBroken
     //
     __inline ULONG
-    EventWriteBlockBroken(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const signed int BlockId, __in const signed int BlockAux, __in const unsigned __int64 BlockCount)
+    EventWriteBlockBroken(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const signed int BlockId, __in const signed int BlockAux, __in const unsigned std::int64_t BlockCount)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_BlockBroken 7
 
@@ -285,7 +285,7 @@ Remarks:
     // Entry point to log the event BlockPlaced
     //
     __inline ULONG
-    EventWriteBlockPlaced(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const signed int BlockId, __in const signed int BlockAux, __in const unsigned __int64 BlockCount)
+    EventWriteBlockPlaced(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const signed int BlockId, __in const signed int BlockAux, __in const unsigned std::int64_t BlockCount)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_BlockPlaced 7
 
@@ -368,7 +368,7 @@ Remarks:
     // Entry point to log the event IncDistanceTravelled
     //
     __inline ULONG
-    EventWriteIncDistanceTravelled(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const unsigned __int64 Distance, __in const signed int TravelMethodId)
+    EventWriteIncDistanceTravelled(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const unsigned std::int64_t Distance, __in const signed int TravelMethodId)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_IncDistanceTravelled 6
 
@@ -390,7 +390,7 @@ Remarks:
     // Entry point to log the event IncTimePlayed
     //
     __inline ULONG
-    EventWriteIncTimePlayed(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const unsigned __int64 TimePlayed)
+    EventWriteIncTimePlayed(__in_opt PCWSTR UserId, __in LPCGUID PlayerSessionId, __in const signed int DifficultyLevelId, __in const unsigned std::int64_t TimePlayed)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_IncTimePlayed 5
 
@@ -555,7 +555,7 @@ Remarks:
     // Entry point to log the event McItemAcquired
     //
     __inline ULONG
-    EventWriteMcItemAcquired(__in_opt PCWSTR UserId, __in const signed int SectionId, __in LPCGUID PlayerSessionId, __in_opt PCWSTR MultiplayerCorrelationId, __in const signed int GameplayModeId, __in const signed int DifficultyLevelId, __in const signed int ItemId, __in const signed int AcquisitionMethodId, __in const float LocationX, __in const float LocationY, __in const float LocationZ, __in const signed int ItemAux, __in const unsigned __int64 ItemCount)
+    EventWriteMcItemAcquired(__in_opt PCWSTR UserId, __in const signed int SectionId, __in LPCGUID PlayerSessionId, __in_opt PCWSTR MultiplayerCorrelationId, __in const signed int GameplayModeId, __in const signed int DifficultyLevelId, __in const signed int ItemId, __in const signed int AcquisitionMethodId, __in const float LocationX, __in const float LocationY, __in const float LocationZ, __in const signed int ItemAux, __in const unsigned std::int64_t ItemCount)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_McItemAcquired 14
 
@@ -585,7 +585,7 @@ Remarks:
     // Entry point to log the event McItemUsed
     //
     __inline ULONG
-    EventWriteMcItemUsed(__in_opt PCWSTR UserId, __in const signed int SectionId, __in LPCGUID PlayerSessionId, __in_opt PCWSTR MultiplayerCorrelationId, __in const signed int GameplayModeId, __in const signed int DifficultyLevelId, __in const signed int ItemId, __in const float LocationX, __in const float LocationY, __in const float LocationZ, __in const signed int ItemAux, __in const unsigned __int64 ItemCount, __in const signed int Hunger)
+    EventWriteMcItemUsed(__in_opt PCWSTR UserId, __in const signed int SectionId, __in LPCGUID PlayerSessionId, __in_opt PCWSTR MultiplayerCorrelationId, __in const signed int GameplayModeId, __in const signed int DifficultyLevelId, __in const signed int ItemId, __in const float LocationX, __in const float LocationY, __in const float LocationZ, __in const signed int ItemAux, __in const unsigned std::int64_t ItemCount, __in const signed int Hunger)
     {
 #define ARGUMENT_COUNT_XBLA_149E11AE_McItemUsed 14
 

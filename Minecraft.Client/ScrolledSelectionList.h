@@ -32,7 +32,7 @@ class ScrolledSelectionList
     float yo;
 
     int lastSelection;
-    __int64 lastSelectionTime;
+    std::int64_t lastSelectionTime;
 
     bool renderSelection;
     bool _renderHeader;

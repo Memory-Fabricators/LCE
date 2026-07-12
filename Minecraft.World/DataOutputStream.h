@@ -3,6 +3,7 @@
 
 #include "DataOutput.h"
 #include "OutputStream.h"
+#include <cstdint>
 
 class DataOutputStream : public OutputStream, public DataOutput
 {
@@ -22,11 +23,11 @@ class DataOutputStream : public OutputStream, public DataOutput
     virtual void write(byteArray b);
     virtual void write(byteArray b, unsigned int offset, unsigned int length);
     virtual void close();
-    virtual void writeByte(byte a);
+    virtual void writeByte(unsigned char a);
     virtual void writeDouble(double a);
     virtual void writeFloat(float a);
     virtual void writeInt(int a);
-    virtual void writeLong(__int64 a);
+    virtual void writeLong(std::int64_t a);
     virtual void writeShort(short a);
     virtual void writeChar(wchar_t a);
     virtual void writeChars(const wstring &a);

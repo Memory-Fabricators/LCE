@@ -3,6 +3,20 @@
 #include "../Minecraft.World/StringHelpers.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+
+static int *CopyImagePixels(const SDL_Surface *surface)
+{
+    int *pixels = new int[static_cast<std::size_t>(surface->w) * surface->h];
+    for (int y = 0; y < surface->h; ++y)
+    {
+        const auto *row = static_cast<const std::uint8_t *>(surface->pixels) + static_cast<std::size_t>(y) * surface->pitch;
+        memcpy(pixels + static_cast<std::size_t>(y) * surface->w, row, static_cast<std::size_t>(surface->w) * sizeof(*pixels));
+    }
+    return pixels;
+}
 
 #ifdef _XBOX
 typedef struct
@@ -49,7 +63,6 @@ void BufferedImage::ByteFlip4(unsigned int &data)
 // 24-bits used (ie no alpha channel) whereas method 0 is a full 32-bit image with a valid alpha channel.
 BufferedImage::BufferedImage(const wstring &File, bool filenameHasExtension /*=false*/, bool bTitleUpdateTexture /*=false*/, const wstring &drive /*=L""*/)
 {
-    HRESULT hr;
     wstring wDrive;
     wstring filePath;
     filePath = File;
@@ -166,11 +179,8 @@ BufferedImage::BufferedImage(const wstring &File, bool filenameHasExtension /*=f
         app.DebugPrintf("\n--- Loading TEXTURE - %s\n\n", pchTextureName);
 #endif
 
-        D3DXIMAGE_INFO ImageInfo;
-        ZeroMemory(&ImageInfo, sizeof(D3DXIMAGE_INFO));
-        hr = RenderManager.LoadTextureData(pchTextureName, &ImageInfo, &data[l]);
-
-        if (hr != ERROR_SUCCESS)
+        auto image = RenderManager.LoadTextureData(pchTextureName);
+        if (!image)
         {
             // 4J - If we haven't loaded the non-mipmap version then exit the game
             if (l == 0)
@@ -180,17 +190,19 @@ BufferedImage::BufferedImage(const wstring &File, bool filenameHasExtension /*=f
             return;
         }
 
+        SDL_Surface *surface = *image;
+        data[l] = CopyImagePixels(surface);
         if (l == 0)
         {
-            width = ImageInfo.Width;
-            height = ImageInfo.Height;
+            width = surface->w;
+            height = surface->h;
         }
+        SDL_DestroySurface(surface);
     }
 }
-
 BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenameHasExtension /*= false*/)
+
 {
-    HRESULT hr;
     wstring filePath = File;
     BYTE *pbData = NULL;
     DWORD dwBytes = 0;
@@ -239,11 +251,8 @@ BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenam
             return;
         }
 
-        D3DXIMAGE_INFO ImageInfo;
-        ZeroMemory(&ImageInfo, sizeof(D3DXIMAGE_INFO));
-        hr = RenderManager.LoadTextureData(pbData, dwBytes, &ImageInfo, &data[l]);
-
-        if (hr != ERROR_SUCCESS)
+        auto image = RenderManager.LoadTextureData(pbData, dwBytes);
+        if (!image)
         {
             // 4J - If we haven't loaded the non-mipmap version then exit the game
             if (l == 0)
@@ -253,11 +262,14 @@ BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenam
             return;
         }
 
+        SDL_Surface *surface = *image;
+        data[l] = CopyImagePixels(surface);
         if (l == 0)
         {
-            width = ImageInfo.Width;
-            height = ImageInfo.Height;
+            width = surface->w;
+            height = surface->h;
         }
+        SDL_DestroySurface(surface);
     }
 }
 
@@ -269,14 +281,14 @@ BufferedImage::BufferedImage(BYTE *pbData, DWORD dwBytes)
         data[l] = NULL;
     }
 
-    D3DXIMAGE_INFO ImageInfo;
-    ZeroMemory(&ImageInfo, sizeof(D3DXIMAGE_INFO));
-    HRESULT hr = RenderManager.LoadTextureData(pbData, dwBytes, &ImageInfo, &data[0]);
-
-    if (hr == ERROR_SUCCESS)
+    auto image = RenderManager.LoadTextureData(pbData, dwBytes);
+    if (image)
     {
-        width = ImageInfo.Width;
-        height = ImageInfo.Height;
+        SDL_Surface *surface = *image;
+        data[0] = CopyImagePixels(surface);
+        width = surface->w;
+        height = surface->h;
+        SDL_DestroySurface(surface);
     }
     else
     {
@@ -322,11 +334,6 @@ int *BufferedImage::getData()
 int *BufferedImage::getData(int level)
 {
     return data[level];
-}
-
-Graphics *BufferedImage::getGraphics()
-{
-    return NULL;
 }
 
 // Returns the transparency. Returns either OPAQUE, BITMASK, or TRANSLUCENT.

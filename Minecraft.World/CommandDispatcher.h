@@ -1,5 +1,7 @@
 #pragma once
 
+#include "CommandsEnum.h"
+
 class Command;
 class CommandSender;
 

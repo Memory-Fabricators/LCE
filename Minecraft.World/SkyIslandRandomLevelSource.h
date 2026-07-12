@@ -7,7 +7,7 @@ class Level;
 class SkyIslandRandomLevelSource : public ChunkSource
 {
   public:
-    SkyIslandRandomLevelSource(Level *level, __int64 seed);
+    SkyIslandRandomLevelSource(Level *level, std::int64_t seed);
 
     virtual bool hasChunk(int x, int y);
     virtual LevelChunk *getChunk(int x, int z);

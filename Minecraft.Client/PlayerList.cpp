@@ -212,7 +212,7 @@ void PlayerList::placeNewPlayer(Connection *connection, shared_ptr<ServerPlayer>
     addPlayerToReceiving(player);
 
     playerConnection->send(shared_ptr<LoginPacket>(new LoginPacket(L"", player->entityId, level->getLevelData()->getGenerator(), level->getSeed(), player->gameMode->getGameModeForPlayer()->getId(),
-                                                                   (byte)level->dimension->id, (byte)level->getMaxBuildHeight(), (byte)getMaxPlayers(),
+                                                                   level->dimension->id, level->getMaxBuildHeight(), getMaxPlayers(),
                                                                    level->difficulty, TelemetryManager->GetMultiplayerInstanceID(), (BYTE)playerIndex, level->useNewSeaLevel(), player->getAllPlayerGamePrivileges(),
                                                                    level->getLevelData()->getXZSize(), level->getLevelData()->getHellScale())));
     playerConnection->send(shared_ptr<SetSpawnPositionPacket>(new SetSpawnPositionPacket(spawnPos->x, spawnPos->y, spawnPos->z)));

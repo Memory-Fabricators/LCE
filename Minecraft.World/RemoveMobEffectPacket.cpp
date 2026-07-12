@@ -11,7 +11,7 @@ RemoveMobEffectPacket::RemoveMobEffectPacket()
 RemoveMobEffectPacket::RemoveMobEffectPacket(int entityId, MobEffectInstance *effect)
 {
     this->entityId = entityId;
-    this->effectId = (byte)(effect->getId() & 0xff);
+    this->effectId = (effect->getId() & 0xff);
 }
 
 void RemoveMobEffectPacket::read(DataInputStream *dis)

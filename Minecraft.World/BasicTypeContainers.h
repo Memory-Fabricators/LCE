@@ -1,5 +1,6 @@
 #pragma once
 
+#include <climits>
 class Byte
 {
   public:
@@ -60,14 +61,14 @@ class Double
         return false; /*4J TODO*/
     }
 
-    static double longBitsToDouble(__int64 bits)
+    static double longBitsToDouble(std::int64_t bits)
     {
         return *(double *)&bits;
     }
 
-    static __int64 doubleToLongBits(double d)
+    static std::int64_t doubleToLongBits(double d)
     {
-        return *(__int64 *)&d;
+        return *(std::int64_t *)&d;
     }
 };
 

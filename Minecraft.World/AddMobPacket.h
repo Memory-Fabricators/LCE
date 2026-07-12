@@ -13,7 +13,7 @@ class AddMobPacket : public Packet, public enable_shared_from_this<AddMobPacket>
     int type;
     int x, y, z;
     int xd, yd, zd;
-    byte yRot, xRot, yHeadRot;
+    unsigned char yRot, xRot, yHeadRot;
 
   private:
     shared_ptr<SynchedEntityData> entityData;

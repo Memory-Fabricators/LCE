@@ -1,4 +1,7 @@
 #pragma once
+#include "ArrayWithLength.h"
+#include <unordered_map>
+#include <vector>
 using namespace std;
 
 class Packet;
@@ -22,10 +25,10 @@ class Packet
         int totalSize;
 
         // 4J Added
-        __int64 countSamples[512];
-        __int64 sizeSamples[512];
+        std::int64_t countSamples[512];
+        std::int64_t sizeSamples[512];
         int samplesPos;
-        __int64 firstSampleTime;
+        std::int64_t firstSampleTime;
 
       public:
         const int id;
@@ -42,7 +45,7 @@ class Packet
 
         // 4J Added
         void renderStats();
-        __int64 getCountSample(int samplePos);
+        std::int64_t getCountSample(int samplePos);
         wstring getLegendString();
     };
 
@@ -61,7 +64,7 @@ class Packet
     static void map(int id, bool receiveOnClient, bool receiveOnServer, bool sendToAnyClient, bool renderStats, const type_info &clazz, packetCreateFn);
 
   public:
-    const __int64 createTime;
+    const std::int64_t createTime;
 
     Packet();
 
@@ -88,7 +91,7 @@ class Packet
     static void renderPacketStats(int id);
     static void renderAllPacketStats();
     static void renderAllPacketStatsKey();
-    static __int64 getIndexedStatValue(unsigned int samplePos, unsigned int renderableId);
+    static std::int64_t getIndexedStatValue(unsigned int samplePos, unsigned int renderableId);
 
   private:
     static unordered_map<int, PacketStatistics *> statistics;

@@ -20,9 +20,9 @@ Timer::Timer(float ticksPerSecond)
 
 void Timer::advanceTime()
 {
-    __int64 nowMs = System::currentTimeMillis();
-    __int64 passedMs = nowMs - lastMs;
-    __int64 msSysTime = System::nanoTime() / 1000000;
+    std::int64_t nowMs = System::currentTimeMillis();
+    std::int64_t passedMs = nowMs - lastMs;
+    std::int64_t msSysTime = System::nanoTime() / 1000000;
     double now = msSysTime / 1000.0;
 
     if (passedMs > 1000)
@@ -38,7 +38,7 @@ void Timer::advanceTime()
         accumMs += passedMs;
         if (accumMs > 1000)
         {
-            __int64 passedMsSysTime = msSysTime - lastMsSysTime;
+            std::int64_t passedMsSysTime = msSysTime - lastMsSysTime;
 
             double adjustTimeT = accumMs / (double)passedMsSysTime;
             adjustTime += (adjustTimeT - adjustTime) * 0.2f;
@@ -94,9 +94,9 @@ void Timer::advanceTimeQuickly()
 
 void Timer::skipTime()
 {
-    __int64 nowMs = System::currentTimeMillis();
-    __int64 passedMs = nowMs - lastMs;
-    __int64 msSysTime = System::nanoTime() / 1000000;
+    std::int64_t nowMs = System::currentTimeMillis();
+    std::int64_t passedMs = nowMs - lastMs;
+    std::int64_t msSysTime = System::nanoTime() / 1000000;
     double now = msSysTime / 1000.0;
 
     if (passedMs > 1000)
@@ -112,7 +112,7 @@ void Timer::skipTime()
         accumMs += passedMs;
         if (accumMs > 1000)
         {
-            __int64 passedMsSysTime = msSysTime - lastMsSysTime;
+            std::int64_t passedMsSysTime = msSysTime - lastMsSysTime;
 
             double adjustTimeT = accumMs / (double)passedMsSysTime;
             adjustTime += (adjustTimeT - adjustTime) * 0.2f;

@@ -31,7 +31,7 @@ class RegionFile
     int *chunkTimestamps;
     vector<bool> *sectorFree;
     int sizeDelta;
-    __int64 _lastModified;
+    std::int64_t _lastModified;
     bool m_bIsEmpty; // 4J added
 
   public:
@@ -39,7 +39,7 @@ class RegionFile
     ~RegionFile();
 
     /* the modification date of the region file when it was first opened */
-    __int64 lastModified();
+    std::int64_t lastModified();
 
     /* gets how much the region file has grown since it was last checked */
     int getSizeDelta();
@@ -72,11 +72,11 @@ class RegionFile
 
     /* write a chunk at (x,z) with length bytes of data to disk */
   protected:
-    void write(int x, int z, byte *data, int length);
+    void write(int x, int z, unsigned char *data, int length);
 
     /* write a chunk data to the region file at specified sector number */
   private:
-    void write(int sectorNumber, byte *data, int length, unsigned int compLength);
+    void write(int sectorNumber, unsigned char *data, int length, unsigned int compLength);
     void zero(int sectorNumber, int length); // 4J added
 
     /* is this an invalid chunk coordinate? */

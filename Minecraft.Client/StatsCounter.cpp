@@ -10,6 +10,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 
 #include "../Minecraft.Client/Common/Leaderboards/LeaderboardManager.h"
+#include <climits>
 
 Stat **StatsCounter::LARGE_STATS[] = {
     &Stats::walkOneM,

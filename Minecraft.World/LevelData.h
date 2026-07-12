@@ -12,14 +12,14 @@ class LevelData
     friend class DerivedLevelData;
 
   private:
-    __int64 seed;
+    std::int64_t seed;
     LevelType *m_pGenerator; // = LevelType.normal;
     int xSpawn;
     int ySpawn;
     int zSpawn;
-    __int64 time;
-    __int64 lastPlayed;
-    __int64 sizeOnDisk;
+    std::int64_t time;
+    std::int64_t lastPlayed;
+    std::int64_t sizeOnDisk;
     //    CompoundTag *loadedPlayerTag;	// 4J removed
     int dimension;
     wstring levelName;
@@ -72,7 +72,7 @@ class LevelData
     virtual void setTagData(CompoundTag *tag); // 4J - removed  CompoundTag *playerTag
 
   public:
-    virtual __int64 getSeed();
+    virtual std::int64_t getSeed();
     virtual int getXSpawn();
     virtual int getYSpawn();
     virtual int getZSpawn();
@@ -80,11 +80,11 @@ class LevelData
     virtual int getZStronghold();
     virtual int getXStrongholdEndPortal();
     virtual int getZStrongholdEndPortal();
-    virtual __int64 getTime();
-    virtual __int64 getSizeOnDisk();
+    virtual std::int64_t getTime();
+    virtual std::int64_t getSizeOnDisk();
     virtual CompoundTag *getLoadedPlayerTag();
     // int getDimension(); // 4J Removed TU 9 as it's never accurate
-    virtual void setSeed(__int64 seed);
+    virtual void setSeed(std::int64_t seed);
     virtual void setXSpawn(int xSpawn);
     virtual void setYSpawn(int ySpawn);
     virtual void setZSpawn(int zSpawn);
@@ -97,8 +97,8 @@ class LevelData
     virtual void setXStrongholdEndPortal(int xStrongholdEndPortal);
     virtual void setZStrongholdEndPortal(int zStrongholdEndPortal);
 
-    virtual void setTime(__int64 time);
-    virtual void setSizeOnDisk(__int64 sizeOnDisk);
+    virtual void setTime(std::int64_t time);
+    virtual void setSizeOnDisk(std::int64_t sizeOnDisk);
     virtual void setLoadedPlayerTag(CompoundTag *loadedPlayerTag);
     // void setDimension(int dimension); // 4J Removed TU 9 as it's never used
     virtual void setSpawn(int xSpawn, int ySpawn, int zSpawn);
@@ -106,7 +106,7 @@ class LevelData
     virtual void setLevelName(const wstring &levelName);
     virtual int getVersion();
     virtual void setVersion(int version);
-    virtual __int64 getLastPlayed();
+    virtual std::int64_t getLastPlayed();
     virtual bool isThundering();
     virtual void setThundering(bool thundering);
     virtual int getThunderTime();

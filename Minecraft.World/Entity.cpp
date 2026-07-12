@@ -354,7 +354,7 @@ Entity::Entity(Level *level, bool useSmallId) // 4J - added useSmallId parameter
     // resetPos();
     setPos(0, 0, 0);
 
-    entityData->define(DATA_SHARED_FLAGS_ID, (byte)0);
+    entityData->define(DATA_SHARED_FLAGS_ID, 0);
     entityData->define(DATA_AIR_SUPPLY_ID, TOTAL_AIR_SUPPLY); // 4J Stu - Brought forward from 1.2.3 to fix 38654 - Gameplay: Player will take damage when air bubbles are present if resuming game from load/autosave underwater.
 
     // 4J Stu - We cannot call virtual functions in ctors, as at this point the object
@@ -1858,7 +1858,7 @@ void Entity::lerpMotion(double xd, double yd, double zd)
     this->zd = zd;
 }
 
-void Entity::handleEntityEvent(byte eventId)
+void Entity::handleEntityEvent(unsigned char eventId)
 {
 }
 
@@ -1962,14 +1962,14 @@ bool Entity::getSharedFlag(int flag)
 
 void Entity::setSharedFlag(int flag, bool value)
 {
-    byte currentValue = entityData->getByte(DATA_SHARED_FLAGS_ID);
+    unsigned char currentValue = entityData->getByte(DATA_SHARED_FLAGS_ID);
     if (value)
     {
-        entityData->set(DATA_SHARED_FLAGS_ID, (byte)(currentValue | (1 << flag)));
+        entityData->set(DATA_SHARED_FLAGS_ID, (unsigned char)(currentValue | (1 << flag)));
     }
     else
     {
-        entityData->set(DATA_SHARED_FLAGS_ID, (byte)(currentValue & ~(1 << flag)));
+        entityData->set(DATA_SHARED_FLAGS_ID, (unsigned char)(currentValue & ~(1 << flag)));
     }
 }
 

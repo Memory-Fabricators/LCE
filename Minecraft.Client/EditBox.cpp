@@ -1,5 +1,6 @@
 #include "EditBox.h"
 #include "../Minecraft.World/SharedConstants.h"
+#include "SDL3_Input.h"
 #include "stdafx.h"
 
 EditBox::EditBox(Screen *screen, Font *font, int x, int y, int width, int height, const wstring &value)

@@ -1,5 +1,6 @@
 #include "BowItem.h"
 #include "SoundTypes.h"
+#include "UseAnim.h"
 #include "net.minecraft.world.entity.item.h"
 #include "net.minecraft.world.entity.player.h"
 #include "net.minecraft.world.entity.projectile.h"
@@ -84,9 +85,9 @@ int BowItem::getUseDuration(shared_ptr<ItemInstance> itemInstance)
     return 20 * 60 * 60;
 }
 
-UseAnim BowItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation BowItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_bow;
+    return UseAnimation::bow;
 }
 
 shared_ptr<ItemInstance> BowItem::use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player)

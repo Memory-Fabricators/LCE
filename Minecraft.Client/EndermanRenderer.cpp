@@ -3,6 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "EndermanModel.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 EndermanRenderer::EndermanRenderer() : MobRenderer(new EndermanModel(), 0.5f)
 {
@@ -55,7 +56,7 @@ void EndermanRenderer::additionalRendering(shared_ptr<Mob> _mob, float a)
             int u = col % 65536;
             int v = col / 65536;
 
-            glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+            glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
             glColor4f(1, 1, 1, 1);
         }
 
@@ -105,7 +106,7 @@ int EndermanRenderer::prepareArmor(shared_ptr<Mob> _mob, int layer, float a)
         int u = col % 65536;
         int v = col / 65536;
 
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
 

@@ -7,6 +7,7 @@
 #include "EntityRenderDispatcher.h"
 #include "Tesselator.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 ExperienceOrbRenderer::ExperienceOrbRenderer()
 {
@@ -42,7 +43,7 @@ void ExperienceOrbRenderer::render(shared_ptr<Entity> _orb, double x, double y, 
         int col = orb->getLightColor(a);
         int u = col % 65536;
         int v = col / 65536;
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
     else

@@ -48,7 +48,7 @@ class EmptyLevelChunk : public LevelChunk
     int getBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true); // 4J - added includeLighting parameter
     int setBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p, bool includeLighting = true); // 4J - added includeLighting parameter
     bool testSetBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p);                         // 4J added
-    Random *getRandom(__int64 l);
+    Random *getRandom(std::int64_t l);
     bool isEmpty();
     virtual void reSyncLighting() {}; // 4J added
 };

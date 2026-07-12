@@ -684,7 +684,7 @@ class Item : public enable_shared_from_this<Item>
     virtual void onCraftedBy(shared_ptr<ItemInstance> itemInstance, Level *level, shared_ptr<Player> player);
     virtual bool isComplex();
 
-    virtual UseAnim getUseAnimation(shared_ptr<ItemInstance> itemInstance);
+    virtual UseAnimation getUseAnimation(shared_ptr<ItemInstance> itemInstance);
     virtual int getUseDuration(shared_ptr<ItemInstance> itemInstance);
     virtual void releaseUsing(shared_ptr<ItemInstance> itemInstance, Level *level, shared_ptr<Player> player, int durationLeft);
 

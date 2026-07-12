@@ -1004,7 +1004,7 @@ class CMinecraftApp
     void GetImageTextData(PBYTE pbImageData, DWORD dwImageBytes,
                           unsigned char *pszSeed, unsigned int &uiHostOptions,
                           bool &bHostOptionsRead, DWORD &uiTexturePack);
-    unsigned int CreateImageTextData(PBYTE bTextMetadata, __int64 seed,
+    unsigned int CreateImageTextData(PBYTE bTextMetadata, std::int64_t seed,
                                      bool hasSeed, unsigned int uiHostOptions,
                                      unsigned int uiTexturePackId);
 

@@ -2,9 +2,7 @@
 
 #include "MobRenderer.h"
 
-#ifdef _XBOX
 class EnderDragon;
-#endif
 class DragonModel;
 
 class EnderDragonRenderer : public MobRenderer

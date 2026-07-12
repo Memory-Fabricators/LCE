@@ -6,6 +6,7 @@
 #include "../../../Minecraft.World/net.minecraft.world.level.tile.entity.h"
 #include "../../../Minecraft.World/net.minecraft.world.phys.h"
 #include "ConsoleSchematicFile.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "LevelGenerationOptions.h"
 #include "stdafx.h"
 
@@ -37,15 +38,15 @@ void ApplySchematicRuleDefinition::writeAttributes(DataOutputStream *dos, UINT n
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_filename);
+    ::write(dos, GameRuleAttribute::filename);
     dos->writeUTF(m_schematicName);
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x);
+    ::write(dos, GameRuleAttribute::x);
     dos->writeUTF(_toString(m_location->x));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y);
+    ::write(dos, GameRuleAttribute::y);
     dos->writeUTF(_toString(m_location->y));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z);
+    ::write(dos, GameRuleAttribute::z);
     dos->writeUTF(_toString(m_location->z));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_rot);
+    ::write(dos, GameRuleAttribute::rot);
 
     switch (m_rotation)
     {

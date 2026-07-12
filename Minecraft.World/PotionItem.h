@@ -28,7 +28,7 @@ class PotionItem : public Item
     virtual vector<MobEffectInstance *> *getMobEffects(int auxValue);
     virtual shared_ptr<ItemInstance> useTimeDepleted(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual int getUseDuration(shared_ptr<ItemInstance> itemInstance);
-    virtual UseAnim getUseAnimation(shared_ptr<ItemInstance> itemInstance);
+    virtual UseAnimation getUseAnimation(shared_ptr<ItemInstance> itemInstance);
     virtual shared_ptr<ItemInstance> use(shared_ptr<ItemInstance> instance, Level *level, shared_ptr<Player> player);
     virtual bool TestUse(Level *level, shared_ptr<Player> player);
     virtual bool useOn(shared_ptr<ItemInstance> itemInstance, shared_ptr<Player> player, Level *level, int x, int y, int z, int face, float clickX, float clickY, float clickZ, bool bTestUseOnOnly = false);

@@ -10,7 +10,7 @@ EntityEventPacket::EntityEventPacket()
     eventId = 0;
 }
 
-EntityEventPacket::EntityEventPacket(int entityId, byte eventId)
+EntityEventPacket::EntityEventPacket(int entityId, unsigned char eventId)
 {
     this->entityId = entityId;
     this->eventId = eventId;

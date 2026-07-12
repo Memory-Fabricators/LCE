@@ -4,6 +4,7 @@
 #include "EntityRenderDispatcher.h"
 #include "TileEntityRenderDispatcher.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 void MobSpawnerRenderer::render(shared_ptr<TileEntity> _spawner, double x, double y, double z, float a, bool setColor, float alpha, bool useCompiled)
 {

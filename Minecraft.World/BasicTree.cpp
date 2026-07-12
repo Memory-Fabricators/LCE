@@ -3,7 +3,7 @@
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
 
-byte BasicTree::axisConversionArray[] = {2, 0, 0, 1, 2, 1};
+unsigned char BasicTree::axisConversionArray[] = {2, 0, 0, 1, 2, 1};
 
 BasicTree::~BasicTree()
 {
@@ -140,7 +140,7 @@ void BasicTree::prepare()
     //    System.arraycopy(tempFoliageCoords, 0, foliageCoords, 0, clusterCount);
 }
 
-void BasicTree::crossection(int x, int y, int z, float radius, byte direction, int material)
+void BasicTree::crossection(int x, int y, int z, float radius, unsigned char direction, int material)
 {
     PIXBeginNamedEvent(0, "BasicTree crossection");
     // Create a circular cross section.
@@ -154,8 +154,8 @@ void BasicTree::crossection(int x, int y, int z, float radius, byte direction, i
     // direction is the direction the cross section is pointed, 0 for x, 1 for y, 2 for z
     // material is the index number for the material to use
     int rad = (int)(radius + 0.618);
-    byte secidx1 = axisConversionArray[direction];
-    byte secidx2 = axisConversionArray[direction + 3];
+    unsigned char secidx1 = axisConversionArray[direction];
+    unsigned char secidx2 = axisConversionArray[direction + 3];
     int center[] = {x, y, z};
     int position[] = {0, 0, 0};
     int offset1 = -rad;
@@ -261,7 +261,7 @@ void BasicTree::foliageCluster(int x, int y, int z)
     while (cury >= y)
     {
         radius = foliageShape(cury - y);
-        crossection(x, cury, z, radius, (byte)1, Tile::leaves_Id);
+        crossection(x, cury, z, radius, (unsigned char)1, Tile::leaves_Id);
         cury--;
     }
     PIXEndNamedEvent();
@@ -275,8 +275,8 @@ void BasicTree::limb(int *start, int *end, int material)
     // Populate delta, the difference between start and end for all three axies.
     // Set primidx to the index with the largest overall distance traveled.
     int delta[] = {0, 0, 0};
-    byte idx = 0;
-    byte primidx = 0;
+    unsigned char idx = 0;
+    unsigned char primidx = 0;
     while (idx < 3)
     {
         delta[idx] = end[idx] - start[idx];
@@ -292,8 +292,8 @@ void BasicTree::limb(int *start, int *end, int material)
         return;
     }
     // set up the other two axis indices.
-    byte secidx1 = axisConversionArray[primidx];
-    byte secidx2 = axisConversionArray[primidx + 3];
+    unsigned char secidx1 = axisConversionArray[primidx];
+    unsigned char secidx2 = axisConversionArray[primidx + 3];
     // primsign is digit 1 or -1 depending on whether the limb is headed
     // along the positive or negative primidx axis.
     char primsign;
@@ -431,8 +431,8 @@ int BasicTree::checkLine(int *start, int *end)
     // If the first block searched is lava, return 0
 
     int delta[] = {0, 0, 0};
-    byte idx = 0;
-    byte primidx = 0;
+    unsigned char idx = 0;
+    unsigned char primidx = 0;
     while (idx < 3)
     {
         delta[idx] = end[idx] - start[idx];
@@ -448,11 +448,11 @@ int BasicTree::checkLine(int *start, int *end)
         return -1;
     }
     // set up the other two axis indices.
-    byte secidx1 = axisConversionArray[primidx];
-    byte secidx2 = axisConversionArray[primidx + 3];
+    unsigned char secidx1 = axisConversionArray[primidx];
+    unsigned char secidx2 = axisConversionArray[primidx + 3];
     // primsign is digit 1 or -1 depending on whether the limb is headed
     // along the positive or negative primidx axis.
-    char primsign; // 4J Stu - Was byte, but we use in a sum below and byte=unsigned char so we were setting endoffset incorrectly
+    char primsign; // 4J Stu - Was unsigned char, but we use in a sum below and unsigned char=unsigned char so we were setting endoffset incorrectly
     if (delta[primidx] > 0)
     {
         primsign = 1;
@@ -578,7 +578,7 @@ bool BasicTree::place(Level *level, Random *random, int x, int y, int z)
 
     // Initialize the instance fields for the level and the seed.
     thisLevel = level;
-    __int64 seed = random->nextLong();
+    std::int64_t seed = random->nextLong();
     rnd->setSeed(seed);
     // Initialize the origin of the tree trunk
     origin[0] = x;

@@ -1,4 +1,5 @@
 #pragma once
+#include "ConsoleGameRulesConstants.h"
 using namespace std;
 
 #include "LevelGenerators.h"
@@ -24,8 +25,8 @@ class WstringLookup;
 class GameRuleManager
 {
   public:
-    static WCHAR *wchTagNameA[ConsoleGameRules::eGameRuleType_Count];
-    static WCHAR *wchAttrNameA[ConsoleGameRules::eGameRuleAttr_Count];
+    static const WCHAR *wchTagNameA[static_cast<int>(GameRuleAttribute::Count)];
+    static const WCHAR *wchAttrNameA[static_cast<int>(GameRuleAttribute::Count)];
 
     static const short version_number = 2;
 
@@ -40,10 +41,10 @@ class GameRuleManager
 
     void loadGameRules(DLCPack *);
 
-    LevelGenerationOptions *loadGameRules(byte *dIn, UINT dSize);
-    void loadGameRules(LevelGenerationOptions *lgo, byte *dIn, UINT dSize);
+    LevelGenerationOptions *loadGameRules(unsigned char *dIn, UINT dSize);
+    void loadGameRules(LevelGenerationOptions *lgo, unsigned char *dIn, UINT dSize);
 
-    void saveGameRules(byte **dOut, UINT *dSize);
+    void saveGameRules(unsigned char **dOut, UINT *dSize);
 
   private:
     LevelGenerationOptions *readHeader(DLCGameRulesHeader *grh);
@@ -51,11 +52,11 @@ class GameRuleManager
     void writeRuleFile(DataOutputStream *dos);
 
   public:
-    bool readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT dSize, StringTable *strings); //(DLCGameRulesFile *dlcFile, StringTable *strings);
+    bool readRuleFile(LevelGenerationOptions *lgo, unsigned char *dIn, UINT dSize, StringTable *strings); //(DLCGameRulesFile *dlcFile, StringTable *strings);
 
   private:
     void readAttributes(DataInputStream *dis, vector<wstring> *tagsAndAtts, GameRuleDefinition *rule);
-    void readChildren(DataInputStream *dis, vector<wstring> *tagsAndAtts, unordered_map<int, ConsoleGameRules::EGameRuleType> *tagIdMap, GameRuleDefinition *rule);
+    void readChildren(DataInputStream *dis, vector<wstring> *tagsAndAtts, unordered_map<int, GameRuleType> *tagIdMap, GameRuleDefinition *rule);
 
   public:
     void processSchematics(LevelChunk *levelChunk);

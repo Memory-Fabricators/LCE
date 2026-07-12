@@ -1,0 +1,10 @@
+# Exclude legacy console-specific ports from `ninja clang-format` /
+# `clang-format-check`. These aren't part of the active SDL3 port work and
+# we have no way to build/test them here, so let's not risk reformatting
+# code we can't verify still compiles/behaves correctly afterwards.
+Minecraft.Client/PS3/*
+Minecraft.Client/Xbox/*
+Minecraft.Client/Orbis/*
+Minecraft.Client/PSVita/*
+Minecraft.Client/Durango/*
+Minecraft.Client/Windows64/*

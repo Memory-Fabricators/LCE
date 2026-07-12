@@ -309,7 +309,7 @@ bool SonyRemoteStorage_Vita::setDataInternal()
         char seed[22];
         app.GetImageTextData(m_thumbnailData, m_thumbnailDataSize, (unsigned char *)seed, uiHostOptions, bHostOptionsRead, uiTexturePack);
 
-        __int64 iSeed = strtoll(seed, NULL, 10);
+        std::int64_t iSeed = strtoll(seed, NULL, 10);
         char seedHex[17];
         sprintf(seedHex, "%016llx", iSeed);
         memcpy(descData.m_seed, seedHex, 16); // Don't copy null

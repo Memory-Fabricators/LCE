@@ -25,7 +25,7 @@ class AddPlayerPacket : public Packet, public enable_shared_from_this<AddPlayerP
     DWORD m_skinId;                  // 4J Added
     DWORD m_capeId;                  // 4J Added
     unsigned int m_uiGamePrivileges; // 4J Added
-    byte yHeadRot;                   // 4J Added
+    unsigned char yHeadRot;          // 4J Added
 
     AddPlayerPacket();
     ~AddPlayerPacket();

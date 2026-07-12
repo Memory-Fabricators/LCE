@@ -5,6 +5,7 @@
 #include "../../../Minecraft.World/net.minecraft.world.food.h"
 #include "../../../Minecraft.World/net.minecraft.world.item.h"
 #include "ConsoleGameRules.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 UpdatePlayerRuleDefinition::UpdatePlayerRuleDefinition()
@@ -42,26 +43,26 @@ void UpdatePlayerRuleDefinition::writeAttributes(DataOutputStream *dos, UINT num
     }
     GameRuleDefinition::writeAttributes(dos, numAttributes + attrCount);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnX);
+    ::write(dos, GameRuleAttribute::x);
     dos->writeUTF(_toString(m_spawnPos->x));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnY);
+    ::write(dos, GameRuleAttribute::y);
     dos->writeUTF(_toString(m_spawnPos->y));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_spawnZ);
+    ::write(dos, GameRuleAttribute::z);
     dos->writeUTF(_toString(m_spawnPos->z));
 
     if (m_bUpdateYRot)
     {
-        ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_yRot);
+        ::write(dos, GameRuleAttribute::yRot);
         dos->writeUTF(_toString(m_yRot));
     }
     if (m_bUpdateHealth)
     {
-        ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_food);
+        ::write(dos, GameRuleAttribute::food);
         dos->writeUTF(_toString(m_health));
     }
     if (m_bUpdateFood)
     {
-        ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_health);
+        ::write(dos, GameRuleAttribute::health);
         dos->writeUTF(_toString(m_food));
     }
 }
@@ -75,10 +76,10 @@ void UpdatePlayerRuleDefinition::getChildren(vector<GameRuleDefinition *> *child
     }
 }
 
-GameRuleDefinition *UpdatePlayerRuleDefinition::addChild(ConsoleGameRules::EGameRuleType ruleType)
+GameRuleDefinition *UpdatePlayerRuleDefinition::addChild(GameRuleType ruleType)
 {
     GameRuleDefinition *rule = NULL;
-    if (ruleType == ConsoleGameRules::eGameRuleType_AddItem)
+    if (ruleType == GameRuleType::AddItem)
     {
         rule = new AddItemRuleDefinition();
         m_items.push_back((AddItemRuleDefinition *)rule);

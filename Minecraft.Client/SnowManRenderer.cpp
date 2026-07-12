@@ -5,7 +5,7 @@
 #include "EntityRenderDispatcher.h"
 #include "ModelPart.h"
 #include "SnowManModel.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 SnowManRenderer::SnowManRenderer() : MobRenderer(new SnowManModel(), 0.5f)
 {

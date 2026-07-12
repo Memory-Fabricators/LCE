@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ConsoleGameRulesConstants.h"
 #include "GameRuleDefinition.h"
 
 class Pos;
@@ -18,9 +19,9 @@ class CollectItemRuleDefinition : public GameRuleDefinition
     CollectItemRuleDefinition();
     ~CollectItemRuleDefinition();
 
-    ConsoleGameRules::EGameRuleType getActionType()
+    GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_CollectItemRule;
+        return GameRuleType::CollectItemRule;
     }
 
     virtual void writeAttributes(DataOutputStream *, UINT numAttributes);

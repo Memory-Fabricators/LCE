@@ -3,6 +3,7 @@
 #include "SharedConstants.h"
 #include "SoundTypes.h"
 #include "StringHelpers.h"
+#include "UseAnim.h"
 #include "net.minecraft.world.effect.h"
 #include "net.minecraft.world.entity.player.h"
 #include "net.minecraft.world.entity.projectile.h"
@@ -93,9 +94,9 @@ int PotionItem::getUseDuration(shared_ptr<ItemInstance> itemInstance)
     return DRINK_DURATION;
 }
 
-UseAnim PotionItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation PotionItem::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_drink;
+    return UseAnimation::drink;
 }
 
 bool PotionItem::TestUse(Level *level, shared_ptr<Player> player)

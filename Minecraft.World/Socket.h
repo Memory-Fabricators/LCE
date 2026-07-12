@@ -41,7 +41,7 @@ class Socket
         virtual int read(byteArray b);
         virtual int read(byteArray b, unsigned int offset, unsigned int length);
         virtual void close();
-        virtual __int64 skip(__int64 n)
+        virtual std::int64_t skip(std::int64_t n)
         {
             return n;
         } // 4J Stu - Not implemented
@@ -83,7 +83,7 @@ class Socket
         virtual int read(byteArray b);
         virtual int read(byteArray b, unsigned int offset, unsigned int length);
         virtual void close();
-        virtual __int64 skip(__int64 n)
+        virtual std::int64_t skip(std::int64_t n)
         {
             return n;
         } // 4J Stu - Not implemented
@@ -116,13 +116,13 @@ class Socket
 
     // For local connections between the host player and the server
     static CRITICAL_SECTION s_hostQueueLock[2];
-    static std::queue<byte> s_hostQueue[2];
+    static std::queue<unsigned char> s_hostQueue[2];
     static SocketOutputStreamLocal *s_hostOutStream[2];
     static SocketInputStreamLocal *s_hostInStream[2];
 
     // For network connections
-    std::queue<byte> m_queueNetwork[2];     // For input data
-    CRITICAL_SECTION m_queueLockNetwork[2]; // For input data
+    std::queue<unsigned char> m_queueNetwork[2]; // For input data
+    CRITICAL_SECTION m_queueLockNetwork[2];      // For input data
     SocketInputStreamNetwork *m_inputStream[2];
     SocketOutputStreamNetwork *m_outputStream[2];
     bool m_endClosed[2];

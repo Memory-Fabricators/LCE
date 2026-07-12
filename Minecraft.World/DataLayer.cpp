@@ -41,11 +41,11 @@ void DataLayer::set(int x, int y, int z, int val)
 
     if (part == 0)
     {
-        data[slot] = (byte)((data[slot] & 0xf0) | (val & 0xf));
+        data[slot] = ((data[slot] & 0xf0) | (val & 0xf));
     }
     else
     {
-        data[slot] = (byte)((data[slot] & 0x0f) | ((val & 0xf) << 4));
+        data[slot] = ((data[slot] & 0x0f) | ((val & 0xf) << 4));
     }
 }
 
@@ -56,7 +56,7 @@ bool DataLayer::isValid()
 
 void DataLayer::setAll(int br)
 {
-    byte val = (byte)(br & (br << 4));
+    auto val = (br & (br << 4));
     for (unsigned int i = 0; i < data.length; i++)
     {
         data[i] = val;

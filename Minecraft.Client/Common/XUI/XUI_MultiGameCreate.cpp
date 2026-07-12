@@ -926,11 +926,11 @@ void CScene_MultiGameCreate::CreateGame(CScene_MultiGameCreate *pClass, DWORD dw
 
     // start the game
     bool isFlat = (pClass->m_MoreOptionsParams.bFlatWorld == TRUE);
-    __int64 seedValue = 0; // BiomeSource::findSeed(isFlat?LevelType::lvl_flat:LevelType::lvl_normal);	// 4J - was (new Random())->nextLong() - now trying to actually find a seed to suit our requirements
+    std::int64_t seedValue = 0; // BiomeSource::findSeed(isFlat?LevelType::lvl_flat:LevelType::lvl_normal);	// 4J - was (new Random())->nextLong() - now trying to actually find a seed to suit our requirements
 
     if (wSeed.length() != 0)
     {
-        __int64 value = 0;
+        std::int64_t value = 0;
         unsigned int len = (unsigned int)wSeed.length();
 
         // Check if the input string contains a numerical value
@@ -950,7 +950,7 @@ void CScene_MultiGameCreate::CreateGame(CScene_MultiGameCreate *pClass, DWORD dw
         // If the input string is a numerical value, convert it to a number
         if (isNumber)
         {
-            value = _fromString<__int64>(wSeed);
+            value = _fromString<std::int64_t>(wSeed);
         }
 
         // If the value is not 0 use it, otherwise use the algorithm from the java String.hashCode() function to hash it

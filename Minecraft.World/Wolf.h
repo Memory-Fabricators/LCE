@@ -70,7 +70,7 @@ class Wolf : public TamableAnimal
     virtual bool hurt(DamageSource *source, int dmg);
     virtual bool doHurtTarget(shared_ptr<Entity> target);
     virtual bool interact(shared_ptr<Player> player);
-    virtual void handleEntityEvent(byte id);
+    virtual void handleEntityEvent(unsigned char id);
     float getTailAngle();
     virtual bool isFood(shared_ptr<ItemInstance> item);
     virtual int getMaxSpawnClusterSize();

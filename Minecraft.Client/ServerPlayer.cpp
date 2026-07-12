@@ -25,6 +25,7 @@
 #include "ServerLevel.h"
 #include "ServerPlayerGameMode.h"
 #include "Settings.h"
+#include "UseAnim.h"
 #include "stdafx.h"
 
 ServerPlayer::ServerPlayer(MinecraftServer *server, Level *level, const wstring &name, ServerPlayerGameMode *gameMode) : Player(level)
@@ -373,9 +374,9 @@ void ServerPlayer::doChunkSendingTick(bool dontDelayChunks)
                     okToSend = true;
                     MinecraftServer::s_slowQueuePacketSent = true;
 
-                    //					static unordered_map<wstring,__int64> mapLastTime;
-                    //					__int64 thisTime = System::currentTimeMillis();
-                    //					__int64 lastTime = mapLastTime[connection->getNetworkPlayer()->GetUID().toString()];
+                    //					static unordered_map<wstring,std::int64_t> mapLastTime;
+                    //					std::int64_t thisTime = System::currentTimeMillis();
+                    //					std::int64_t lastTime = mapLastTime[connection->getNetworkPlayer()->GetUID().toString()];
                     //					app.DebugPrintf(" - OK to send (%d ms since last)\n", thisTime - lastTime);
                     //					mapLastTime[connection->getNetworkPlayer()->GetUID().toString()] = thisTime;
                 }
@@ -1422,7 +1423,7 @@ void ServerPlayer::startUsingItem(shared_ptr<ItemInstance> instance, int duratio
 {
     Player::startUsingItem(instance, duration);
 
-    if (instance != NULL && instance->getItem() != NULL && instance->getItem()->getUseAnimation(instance) == UseAnim_eat)
+    if (instance != NULL && instance->getItem() != NULL && instance->getItem()->getUseAnimation(instance) == UseAnimation::eat)
     {
         getLevel()->getTracker()->broadcastAndSend(shared_from_this(), shared_ptr<AnimatePacket>(new AnimatePacket(shared_from_this(), AnimatePacket::EAT)));
     }

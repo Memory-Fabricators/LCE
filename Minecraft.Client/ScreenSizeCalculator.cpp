@@ -1,6 +1,7 @@
 #include "ScreenSizeCalculator.h"
 #include "Options.h"
 #include "stdafx.h"
+#include <cmath>
 
 ScreenSizeCalculator::ScreenSizeCalculator(Options *options, int width, int height, int forceScale /*=-1*/)
 {

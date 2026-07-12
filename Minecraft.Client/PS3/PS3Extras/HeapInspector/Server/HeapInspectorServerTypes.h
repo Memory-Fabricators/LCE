@@ -20,8 +20,8 @@ typedef unsigned int uint32;
 typedef unsigned long long uint64;
 typedef long long int64;
 #else
-typedef unsigned __int64 uint64;
-typedef __int64 int64;
+typedef unsigned std::int64_t uint64;
+typedef std::int64_t int64;
 #endif
 
 typedef char int8;

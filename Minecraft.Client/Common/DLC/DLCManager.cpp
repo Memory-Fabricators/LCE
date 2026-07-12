@@ -381,6 +381,25 @@ bool DLCManager::readDLCDataFile(DWORD &dwFilesProcessed, const string &path, DL
     return processDLCDataFile(dwFilesProcessed, pbData, bytesRead, pack);
 }
 
+// DLC archives store strings as UTF-16. Linux wchar_t is 32-bit, so do not
+// use sizeof(WCHAR) or the in-memory flexible-array struct sizes to walk them.
+static wstring ReadDLCUtf16(const PBYTE data, DWORD count)
+{
+    const uint16_t *text = reinterpret_cast<const uint16_t *>(data);
+    wstring result;
+    for (DWORD i = 0; i < count && text[i] != 0; ++i)
+    {
+        result.push_back(static_cast<wchar_t>(text[i]));
+    }
+    return result;
+}
+
+// The serialized structs include their one UTF-16 NUL array element plus
+// padding: 16 bytes for file details and 12 bytes for parameters.
+static constexpr DWORD DLC_FILE_DETAILS_HEADER_SIZE = 16;
+static constexpr DWORD DLC_FILE_PARAM_HEADER_SIZE = 12;
+static constexpr DWORD DLC_UTF16_CHAR_SIZE = sizeof(uint16_t);
+
 bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD dwLength, DLCPack *pack)
 {
     unordered_map<int, DLCManager::EDLCParameterType> parameterMapping;
@@ -417,13 +436,15 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
     for (unsigned int i = 0; i < uiParameterCount; i++)
     {
         // Map DLC strings to application strings, then store the DLC index mapping to application index
-        wstring parameterName((WCHAR *)pParams->wchData);
+        wstring parameterName = ReadDLCUtf16(
+            reinterpret_cast<const PBYTE>(pParams->wchData), pParams->dwWchCount);
         DLCManager::EDLCParameterType type = DLCManager::getParameterType(parameterName);
         if (type != DLCManager::e_DLCParamType_Invalid)
         {
             parameterMapping[pParams->dwType] = type;
         }
-        uiCurrentByte += sizeof(C4JStorage::DLC_FILE_PARAM) + (pParams->dwWchCount * sizeof(WCHAR));
+        uiCurrentByte += DLC_FILE_PARAM_HEADER_SIZE +
+                         pParams->dwWchCount * DLC_UTF16_CHAR_SIZE;
         pParams = (C4JStorage::DLC_FILE_PARAM *)&pbData[uiCurrentByte];
     }
     // ulCurrentByte+=ulParameterCount * sizeof(C4JStorage::DLC_FILE_PARAM);
@@ -435,7 +456,8 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
     DWORD dwTemp = uiCurrentByte;
     for (unsigned int i = 0; i < uiFileCount; i++)
     {
-        dwTemp += sizeof(C4JStorage::DLC_FILE_DETAILS) + pFile->dwWchCount * sizeof(WCHAR);
+        dwTemp += DLC_FILE_DETAILS_HEADER_SIZE +
+                  pFile->dwWchCount * DLC_UTF16_CHAR_SIZE;
         pFile = (C4JStorage::DLC_FILE_DETAILS *)&pbData[dwTemp];
     }
     PBYTE pbTemp = ((PBYTE)pFile); //+ sizeof(C4JStorage::DLC_FILE_DETAILS)*ulFileCount;
@@ -454,7 +476,9 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
         }
         else if (type != e_DLCType_PackConfig)
         {
-            dlcFile = pack->addFile(type, (WCHAR *)pFile->wchFile);
+            dlcFile = pack->addFile(type, ReadDLCUtf16(
+                                              reinterpret_cast<const PBYTE>(pFile->wchFile), pFile->dwWchCount)
+                                              .c_str());
         }
 
         // Params
@@ -471,21 +495,28 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
             {
                 if (type == e_DLCType_PackConfig)
                 {
-                    pack->addParameter(it->second, (WCHAR *)pParams->wchData);
+                    pack->addParameter(it->second, ReadDLCUtf16(
+                                                       reinterpret_cast<const PBYTE>(pParams->wchData), pParams->dwWchCount)
+                                                       .c_str());
                 }
                 else
                 {
                     if (dlcFile != NULL)
                     {
-                        dlcFile->addParameter(it->second, (WCHAR *)pParams->wchData);
+                        dlcFile->addParameter(it->second, ReadDLCUtf16(
+                                                              reinterpret_cast<const PBYTE>(pParams->wchData), pParams->dwWchCount)
+                                                              .c_str());
                     }
                     else if (dlcTexturePack != NULL)
                     {
-                        dlcTexturePack->addParameter(it->second, (WCHAR *)pParams->wchData);
+                        dlcTexturePack->addParameter(it->second, ReadDLCUtf16(
+                                                                     reinterpret_cast<const PBYTE>(pParams->wchData), pParams->dwWchCount)
+                                                                     .c_str());
                     }
                 }
             }
-            pbTemp += sizeof(C4JStorage::DLC_FILE_PARAM) + (sizeof(WCHAR) * pParams->dwWchCount);
+            pbTemp += DLC_FILE_PARAM_HEADER_SIZE +
+                      DLC_UTF16_CHAR_SIZE * pParams->dwWchCount;
             pParams = (C4JStorage::DLC_FILE_PARAM *)pbTemp;
         }
         // pbTemp+=ulParameterCount * sizeof(C4JStorage::DLC_FILE_PARAM);
@@ -520,7 +551,8 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
             switch (pFile->dwType)
             {
             case DLCManager::e_DLCType_Skin:
-                app.vSkinNames.push_back((WCHAR *)pFile->wchFile);
+                app.vSkinNames.push_back(ReadDLCUtf16(
+                    reinterpret_cast<const PBYTE>(pFile->wchFile), pFile->dwWchCount));
                 break;
             }
 
@@ -529,7 +561,8 @@ bool DLCManager::processDLCDataFile(DWORD &dwFilesProcessed, PBYTE pbData, DWORD
 
         // Move the pointer to the start of the next files data;
         pbTemp += pFile->uiFileSize;
-        uiCurrentByte += sizeof(C4JStorage::DLC_FILE_DETAILS) + pFile->dwWchCount * sizeof(WCHAR);
+        uiCurrentByte += DLC_FILE_DETAILS_HEADER_SIZE +
+                         pFile->dwWchCount * DLC_UTF16_CHAR_SIZE;
 
         pFile = (C4JStorage::DLC_FILE_DETAILS *)&pbData[uiCurrentByte];
     }

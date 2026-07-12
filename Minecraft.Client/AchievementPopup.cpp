@@ -8,6 +8,7 @@
 #include "Lighting.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 AchievementPopup::AchievementPopup(Minecraft *mc)
 {

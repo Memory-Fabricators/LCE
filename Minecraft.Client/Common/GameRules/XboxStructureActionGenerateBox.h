@@ -14,9 +14,9 @@ class XboxStructureActionGenerateBox : public ConsoleGenerateStructureAction
   public:
     XboxStructureActionGenerateBox();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_GenerateBox;
+        return GameRuleType::GenerateBox;
     }
 
     virtual int getEndX()

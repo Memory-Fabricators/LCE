@@ -19,9 +19,9 @@ class NotGateTile : public TorchTile
     {
       public:
         int x, y, z;
-        __int64 when;
+        std::int64_t when;
 
-        Toggle(int x, int y, int z, __int64 when)
+        Toggle(int x, int y, int z, std::int64_t when)
         {
             this->x = x;
             this->y = y;
@@ -61,7 +61,7 @@ class NotGateTile : public TorchTile
   public:
     void animateTick(Level *level, int xt, int yt, int zt, Random *random);
     int cloneTileId(Level *level, int x, int y, int z);
-    void levelTimeChanged(Level *level, __int64 delta, __int64 newTime);
+    void levelTimeChanged(Level *level, std::int64_t delta, std::int64_t newTime);
 
     void registerIcons(IconRegister *iconRegister);
 };

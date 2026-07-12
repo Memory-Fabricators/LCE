@@ -1,6 +1,7 @@
 #include "XboxStructureActionPlaceBlock.h"
 #include "../../../Minecraft.World/StringHelpers.h"
 #include "../../../Minecraft.World/net.minecraft.world.level.levelgen.structure.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 XboxStructureActionPlaceBlock::XboxStructureActionPlaceBlock()
@@ -12,16 +13,16 @@ void XboxStructureActionPlaceBlock::writeAttributes(DataOutputStream *dos, UINT 
 {
     ConsoleGenerateStructureAction::writeAttributes(dos, numAttrs + 5);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_x);
+    ::write(dos, GameRuleAttribute::x);
     dos->writeUTF(_toString(m_x));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_y);
+    ::write(dos, GameRuleAttribute::y);
     dos->writeUTF(_toString(m_y));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_z);
+    ::write(dos, GameRuleAttribute::z);
     dos->writeUTF(_toString(m_z));
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_data);
+    ::write(dos, GameRuleAttribute::data);
     dos->writeUTF(_toString(m_data));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_block);
+    ::write(dos, GameRuleAttribute::block);
     dos->writeUTF(_toString(m_tile));
 }
 

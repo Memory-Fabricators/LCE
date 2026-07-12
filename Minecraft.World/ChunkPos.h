@@ -10,7 +10,7 @@ class ChunkPos
 
     ChunkPos(int x, int z);
 
-    static __int64 hashCode(int x, int z);
+    static std::int64_t hashCode(int x, int z);
     int hashCode();
 
     double distanceToSqr(shared_ptr<Entity> e);
@@ -22,7 +22,7 @@ class ChunkPos
     TilePos getMiddleBlockPosition(int y);
     wstring toString();
 
-    static __int64 hash_fnct(const ChunkPos &k);
+    static std::int64_t hash_fnct(const ChunkPos &k);
     static bool eq_test(const ChunkPos &x, const ChunkPos &y);
     bool operator==(const ChunkPos &k) const
     {
@@ -36,16 +36,16 @@ class ChunkPos
     }
 };
 
-typedef struct
+typedef struct ChunkPosKeyHash
 {
-    __int64 operator()(const ChunkPos &k) const
+    std::int64_t operator()(const ChunkPos &k) const
     {
         return ChunkPos::hash_fnct(k);
     }
 
 } ChunkPosKeyHash;
 
-typedef struct
+typedef struct ChunkPosKeyEq
 {
     bool operator()(const ChunkPos &x, const ChunkPos &y) const
     {

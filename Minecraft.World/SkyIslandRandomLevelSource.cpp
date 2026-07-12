@@ -2,7 +2,7 @@
 #include "net.minecraft.world.level.h"
 #include "stdafx.h"
 
-SkyIslandRandomLevelSource::SkyIslandRandomLevelSource(Level *level, __int64 seed)
+SkyIslandRandomLevelSource::SkyIslandRandomLevelSource(Level *level, std::int64_t seed)
     : m_level(level)
 {
 }

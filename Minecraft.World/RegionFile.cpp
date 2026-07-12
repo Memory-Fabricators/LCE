@@ -161,7 +161,7 @@ RegionFile::~RegionFile()
     m_saveFile->closeHandle(fileEntry);
 }
 
-__int64 RegionFile::lastModified()
+std::int64_t RegionFile::lastModified()
 {
     return _lastModified;
 }
@@ -242,8 +242,8 @@ DataInputStream *RegionFile::getChunkDataInputStream(int x, int z) // TODO - was
     }
 
     MemSect(50);
-    byte *data = new byte[length];
-    byte *decomp = new byte[decompLength];
+    auto *data = new unsigned char[length];
+    auto *decomp = new unsigned char[decompLength];
     MemSect(0);
     readDecompLength = decompLength;
     m_saveFile->readFile(fileEntry, data, length, &numberOfBytesRead);
@@ -282,10 +282,10 @@ DataOutputStream *RegionFile::getChunkDataOutputStream(int x, int z)
 }
 
 /* write a chunk at (x,z) with length bytes of data to disk */
-void RegionFile::write(int x, int z, byte *data, int length) // TODO - was synchronized
+void RegionFile::write(int x, int z, unsigned char *data, int length) // TODO - was synchronized
 {
     // 4J Stu - Do the compression here so that we know how much space we need to store the compressed data
-    byte *compData = new byte[length + 2048]; // presuming compression is going to make this smaller...	UPDATE - for some really small things this isn't the case. Added 2K on here to cover those.
+    auto *compData = new unsigned char[length + 2048]; // presuming compression is going to make this smaller...	UPDATE - for some really small things this isn't the case. Added 2K on here to cover those.
     unsigned int compLength = length;
     Compression::getCompression()->CompressLZXRLE(compData, &compLength, data, length);
 
@@ -419,7 +419,7 @@ void RegionFile::write(int x, int z, byte *data, int length) // TODO - was synch
 }
 
 /* write a chunk data to the region file at specified sector number */
-void RegionFile::write(int sectorNumber, byte *data, int length, unsigned int compLength)
+void RegionFile::write(int sectorNumber, unsigned char *data, int length, unsigned int compLength)
 {
     DWORD numberOfBytesWritten = 0;
     // SetFilePointer(file,sectorNumber * SECTOR_BYTES,0,FILE_BEGIN);

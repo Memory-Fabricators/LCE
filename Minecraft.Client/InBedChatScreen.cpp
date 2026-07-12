@@ -3,6 +3,7 @@
 #include "../Minecraft.World/net.minecraft.locale.h"
 #include "Button.h"
 #include "MultiPlayerLocalPlayer.h"
+#include "SDL3_Input.h"
 #include "stdafx.h"
 
 void InBedChatScreen::init()

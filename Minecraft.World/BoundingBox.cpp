@@ -1,7 +1,7 @@
 #include "BoundingBox.h"
 #include "Direction.h"
 #include "JavaMath.h"
-#include "stdafx.h"
+#include <climits>
 
 BoundingBox::BoundingBox()
 {

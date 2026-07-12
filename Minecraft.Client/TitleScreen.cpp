@@ -11,6 +11,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 Random *TitleScreen::random = new Random();
 
@@ -125,35 +126,35 @@ void TitleScreen::buttonClicked(Button *button)
 
 void TitleScreen::render(int xm, int ym, float a)
 {
-    // 4J Unused
-#if 0
     renderBackground();
-    Tesselator *t = Tesselator::getInstance();
 
-    int logoWidth = 155 + 119;
-    int logoX = width / 2 - logoWidth / 2;
-    int logoY = 30;
-
-    glBindTexture(GL_TEXTURE_2D, minecraft->textures->loadTexture(L"/title/mclogo.png"));
-    glColor4f(1, 1, 1, 1);
-    blit(logoX + 0, logoY + 0, 0, 0, 155, 44);
-    blit(logoX + 155, logoY + 0, 0, 45, 155, 44);
-    t->color(0xffffff);
+    // 4J - the original mclogo.png title graphic isn't present in this port's
+    // asset tree, so draw a plain text title in its place rather than a
+    // missing-texture quad.
+    wstring title = L"Minecraft";
     glPushMatrix();
-    glTranslatef((float)width / 2 + 90, 70, 0);
-
-    glRotatef(-20, 0, 0, 1);
-    float sss = 1.8f - Mth::abs(Mth::sin(System::currentTimeMillis() % 1000 / 1000.0f * PI * 2) * 0.1f);
-
-    sss = sss * 100 / (font->width(splash) + 8 * 4);
-    glScalef(sss, sss, sss);
-    drawCenteredString(font, splash, 0, -8, 0xffff00);
+    glTranslatef((float)width / 2, 70, 0);
+    glScalef(2.0f, 2.0f, 2.0f);
+    drawCenteredString(font, title, 0, -8, 0xffffff);
     glPopMatrix();
+
+    if (!splash.empty())
+    {
+        glPushMatrix();
+        glTranslatef((float)width / 2 + 90, 70, 0);
+
+        glRotatef(-20, 0, 0, 1);
+        float sss = 1.8f - Mth::abs(Mth::sin(System::currentTimeMillis() % 1000 / 1000.0f * PI * 2) * 0.1f);
+
+        sss = sss * 100 / (font->width(splash) + 8 * 4);
+        glScalef(sss, sss, sss);
+        drawCenteredString(font, splash, 0, -8, 0xffff00);
+        glPopMatrix();
+    }
 
     drawString(font, ClientConstants::VERSION_STRING, 2, 2, 0x505050);
     wstring msg = L"Copyright Mojang AB. Do not distribute.";
     drawString(font, msg, width - font->width(msg) - 2, height - 10, 0xffffff);
 
     Screen::render(xm, ym, a);
-#endif
 }

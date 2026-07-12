@@ -9,7 +9,7 @@
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
 
-TheEndLevelRandomLevelSource::TheEndLevelRandomLevelSource(Level *level, __int64 seed)
+TheEndLevelRandomLevelSource::TheEndLevelRandomLevelSource(Level *level, std::int64_t seed)
 {
     m_XZSize = END_LEVEL_MIN_WIDTH;
 
@@ -92,7 +92,7 @@ void TheEndLevelRandomLevelSource::prepareHeights(int xOffs, int zOffs, byteArra
                             {
                             }
 
-                            blocks[offs] = (byte)tileId;
+                            blocks[offs] = tileId;
                             offs += step;
                             val += vala;
                         }
@@ -120,8 +120,8 @@ void TheEndLevelRandomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray
             int runDepth = 1;
             int run = -1;
 
-            byte top = (byte)Tile::whiteStone_Id;
-            byte material = (byte)Tile::whiteStone_Id;
+            auto top = Tile::whiteStone_Id;
+            auto material = Tile::whiteStone_Id;
 
             for (int y = Level::genDepthMinusOne; y >= 0; y--)
             {
@@ -140,7 +140,7 @@ void TheEndLevelRandomLevelSource::buildSurfaces(int xOffs, int zOffs, byteArray
                         if (runDepth <= 0)
                         {
                             top = 0;
-                            material = (byte)Tile::whiteStone_Id;
+                            material = Tile::whiteStone_Id;
                         }
 
                         run = runDepth;
@@ -176,7 +176,7 @@ LevelChunk *TheEndLevelRandomLevelSource::getChunk(int xOffs, int zOffs)
     BiomeArray biomes;
     // 4J - now allocating this with a physical alloc & bypassing general memory management so that it will get cleanly freed
     unsigned int blocksSize = Level::genDepth * 16 * 16;
-    byte *tileData = (byte *)XPhysicalAlloc(blocksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
+    unsigned char *tileData = (unsigned char *)XPhysicalAlloc(blocksSize, MAXULONG_PTR, 4096, PAGE_READWRITE);
     XMemSet128(tileData, 0, blocksSize);
     byteArray blocks = byteArray(tileData, blocksSize);
     //    byteArray blocks = byteArray(16 * level->depth * 16);
@@ -422,8 +422,8 @@ void TheEndLevelRandomLevelSource::postProcess(ChunkSource *parent, int xt, int 
     // We'll be running our postProcess in parallel with getChunk etc. so we need to use a separate random - have used the same initialisation code as
     // used in RandomLevelSource::postProcess to make sure this random value is consistent for each world generation.
     pprandom->setSeed(level->getSeed());
-    __int64 xScale = pprandom->nextLong() / 2 * 2 + 1;
-    __int64 zScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t xScale = pprandom->nextLong() / 2 * 2 + 1;
+    std::int64_t zScale = pprandom->nextLong() / 2 * 2 + 1;
     pprandom->setSeed(((xt * xScale) + (zt * zScale)) ^ level->getSeed());
 
     Biome *biome = level->getBiome(xo + 16, zo + 16);

@@ -96,7 +96,7 @@ void PlayerChunkMap::PlayerChunk::remove(shared_ptr<ServerPlayer> player)
     players.erase(it);
     if (players.size() == 0)
     {
-        __int64 id = (pos.x + 0x7fffffffLL) | ((pos.z + 0x7fffffffLL) << 32);
+        std::int64_t id = (pos.x + 0x7fffffffLL) | ((pos.z + 0x7fffffffLL) << 32);
         AUTO_VAR(it, parent->chunks.find(id));
         if (it != parent->chunks.end())
         {
@@ -381,7 +381,7 @@ bool PlayerChunkMap::PlayerChunk::broadcastChanges(bool allowRegionUpdate)
     else
     {
         // 4J As we only get here if changes is less than MAX_CHANGES_BEFORE_RESEND (10) we only need to send a byte value in the packet
-        broadcast(shared_ptr<ChunkTilesUpdatePacket>(new ChunkTilesUpdatePacket(pos.x, pos.z, changedTiles, (byte)changes, level)));
+        broadcast(shared_ptr<ChunkTilesUpdatePacket>(new ChunkTilesUpdatePacket(pos.x, pos.z, changedTiles, changes, level)));
         for (int i = 0; i < changes; i++)
         {
             int x = pos.x * 16 + ((changedTiles[i] >> 12) & 15);
@@ -472,13 +472,13 @@ void PlayerChunkMap::tick()
 
 bool PlayerChunkMap::hasChunk(int x, int z)
 {
-    __int64 id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
+    std::int64_t id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
     return chunks.find(id) != chunks.end();
 }
 
 PlayerChunkMap::PlayerChunk *PlayerChunkMap::getChunk(int x, int z, bool create)
 {
-    __int64 id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
+    std::int64_t id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
     AUTO_VAR(it, chunks.find(id));
 
     PlayerChunk *chunk = NULL;
@@ -499,7 +499,7 @@ PlayerChunkMap::PlayerChunk *PlayerChunkMap::getChunk(int x, int z, bool create)
 // queue a request for it to be created.
 void PlayerChunkMap::getChunkAndAddPlayer(int x, int z, shared_ptr<ServerPlayer> player)
 {
-    __int64 id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
+    std::int64_t id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
     AUTO_VAR(it, chunks.find(id));
 
     if (it != chunks.end())
@@ -526,7 +526,7 @@ void PlayerChunkMap::getChunkAndRemovePlayer(int x, int z, shared_ptr<ServerPlay
             return;
         }
     }
-    __int64 id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
+    std::int64_t id = (x + 0x7fffffffLL) | ((z + 0x7fffffffLL) << 32);
     AUTO_VAR(it, chunks.find(id));
 
     if (it != chunks.end())

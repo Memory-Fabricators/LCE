@@ -1,5 +1,6 @@
 #include "StartFeature.h"
 #include "../../../Minecraft.World/StringHelpers.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 StartFeature::StartFeature()
@@ -13,11 +14,11 @@ void StartFeature::writeAttributes(DataOutputStream *dos, UINT numAttrs)
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 3);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_chunkX);
+    ::write(dos, GameRuleAttribute::chunkX);
     dos->writeUTF(_toString(m_chunkX));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_chunkZ);
+    ::write(dos, GameRuleAttribute::chunkZ);
     dos->writeUTF(_toString(m_chunkZ));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_feature);
+    ::write(dos, GameRuleAttribute::feature);
     dos->writeUTF(_toString((int)m_feature));
 }
 

@@ -5,6 +5,7 @@
 class MerchantContainer;
 class Player;
 class Merchant;
+class MerchantRecipe;
 
 class MerchantResultSlot : public Slot
 {

@@ -2,6 +2,9 @@
 
 #include "SavedData.h"
 
+class DoorInfo;
+class Village;
+
 class Villages : public SavedData
 {
   public:

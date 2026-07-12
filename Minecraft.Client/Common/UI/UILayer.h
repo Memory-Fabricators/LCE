@@ -90,5 +90,5 @@ class UILayer
     void handleUnlockFullVersion();
     UIScene *FindScene(EUIScene sceneType);
 
-    void PrintTotalMemoryUsage(__int64 &totalStatic, __int64 &totalDynamic);
+    void PrintTotalMemoryUsage(std::int64_t &totalStatic, std::int64_t &totalDynamic);
 };

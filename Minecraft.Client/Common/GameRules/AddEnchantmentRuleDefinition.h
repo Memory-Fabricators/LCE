@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ConsoleGameRulesConstants.h"
 #include "GameRuleDefinition.h"
 
 class ItemInstance;
@@ -13,9 +14,9 @@ class AddEnchantmentRuleDefinition : public GameRuleDefinition
   public:
     AddEnchantmentRuleDefinition();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_AddEnchantment;
+        return GameRuleType::AddEnchantment;
     }
 
     virtual void writeAttributes(DataOutputStream *, UINT numAttrs);

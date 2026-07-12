@@ -22,7 +22,7 @@ class ShortTag : public Tag
         data = dis->readShort();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Short;
     }

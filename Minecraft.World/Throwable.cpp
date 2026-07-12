@@ -273,9 +273,9 @@ void Throwable::addAdditonalSaveData(CompoundTag *tag)
     tag->putShort(L"xTile", (short)xTile);
     tag->putShort(L"yTile", (short)yTile);
     tag->putShort(L"zTile", (short)zTile);
-    tag->putByte(L"inTile", (byte)lastTile);
-    tag->putByte(L"shake", (byte)shakeTime);
-    tag->putByte(L"inGround", (byte)(inGround ? 1 : 0));
+    tag->putByte(L"inTile", lastTile);
+    tag->putByte(L"shake", shakeTime);
+    tag->putByte(L"inGround", (inGround ? 1 : 0));
 }
 
 void Throwable::readAdditionalSaveData(CompoundTag *tag)

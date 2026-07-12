@@ -1,5 +1,6 @@
 #include "GiantMobRenderer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 GiantMobRenderer::GiantMobRenderer(Model *model, float shadow, float _scale) : MobRenderer(model, shadow * _scale)
 {

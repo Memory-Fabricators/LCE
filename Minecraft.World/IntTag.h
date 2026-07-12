@@ -22,7 +22,7 @@ class IntTag : public Tag
         data = dis->readInt();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Int;
     }

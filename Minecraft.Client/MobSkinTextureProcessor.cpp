@@ -12,9 +12,10 @@ BufferedImage *MobSkinTextureProcessor::process(BufferedImage *in)
     height = 32;
 
     BufferedImage *out = new BufferedImage(width, height, BufferedImage::TYPE_INT_ARGB);
-    Graphics *g = out->getGraphics();
-    g->drawImage(in, 0, 0, NULL);
-    g->dispose();
+    // FIXME: implement drawImage somehow
+    // Graphics *g = out->getGraphics();
+    // g->drawImage(in, 0, 0, NULL);
+    // g->dispose();
 
     pixels = out->getData();
 

@@ -30,7 +30,7 @@ class TextureHolder // implements Comparable<TextureHolder> {
     int compareTo(const TextureHolder *other) const;
 };
 
-typedef struct
+typedef struct TextureHolderLessThan
 {
     bool operator()(const TextureHolder *first, const TextureHolder *second) const
     {

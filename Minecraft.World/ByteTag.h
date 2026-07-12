@@ -4,11 +4,11 @@
 class ByteTag : public Tag
 {
   public:
-    byte data;
+    unsigned char data;
     ByteTag(const wstring &name) : Tag(name)
     {
     }
-    ByteTag(const wstring &name, byte data) : Tag(name)
+    ByteTag(const wstring &name, unsigned char data) : Tag(name)
     {
         this->data = data;
     }
@@ -22,7 +22,7 @@ class ByteTag : public Tag
         data = dis->readByte();
     }
 
-    byte getId()
+    unsigned char getId()
     {
         return TAG_Byte;
     }

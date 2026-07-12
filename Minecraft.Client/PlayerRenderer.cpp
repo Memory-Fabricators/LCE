@@ -11,7 +11,9 @@
 #include "ModelPart.h"
 #include "MultiPlayerLocalPlayer.h"
 #include "SkullTileRenderer.h"
+#include "UseAnim.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 const unsigned int PlayerRenderer::s_nametagColors[MINECRAFT_NET_MAX_PLAYERS] =
     {
@@ -157,19 +159,19 @@ void PlayerRenderer::render(shared_ptr<Entity> _mob, double x, double y, double 
     {
         if (mob->getUseItemDuration() > 0)
         {
-            UseAnim anim = item->getUseAnimation();
-            if (anim == UseAnim_block)
+            UseAnimation anim = item->getUseAnimation();
+            if (anim == UseAnimation::block)
             {
                 armorParts1->holdingRightHand = armorParts2->holdingRightHand = humanoidModel->holdingRightHand = 3;
             }
-            else if (anim == UseAnim_bow)
+            else if (anim == UseAnimation::bow)
             {
                 armorParts1->bowAndArrow = armorParts2->bowAndArrow = humanoidModel->bowAndArrow = true;
             }
         }
     }
     // 4J added, for 3rd person view of eating
-    if (item != NULL && mob->getUseItemDuration() > 0 && item->getUseAnimation() == UseAnim_eat)
+    if (item != NULL && mob->getUseItemDuration() > 0 && item->getUseAnimation() == UseAnimation::eat)
     {
         // These factors are largely lifted from ItemInHandRenderer to try and keep the 3rd person eating animation as similar as possible
         float t = (mob->getUseItemDuration() - a + 1);
@@ -466,7 +468,7 @@ void PlayerRenderer::additionalRendering(shared_ptr<Mob> _mob, float a)
             item = shared_ptr<ItemInstance>(new ItemInstance(Item::stick));
         }
 
-        UseAnim anim = UseAnim_none; // null;
+        UseAnimation anim = UseAnimation::none;
         if (mob->getUseItemDuration() > 0)
         {
             anim = item->getUseAnimation();
@@ -500,7 +502,7 @@ void PlayerRenderer::additionalRendering(shared_ptr<Mob> _mob, float a)
             }
             if (mob->getUseItemDuration() > 0)
             {
-                if (anim == UseAnim_block)
+                if (anim == UseAnimation::block)
                 {
                     glTranslatef(0.05f, 0, -0.1f);
                     glRotatef(-50, 0, 1, 0);

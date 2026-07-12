@@ -16,9 +16,9 @@ class XboxStructureActionPlaceSpawner : public XboxStructureActionPlaceBlock
     XboxStructureActionPlaceSpawner();
     ~XboxStructureActionPlaceSpawner();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType()
+    virtual GameRuleType getActionType()
     {
-        return ConsoleGameRules::eGameRuleType_PlaceSpawner;
+        return GameRuleType::PlaceSpawner;
     }
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttrs);

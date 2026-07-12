@@ -11,6 +11,7 @@
 #include "LocalPlayer.h"
 #include "Options.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 // 4J - added
 EntityRenderer::EntityRenderer()

@@ -3,6 +3,7 @@
 #include "../../../Minecraft.World/net.minecraft.world.level.h"
 #include "../../../Minecraft.World/net.minecraft.world.level.levelgen.structure.h"
 #include "../../../Minecraft.World/net.minecraft.world.level.tile.entity.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 XboxStructureActionPlaceSpawner::XboxStructureActionPlaceSpawner()
@@ -19,7 +20,7 @@ void XboxStructureActionPlaceSpawner::writeAttributes(DataOutputStream *dos, UIN
 {
     XboxStructureActionPlaceBlock::writeAttributes(dos, numAttrs + 1);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_entity);
+    ::write(dos, GameRuleAttribute::entity);
     dos->writeUTF(m_entityId);
 }
 

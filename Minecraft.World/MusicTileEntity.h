@@ -16,7 +16,7 @@ class MusicTileEntity : public TileEntity
     }
 
   public:
-    byte note;
+    unsigned char note;
 
     bool on;
 

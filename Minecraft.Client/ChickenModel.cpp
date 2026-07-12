@@ -1,7 +1,7 @@
 #include "ChickenModel.h"
 #include "../Minecraft.World/Mth.h"
+#include "GL/gl.h"
 #include "ModelPart.h"
-#include "stdafx.h"
 
 ChickenModel::ChickenModel() : Model()
 {

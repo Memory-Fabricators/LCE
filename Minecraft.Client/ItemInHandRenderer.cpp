@@ -7,6 +7,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "EntityRenderDispatcher.h"
 #include "EntityRenderer.h"
+#include "GL/gl.h"
 #include "Lighting.h"
 #include "Minimap.h"
 #include "MultiPlayerLevel.h"
@@ -15,6 +16,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "TileRenderer.h"
+#include "UseAnim.h"
 #include "stdafx.h"
 
 int ItemInHandRenderer::list = -1;
@@ -40,7 +42,7 @@ ItemInHandRenderer::ItemInHandRenderer(Minecraft *mc, bool optimisedMinimap)
         list = MemoryTracker::genLists(1);
         float dd = 1 / 16.0f;
 
-        glNewList(list, GL_COMPILE);
+        // FIXME: glNewList(list, GL_COMPILE);
         Tesselator *t = Tesselator::getInstance();
         t->begin();
         for (int yp = 0; yp < 16; yp++)
@@ -294,7 +296,7 @@ void ItemInHandRenderer::renderItem3D(Tesselator *t, float u0, float v0, float u
 
     if (isGlint)
     {
-        glCallList(listGlint);
+        // FIXME: glCallList(listGlint);
     }
     else
     {
@@ -305,7 +307,7 @@ void ItemInHandRenderer::renderItem3D(Tesselator *t, float u0, float v0, float u
         glMatrixMode(GL_TEXTURE);
         glLoadIdentity();
         glTranslatef(u0, v0, 0);
-        glCallList(list);
+        // FIXME: glCallList(list);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
     }
@@ -367,7 +369,7 @@ void ItemInHandRenderer::render(float a)
         int col = mc->level->getLightColor(Mth::floor(player->x), Mth::floor(player->y), Mth::floor(player->z), 0);
         int u = col % 65536;
         int v = col / 65536;
-        glMultiTexCoord2f(GL_TEXTURE1, u / 1.0f, v / 1.0f);
+        glMultiTexCoord4f(GL_TEXTURE1, u / 1.0f, v / 1.0f, 0.0f, 1.0f);
         glColor4f(1, 1, 1, 1);
     }
     if (item != NULL)
@@ -508,8 +510,8 @@ void ItemInHandRenderer::render(float a)
 #endif
         if (player->getUseItemDuration() > 0)
         {
-            UseAnim anim = item->getUseAnimation();
-            if ((anim == UseAnim_eat) || (anim == UseAnim_drink))
+            UseAnimation anim = item->getUseAnimation();
+            if ((anim == UseAnimation::eat) || (anim == UseAnimation::drink))
             {
                 float t = (player->getUseItemDuration() - a + 1);
                 float swing = 1 - (t / item->getUseDuration());
@@ -553,15 +555,15 @@ void ItemInHandRenderer::render(float a)
 
         if (player->getUseItemDuration() > 0)
         {
-            UseAnim anim = item->getUseAnimation();
-            if (anim == UseAnim_block)
+            UseAnimation anim = item->getUseAnimation();
+            if (anim == UseAnimation::block)
             {
                 glTranslatef(-0.5f, 0.2f, 0.0f);
                 glRotatef(30, 0, 1, 0);
                 glRotatef(-80, 1, 0, 0);
                 glRotatef(60, 0, 1, 0);
             }
-            else if (anim == UseAnim_bow)
+            else if (anim == UseAnimation::bow)
             {
 
                 glRotatef(-18, 0, 0, 1);

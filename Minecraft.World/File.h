@@ -30,8 +30,8 @@ class File
     vector<File *> *listFiles() const; // Array
     vector<File *> *listFiles(FileFilter *filter) const;
     bool isDirectory() const;
-    __int64 length();
-    __int64 lastModified();
+    std::int64_t length();
+    std::int64_t lastModified();
     const wstring getPath() const; // 4J Jev: TODO
     wstring getName() const;
 

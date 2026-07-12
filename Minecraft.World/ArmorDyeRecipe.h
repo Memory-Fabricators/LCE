@@ -18,7 +18,7 @@ class ArmorDyeRecipe : public Recipy
 
     // 4J-PB
     virtual bool
-        requires(int iRecipe);
+    requirement(int iRecipe);
     virtual void
-        requires(INGREDIENTS_REQUIRED *pIngReq);
+    requirement(INGREDIENTS_REQUIRED *pIngReq);
 };

@@ -2,6 +2,8 @@
 
 #include "Command.h"
 
+class GameCommandPacket;
+
 class TimeCommand : public Command
 {
   public:

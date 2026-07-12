@@ -16,7 +16,7 @@ libdivide::divider<long long> fast_d7(7);
 libdivide::divider<long long> fast_d10(10);
 #endif
 
-LayerArray Layer::getDefaultLayers(__int64 seed, LevelType *levelType)
+LayerArray Layer::getDefaultLayers(std::int64_t seed, LevelType *levelType)
 {
     // 4J - Some changes moved here from 1.2.3. Temperature & downfall layers are no longer created & returned, and a debug layer is isn't.
     // For reference with regard to future merging, things NOT brought forward from the 1.2.3 version are new layer types that we
@@ -110,7 +110,7 @@ LayerArray Layer::getDefaultLayers(__int64 seed, LevelType *levelType)
     return result;
 }
 
-Layer::Layer(__int64 seedMixup)
+Layer::Layer(std::int64_t seedMixup)
 {
     parent = nullptr;
 
@@ -123,7 +123,7 @@ Layer::Layer(__int64 seedMixup)
     this->seedMixup += seedMixup;
 }
 
-void Layer::init(__int64 seed)
+void Layer::init(std::int64_t seed)
 {
     this->seed = seed;
     if (parent != NULL)
@@ -138,7 +138,7 @@ void Layer::init(__int64 seed)
     this->seed += seedMixup;
 }
 
-void Layer::initRandom(__int64 x, __int64 y)
+void Layer::initRandom(std::int64_t x, std::int64_t y)
 {
     rval = seed;
     rval *= rval * 6364136223846793005l + 1442695040888963407l;

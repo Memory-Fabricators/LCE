@@ -1,0 +1,29 @@
+[wrap-file]
+directory = zlib-ng-55fb5eb0c15b793a86eff77ce04e56a29b34fc64
+source_url = https://github.com/zlib-ng/zlib-ng/archive/55fb5eb0c15b793a86eff77ce04e56a29b34fc64.tar.gz
+source_filename = zlib-ng-55fb5eb0c15b793a86eff77ce04e56a29b34fc64.tar.gz
+source_hash = 46fe717f50d4d184c7bbdf3935bcf0851e75f2ec1654a2fb72083ccb5c75d1b1
+# Pinned to zlib-ng master commit 55fb5eb0c15b793a86eff77ce04e56a29b34fc64
+# (post-2.3.3, pre-2.3.4) because it fixes a real upstream bug that broke
+# our build: inffast_tpl.h included inflate.h before inftrees.h, but
+# inflate.h uses the `code`/ENOUGH types/macros that inftrees.h defines -
+# this only "worked" upstream because every actual .c translation unit
+# that pulls in inflate.h happens to also pull in inftrees.h first via some
+# other include, except inffast_tpl.h itself when compiled standalone via
+# arch/x86/chunkset_avx512.c (see meson.build's `avx512` static_library).
+#
+# Locally maintained meson.build overlay (subprojects/packagefiles/zlib-ng),
+# forked from wrapdb's zlib-ng_2.3.3-1 patch and updated to match this
+# commit's source layout (crc32_chorba_{sse2,sse41}.c replacing
+# chorba_{sse2,sse41}.c, insert_string_roll.c merged into insert_string.c,
+# new avx2vnni option/target, crc32_vpclmulqdq.c split into
+# crc32_vpclmulqdq_{avx2,avx512}.c, arch/generic/*_c.c fallback sources now
+# unconditionally compiled in and self-gating via #ifdef, etc.) - and still
+# removes the hard b_lto error, instead overriding b_lto=false directly on
+# zlib-ng's own SIMD-dispatch build targets, so the rest of the project can
+# still build with LTO enabled - see the comment above zlib_ng_proj in the
+# top-level meson.build.
+patch_directory = zlib-ng
+
+[provide]
+dependency_names = zlib-ng

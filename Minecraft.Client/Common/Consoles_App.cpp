@@ -5603,7 +5603,7 @@ void CMinecraftApp::GetTPD(int iConfig, PBYTE *ppbData, DWORD *pdwBytes)
 // 	// read the local file
 // 	File gtsFile( wsFile->c_str() );
 //
-// 	__int64 fileSize = gtsFile.length();
+// 	std::int64_t fileSize = gtsFile.length();
 //
 // 	if(fileSize!=0)
 // 	{
@@ -7868,7 +7868,7 @@ void CMinecraftApp::GetImageTextData(PBYTE pbImageData, DWORD dwImageBytes, unsi
     return;
 }
 
-unsigned int CMinecraftApp::CreateImageTextData(PBYTE bTextMetadata, __int64 seed, bool hasSeed, unsigned int uiHostOptions, unsigned int uiTexturePackId)
+unsigned int CMinecraftApp::CreateImageTextData(PBYTE bTextMetadata, std::int64_t seed, bool hasSeed, unsigned int uiHostOptions, unsigned int uiTexturePackId)
 {
     int iTextMetadataBytes = 0;
     if (hasSeed)

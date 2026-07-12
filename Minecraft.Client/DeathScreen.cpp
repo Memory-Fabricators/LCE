@@ -4,6 +4,7 @@
 #include "MultiPlayerLocalPlayer.h"
 #include "TitleScreen.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 void DeathScreen::init()
 {

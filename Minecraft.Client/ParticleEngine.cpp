@@ -10,6 +10,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include <GL/gl.h>
 
 ParticleEngine::ParticleEngine(Level *level, Textures *textures)
 {
@@ -100,7 +101,7 @@ void ParticleEngine::render(shared_ptr<Entity> player, float a)
         }
         MemSect(0);
         Tesselator *t = Tesselator::getInstance();
-        glColor4f(1.0f, 1.0f, 1.0f, 1);
+        glColor3f(1.0f, 1.0f, 1.0f);
 #if 0
 		// Note that these changes were brought in from java (1.5ish), but as with the java version, break rendering of the particles
 		// next to water - removing for now

@@ -11,75 +11,75 @@
 #include "ConsoleGameRules.h"
 #include "stdafx.h"
 
-WCHAR *GameRuleManager::wchTagNameA[] =
+const WCHAR *GameRuleManager::wchTagNameA[] =
     {
-        L"",                  // eGameRuleType_Root
-        L"MapOptions",        // eGameRuleType_LevelGenerationOptions
-        L"ApplySchematic",    // eGameRuleType_ApplySchematic
-        L"GenerateStructure", // eGameRuleType_GenerateStructure
-        L"GenerateBox",       // eGameRuleType_GenerateBox
-        L"PlaceBlock",        // eGameRuleType_PlaceBlock
-        L"PlaceContainer",    // eGameRuleType_PlaceContainer
-        L"PlaceSpawner",      // eGameRuleType_PlaceSpawner
-        L"BiomeOverride",     // eGameRuleType_BiomeOverride
-        L"StartFeature",      // eGameRuleType_StartFeature
-        L"AddItem",           // eGameRuleType_AddItem
-        L"AddEnchantment",    // eGameRuleType_AddEnchantment
-        L"LevelRules",        // eGameRuleType_LevelRules
-        L"NamedArea",         // eGameRuleType_NamedArea
-        L"UseTile",           // eGameRuleType_UseTileRule
-        L"CollectItem",       // eGameRuleType_CollectItemRule
-        L"CompleteAll",       // eGameRuleType_CompleteAllRule
-        L"UpdatePlayer",      // eGameRuleType_UpdatePlayerRule
+        L"",                  // Root
+        L"MapOptions",        // LevelGenerationOptions
+        L"ApplySchematic",    // ApplySchematic
+        L"GenerateStructure", // GenerateStructure
+        L"GenerateBox",       // GenerateBox
+        L"PlaceBlock",        // PlaceBlock
+        L"PlaceContainer",    // PlaceContainer
+        L"PlaceSpawner",      // PlaceSpawner
+        L"BiomeOverride",     // BiomeOverride
+        L"StartFeature",      // StartFeature
+        L"AddItem",           // AddItem
+        L"AddEnchantment",    // AddEnchantment
+        L"LevelRules",        // LevelRules
+        L"NamedArea",         // NamedArea
+        L"UseTile",           // UseTileRule
+        L"CollectItem",       // CollectItemRule
+        L"CompleteAll",       // CompleteAllRule
+        L"UpdatePlayer",      // UpdatePlayerRule
 };
 
-WCHAR *GameRuleManager::wchAttrNameA[] =
+const WCHAR *GameRuleManager::wchAttrNameA[] =
     {
-        L"descriptionName",  // eGameRuleAttr_descriptionName
-        L"promptName",       // eGameRuleAttr_promptName
-        L"dataTag",          // eGameRuleAttr_dataTag
-        L"enchantmentId",    // eGameRuleAttr_enchantmentId
-        L"enchantmentLevel", // eGameRuleAttr_enchantmentLevel
-        L"itemId",           // eGameRuleAttr_itemId
-        L"quantity",         // eGameRuleAttr_quantity
-        L"auxValue",         // eGameRuleAttr_auxValue
-        L"slot",             // eGameRuleAttr_slot
-        L"name",             // eGameRuleAttr_name
-        L"food",             // eGameRuleAttr_food
-        L"health",           // eGameRuleAttr_health
-        L"tileId",           // eGameRuleAttr_tileId
-        L"useCoords",        // eGameRuleAttr_useCoords
-        L"seed",             // eGameRuleAttr_seed
-        L"flatworld",        // eGameRuleAttr_flatworld
-        L"filename",         // eGameRuleAttr_filename
-        L"rot",              // eGameRuleAttr_rot
-        L"data",             // eGameRuleAttr_data
-        L"block",            // eGameRuleAttr_block
-        L"entity",           // eGameRuleAttr_entity
-        L"facing",           // eGameRuleAttr_facing
-        L"edgeTile",         // eGameRuleAttr_edgeTile
-        L"fillTile",         // eGameRuleAttr_fillTile
-        L"skipAir",          // eGameRuleAttr_skipAir
-        L"x",                // eGameRuleAttr_x
-        L"x0",               // eGameRuleAttr_x0
-        L"x1",               // eGameRuleAttr_x1
-        L"y",                // eGameRuleAttr_y
-        L"y0",               // eGameRuleAttr_y0
-        L"y1",               // eGameRuleAttr_y1
-        L"z",                // eGameRuleAttr_z
-        L"z0",               // eGameRuleAttr_z0
-        L"z1",               // eGameRuleAttr_z1
-        L"chunkX",           // eGameRuleAttr_chunkX
-        L"chunkZ",           // eGameRuleAttr_chunkZ
-        L"yRot",             // eGameRuleAttr_yRot
-        L"spawnX",           // eGameRuleAttr_spawnX
-        L"spawnY",           // eGameRuleAttr_spawnY
-        L"spawnZ",           // eGameRuleAttr_spawnZ
+        L"descriptionName",  // descriptionName
+        L"promptName",       // promptName
+        L"dataTag",          // dataTag
+        L"enchantmentId",    // enchantmentId
+        L"enchantmentLevel", // enchantmentLevel
+        L"itemId",           // itemId
+        L"quantity",         // quantity
+        L"auxValue",         // auxValue
+        L"slot",             // slot
+        L"name",             // name
+        L"food",             // food
+        L"health",           // health
+        L"tileId",           // tileId
+        L"useCoords",        // useCoords
+        L"seed",             // seed
+        L"flatworld",        // flatworld
+        L"filename",         // filename
+        L"rot",
+        L"data",     // data
+        L"block",    // block
+        L"entity",   // entity
+        L"facing",   // facing
+        L"edgeTile", // edgeTile
+        L"fillTile", // fillTile
+        L"skipAir",  // skipAir
+        L"x",        // x
+        L"x0",       // x0
+        L"x1",       // x1
+        L"y",        // y
+        L"y0",       // y0
+        L"y1",       // y1
+        L"z",        // z
+        L"z0",       // z0
+        L"z1",       // z1
+        L"chunkX",   // chunkX
+        L"chunkZ",   // chunkZ
+        L"yRot",     // yRot
+        L"spawnX",   // spawnX
+        L"spawnY",   // spawnY
+        L"spawnZ",   // spawnZ
         L"orientation",
         L"dimension",
-        L"topTileId", // eGameRuleAttr_topTileId
-        L"biomeId",   // eGameRuleAttr_biomeId
-        L"feature",   // eGameRuleAttr_feature
+        L"topTileId", // topTileId
+        L"biomeId",   // biomeId
+        L"feature",   // feature
 };
 
 GameRuleManager::GameRuleManager()
@@ -103,7 +103,7 @@ void GameRuleManager::loadGameRules(DLCPack *pack)
     {
         DLCGameRulesHeader *dlcHeader = (DLCGameRulesHeader *)pack->getFile(DLCManager::e_DLCType_GameRulesHeader, i);
         DWORD dSize;
-        byte *dData = dlcHeader->getData(dSize);
+        auto *dData = dlcHeader->getData(dSize);
 
         LevelGenerationOptions *createdLevelGenerationOptions = new LevelGenerationOptions();
         //	= loadGameRules(dData, dSize); //, strings);
@@ -124,7 +124,7 @@ void GameRuleManager::loadGameRules(DLCPack *pack)
         DLCGameRulesFile *dlcFile = (DLCGameRulesFile *)pack->getFile(DLCManager::e_DLCType_GameRules, i);
 
         DWORD dSize;
-        byte *dData = dlcFile->getData(dSize);
+        auto *dData = dlcFile->getData(dSize);
 
         LevelGenerationOptions *createdLevelGenerationOptions = new LevelGenerationOptions();
         //	= loadGameRules(dData, dSize); //, strings);
@@ -140,7 +140,7 @@ void GameRuleManager::loadGameRules(DLCPack *pack)
     }
 }
 
-LevelGenerationOptions *GameRuleManager::loadGameRules(byte *dIn, UINT dSize)
+LevelGenerationOptions *GameRuleManager::loadGameRules(unsigned char *dIn, UINT dSize)
 {
     LevelGenerationOptions *lgo = new LevelGenerationOptions();
     lgo->setGrSource(new JustGrSource());
@@ -151,7 +151,7 @@ LevelGenerationOptions *GameRuleManager::loadGameRules(byte *dIn, UINT dSize)
 }
 
 // 4J-JEV: Reverse of saveGameRules.
-void GameRuleManager::loadGameRules(LevelGenerationOptions *lgo, byte *dIn, UINT dSize)
+void GameRuleManager::loadGameRules(LevelGenerationOptions *lgo, unsigned char *dIn, UINT dSize)
 {
     app.DebugPrintf("GameRuleManager::LoadingGameRules:\n");
 
@@ -240,7 +240,7 @@ void GameRuleManager::loadGameRules(LevelGenerationOptions *lgo, byte *dIn, UINT
 }
 
 // 4J-JEV: Reverse of loadGameRules.
-void GameRuleManager::saveGameRules(byte **dOut, UINT *dSize)
+void GameRuleManager::saveGameRules(unsigned char **dOut, UINT *dSize)
 {
     if (m_currentGameRuleDefinitions == NULL &&
         m_currentLevelGenerationOptions == NULL)
@@ -350,13 +350,13 @@ void GameRuleManager::writeRuleFile(DataOutputStream *dos)
     }
 
     // Write string lookup.
-    int numStrings = ConsoleGameRules::eGameRuleType_Count + ConsoleGameRules::eGameRuleAttr_Count;
+    int numStrings = static_cast<int>(GameRuleType::Count) + static_cast<int>(GameRuleType::Count);
     dos->writeInt(numStrings);
-    for (int i = 0; i < ConsoleGameRules::eGameRuleType_Count; i++)
+    for (int i = 0; i < static_cast<int>(GameRuleType::Count); i++)
     {
         dos->writeUTF(wchTagNameA[i]);
     }
-    for (int i = 0; i < ConsoleGameRules::eGameRuleAttr_Count; i++)
+    for (int i = 0; i < static_cast<int>(GameRuleType::Count); i++)
     {
         dos->writeUTF(wchAttrNameA[i]);
     }
@@ -389,7 +389,7 @@ void GameRuleManager::writeRuleFile(DataOutputStream *dos)
     m_currentGameRuleDefinitions->write(dos);
 }
 
-bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT dSize, StringTable *strings) //(DLCGameRulesFile *dlcFile, StringTable *strings)
+bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, unsigned char *dIn, UINT dSize, StringTable *strings) //(DLCGameRulesFile *dlcFile, StringTable *strings)
 {
     bool levelGenAdded = false;
     bool gameRulesAdded = false;
@@ -407,7 +407,7 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
     // Read File.
 
     // version_number
-    __int64 version = dis.readShort();
+    std::int64_t version = dis.readShort();
     unsigned char compressionType = 0;
     if (version == 0)
     {
@@ -460,10 +460,32 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
         default:
             app.DebugPrintf("De-compressing game rules.");
 #ifndef _CONTENT_PACKAGE
-            assert(compressionType == APPROPRIATE_COMPRESSION_TYPE);
+            // A mismatch here means this platform's build is reading
+            // game-rule data encoded for a different platform (see
+            // APPROPRIATE_COMPRESSION_TYPE in compression.h) - almost
+            // certainly a packaging/build config bug rather than something
+            // recoverable per-call. Still, an assert()-triggered abort() is
+            // a poor way to surface that: log it clearly and keep going with
+            // whatever compressionType byte was actually read (best effort,
+            // same as a non-debug build already does), instead of crashing
+            // the whole process.
+            if (compressionType != APPROPRIATE_COMPRESSION_TYPE)
+            {
+                app.DebugPrintf("GameRuleManager:: compressionType %d does not match this "
+                                "platform's expected %d (APPROPRIATE_COMPRESSION_TYPE) - "
+                                "data may have been packaged for a different platform.\n",
+                                (int)compressionType, (int)APPROPRIATE_COMPRESSION_TYPE);
+            }
 #endif
-            // 4J-JEV: DecompressLZXRLE uses the correct platform specific compression type. (need to assert that the data is compressed with it though).
-            Compression::getCompression()->DecompressLZXRLE(decompressedBuffer.data, &decompressedBuffer.length, compressedBuffer.data, compressedSize);
+            // DLC game-rule packs retain the Windows64 ZLIB+RLE encoding even
+            // on SDL. Select it only for this payload; network/chunk data
+            // continues to use the normal local LZX+RLE codec.
+            Compression *compression = Compression::getCompression();
+            Compression::ECompressionTypes previousType = compression->GetDecompressionType();
+            compression->SetDecompressionType((Compression::ECompressionTypes)compressionType);
+            compression->DecompressLZXRLE(decompressedBuffer.data, &decompressedBuffer.length,
+                                          compressedBuffer.data, compressedSize);
+            compression->SetDecompressionType(previousType);
             break;
             /* 4J-JEV:
                 Each platform has only 1 method of compression, 'compression.h' file deals with it.
@@ -490,22 +512,29 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
         contentDis = new DataInputStream(contentBais);
     }
 
-    // string lookup.
+    // String-table count is the first field of the decompressed payload. A
+    // valid Tutorial.pck has 54 entries; reject corrupt decompression before
+    // readUTF can turn a bogus length into unbounded allocations.
     UINT numStrings = contentDis->readInt();
+    if (numStrings > 4096)
+    {
+        app.DebugPrintf("Invalid game-rule string-table count: %u\n", numStrings);
+        return false;
+    }
     vector<wstring> tagsAndAtts;
     for (UINT i = 0; i < numStrings; i++)
     {
         tagsAndAtts.push_back(contentDis->readUTF());
     }
 
-    unordered_map<int, ConsoleGameRules::EGameRuleType> tagIdMap;
-    for (int type = (int)ConsoleGameRules::eGameRuleType_Root; type < (int)ConsoleGameRules::eGameRuleType_Count; ++type)
+    unordered_map<int, GameRuleType> tagIdMap;
+    for (int type = (int)GameRuleType::Root; type < (int)GameRuleType::Count; ++type)
     {
         for (UINT i = 0; i < numStrings; ++i)
         {
             if (tagsAndAtts[i].compare(wchTagNameA[type]) == 0)
             {
-                tagIdMap.insert(unordered_map<int, ConsoleGameRules::EGameRuleType>::value_type(i, (ConsoleGameRules::EGameRuleType)type));
+                tagIdMap.insert(unordered_map<int, GameRuleType>::value_type(i, (GameRuleType)type));
                 break;
             }
         }
@@ -513,14 +542,14 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
 
     // 4J-JEV: TODO: As yet unused.
     /*
-    unordered_map<int, ConsoleGameRules::EGameRuleAttr> attrIdMap;
-    for(int attr = (int)ConsoleGameRules::eGameRuleAttr_descriptionName; attr < (int)ConsoleGameRules::eGameRuleAttr_Count; ++attr)
+    unordered_map<int, GameRuleType::EGameRuleAttr> attrIdMap;
+    for(int attr = (int)GameRuleType::descriptionName; attr < (int)GameRuleType::Count; ++attr)
     {
         for (UINT i = 0; i < numStrings; i++)
         {
             if (tagsAndAtts[i].compare(wchAttrNameA[attr]) == 0)
             {
-                tagIdMap.insert( unordered_map<int, ConsoleGameRules::EGameRuleAttr>::value_type(i , (ConsoleGameRules::EGameRuleAttr)attr) );
+                tagIdMap.insert( unordered_map<int, GameRuleType::EGameRuleAttr>::value_type(i , (GameRuleType::EGameRuleAttr)attr) );
                 break;
             }
         }
@@ -546,7 +575,7 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
     for (UINT i = 0; i < numObjects; ++i)
     {
         int tagId = contentDis->readInt();
-        ConsoleGameRules::EGameRuleType tagVal = ConsoleGameRules::eGameRuleType_Invalid;
+        GameRuleType tagVal = GameRuleType::Invalid;
         AUTO_VAR(it, tagIdMap.find(tagId));
         if (it != tagIdMap.end())
         {
@@ -555,7 +584,7 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
 
         GameRuleDefinition *rule = NULL;
 
-        if (tagVal == ConsoleGameRules::eGameRuleType_LevelGenerationOptions)
+        if (tagVal == GameRuleType::LevelGenerationOptions)
         {
             rule = levelGenerator;
             levelGenAdded = true;
@@ -563,7 +592,7 @@ bool GameRuleManager::readRuleFile(LevelGenerationOptions *lgo, byte *dIn, UINT 
             lgoID = addLevelGenerationOptions(levelGenerator);
             levelGenerator->loadStringTable(strings);
         }
-        else if (tagVal == ConsoleGameRules::eGameRuleType_LevelRules)
+        else if (tagVal == GameRuleType::LevelRules)
         {
             rule = gameRules;
             gameRulesAdded = true;
@@ -627,13 +656,13 @@ void GameRuleManager::readAttributes(DataInputStream *dis, vector<wstring> *tags
     }
 }
 
-void GameRuleManager::readChildren(DataInputStream *dis, vector<wstring> *tagsAndAtts, unordered_map<int, ConsoleGameRules::EGameRuleType> *tagIdMap, GameRuleDefinition *rule)
+void GameRuleManager::readChildren(DataInputStream *dis, vector<wstring> *tagsAndAtts, unordered_map<int, GameRuleType> *tagIdMap, GameRuleDefinition *rule)
 {
     int numChildren = dis->readInt();
     for (UINT child = 0; child < numChildren; ++child)
     {
         int tagId = dis->readInt();
-        ConsoleGameRules::EGameRuleType tagVal = ConsoleGameRules::eGameRuleType_Invalid;
+        GameRuleType tagVal = GameRuleType::Invalid;
         AUTO_VAR(it, tagIdMap->find(tagId));
         if (it != tagIdMap->end())
         {

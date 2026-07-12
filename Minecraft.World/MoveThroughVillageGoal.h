@@ -5,6 +5,7 @@
 class PathfinderMob;
 class Path;
 class DoorInfo;
+class Village;
 
 class MoveThroughVillageGoal : public Goal
 {

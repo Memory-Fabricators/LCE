@@ -1,6 +1,6 @@
 #include "ChestModel.h"
 #include "ModelPart.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 ChestModel::ChestModel()
 {

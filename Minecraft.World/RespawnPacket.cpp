@@ -19,7 +19,7 @@ RespawnPacket::RespawnPacket()
     m_hellScale = HELL_LEVEL_MAX_SCALE;
 }
 
-RespawnPacket::RespawnPacket(char dimension, __int64 mapSeed, int mapHeight, GameType *playerGameType, char difficulty, LevelType *pLevelType, bool newSeaLevel, int newEntityId, int xzSize, int hellScale)
+RespawnPacket::RespawnPacket(char dimension, std::int64_t mapSeed, int mapHeight, GameType *playerGameType, char difficulty, LevelType *pLevelType, bool newSeaLevel, int newEntityId, int xzSize, int hellScale)
 {
     this->dimension = dimension;
     this->mapSeed = mapSeed;

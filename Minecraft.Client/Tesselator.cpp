@@ -4,6 +4,113 @@
 #include "../Minecraft.World/FloatBuffer.h"
 #include "../Minecraft.World/IntBuffer.h"
 #include "stdafx.h"
+#include <GL/gl.h>
+#include <GL/glext.h>
+#include <cstdint>
+#include <cstring>
+#include <vector>
+
+namespace
+{
+// Tesselator packs vertex data into a raw int array in one of two layouts
+// (see Tesselator::vertex()): the standard 8 ints/vertex format (pos as
+// float bits, uv as float bits, packed RGBA8, normal, tex2) or, for chunk
+// terrain (useCompactVertices(true)), a compact 8 int16/vertex format
+// (fixed-point pos/uv, packed RGB565-ish colour). Neither packing is a type
+// GL's fixed-function vertex arrays can consume directly (the packed colour
+// int is big-endian-ordered RGBA regardless of host endianness, and the
+// compact format is fully fixed point), so unpack into a plain interleaved
+// float scratch buffer - pos(3) + uv(2) + rgba(4) = 9 floats/vertex - and
+// feed that straight to real GL. This bypasses RenderManager::DrawVertices
+// entirely: that call took a C4JRender::ePrimitiveType, but Tesselator was
+// passing it a raw GL_* primitive constant (from <GL/gl.h>, e.g. GL_QUADS =
+// 0x0007) reinterpret-cast to the enum, which silently mismatched every
+// enumerator and made DrawVertices fall through to its `default: GL_TRIANGLES`
+// - drawing quad data (or nothing at all when the primitive didn't match) as
+// garbled triangles. This is a real compat-profile GL context so GL_QUADS
+// etc. are natively supported and need no translation at all.
+thread_local std::vector<float> s_decoded;
+
+void decodeStandardVertices(const int *src, int count, std::vector<float> &out)
+{
+    out.resize((size_t)count * 9);
+    for (int i = 0; i < count; i++)
+    {
+        const int *v = src + (size_t)i * 8;
+        float *o = out.data() + (size_t)i * 9;
+
+        float x, y, z, u, vv;
+        memcpy(&x, &v[0], 4);
+        memcpy(&y, &v[1], 4);
+        memcpy(&z, &v[2], 4);
+        memcpy(&u, &v[3], 4);
+        memcpy(&vv, &v[4], 4);
+
+        unsigned int packed = (unsigned int)v[5]; // (r<<24)|(g<<16)|(b<<8)|a
+        o[0] = x;
+        o[1] = y;
+        o[2] = z;
+        o[3] = u;
+        o[4] = vv;
+        o[5] = ((packed >> 24) & 0xff) / 255.0f;
+        o[6] = ((packed >> 16) & 0xff) / 255.0f;
+        o[7] = ((packed >> 8) & 0xff) / 255.0f;
+        o[8] = (packed & 0xff) / 255.0f;
+    }
+}
+
+void decodeCompactVertices(const int16_t *src, int count, std::vector<float> &out)
+{
+    out.resize((size_t)count * 9);
+    for (int i = 0; i < count; i++)
+    {
+        const int16_t *v = src + (size_t)i * 8;
+        float *o = out.data() + (size_t)i * 9;
+
+        o[0] = v[0] / 1024.0f;
+        o[1] = v[1] / 1024.0f;
+        o[2] = v[2] / 1024.0f;
+
+        // Reverses "ipackedcol -= 32768; ipackedcol &= 0xffff;" from
+        // Tesselator::vertex() to recover the original RGB565 value.
+        uint16_t packed = (uint16_t)((int)(uint16_t)v[3] + 32768);
+        o[5] = ((packed >> 11) & 0x1f) / 31.0f;
+        o[6] = ((packed >> 5) & 0x3f) / 63.0f;
+        o[7] = (packed & 0x1f) / 31.0f;
+        o[8] = 1.0f; // alpha isn't carried in the compact format
+
+        o[3] = v[4] / 8192.0f;
+        o[4] = v[5] / 8192.0f;
+    }
+}
+
+// Draws real GL fixed-function vertex arrays from the decoded scratch
+// buffer. `glMode` is the real GL primitive constant Tesselator::begin()
+// was given (GL_QUADS, GL_TRIANGLES, ...).
+void drawDecodedVertices(GLenum glMode, const std::vector<float> &data, int count)
+{
+    if (count <= 0)
+    {
+        return;
+    }
+
+    const GLsizei stride = 9 * sizeof(float);
+    const float *base = data.data();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, stride, base);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    glTexCoordPointer(2, GL_FLOAT, stride, base + 3);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glColorPointer(4, GL_FLOAT, stride, base + 5);
+
+    glDrawArrays(glMode, 0, count);
+
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glDisableClientState(GL_COLOR_ARRAY);
+}
+} // namespace
 
 bool Tesselator::TRIANGLE_MODE = false;
 bool Tesselator::USE_VBO = false;
@@ -73,7 +180,7 @@ Tesselator::Tesselator(int size)
     if (vboMode)
     {
         vboIds = MemoryTracker::createIntBuffer(vboCounts);
-        ARBVertexBufferObject::glGenBuffersARB(vboIds);
+        glGenBuffersARB(2, (GLuint *)vboIds->getBuffer());
     }
 
 #ifdef __PSVITA__
@@ -134,9 +241,8 @@ void Tesselator::end()
                                        useCompactFormat360 ? C4JRender::VERTEX_TYPE_PS3_TS2_CS1 : C4JRender::VERTEX_TYPE_PF3_TF2_CB4_NB4_XW1,
                                        useProjectedTexturePixelShader ? C4JRender::PIXEL_SHADER_TYPE_PROJECTION : C4JRender::PIXEL_SHADER_TYPE_STANDARD);
 #else
-            RenderManager.DrawVertices(C4JRender::PRIMITIVE_TYPE_TRIANGLE_LIST, vertices, _array->data,
-                                       useCompactFormat360 ? C4JRender::VERTEX_TYPE_COMPRESSED : C4JRender::VERTEX_TYPE_PF3_TF2_CB4_NB4_XW1,
-                                       useProjectedTexturePixelShader ? C4JRender::PIXEL_SHADER_TYPE_PROJECTION : C4JRender::PIXEL_SHADER_TYPE_STANDARD);
+            decodeStandardVertices((const int *)_array->data, vertices, s_decoded);
+            drawDecodedVertices(GL_TRIANGLES, s_decoded, vertices);
 #endif
         }
         else
@@ -167,31 +273,22 @@ void Tesselator::end()
             int vertexCount = vertices;
             if (useCompactFormat360)
             {
+                decodeCompactVertices((const int16_t *)_array->data, vertexCount, s_decoded);
+                drawDecodedVertices((GLenum)mode, s_decoded, vertexCount);
 #ifdef __PSVITA__
                 // AP - alpha cut out is expensive on vita. Render non-cut out stuff first then send the cut out stuff
-                if (vertexCount)
-                {
-                    RenderManager.DrawVertices((C4JRender::ePrimitiveType)mode, vertexCount, _array->data, C4JRender::VERTEX_TYPE_COMPRESSED, C4JRender::PIXEL_SHADER_TYPE_STANDARD);
-                }
                 if (vertices2)
                 {
-                    RenderManager.DrawVerticesCutOut((C4JRender::ePrimitiveType)mode, vertices2, _array2->data, C4JRender::VERTEX_TYPE_COMPRESSED, C4JRender::PIXEL_SHADER_TYPE_STANDARD);
+                    thread_local std::vector<float> s_decoded2;
+                    decodeCompactVertices((const int16_t *)_array2->data, vertices2, s_decoded2);
+                    drawDecodedVertices((GLenum)mode, s_decoded2, vertices2);
                 }
-#else
-
-                RenderManager.DrawVertices((C4JRender::ePrimitiveType)mode, vertexCount, _array->data, C4JRender::VERTEX_TYPE_COMPRESSED, C4JRender::PIXEL_SHADER_TYPE_STANDARD);
 #endif
             }
             else
             {
-                if (useProjectedTexturePixelShader)
-                {
-                    RenderManager.DrawVertices((C4JRender::ePrimitiveType)mode, vertexCount, _array->data, C4JRender::VERTEX_TYPE_PF3_TF2_CB4_NB4_XW1_TEXGEN, C4JRender::PIXEL_SHADER_TYPE_PROJECTION);
-                }
-                else
-                {
-                    RenderManager.DrawVertices((C4JRender::ePrimitiveType)mode, vertexCount, _array->data, C4JRender::VERTEX_TYPE_PF3_TF2_CB4_NB4_XW1, C4JRender::PIXEL_SHADER_TYPE_STANDARD);
-                }
+                decodeStandardVertices((const int *)_array->data, vertexCount, s_decoded);
+                drawDecodedVertices((GLenum)mode, s_decoded, vertexCount);
             }
 #endif
         }
@@ -364,7 +461,7 @@ void Tesselator::color(int r, int g, int b, int a)
     col = (r << 24) | (g << 16) | (b << 8) | (a);
 }
 
-void Tesselator::color(byte r, byte g, byte b)
+void Tesselator::color(unsigned char r, unsigned char g, unsigned char b)
 {
     color(r & 0xff, g & 0xff, b & 0xff);
 }
@@ -821,7 +918,11 @@ void Tesselator::vertex(float x, float y, float z)
     count++;
 
     // Signal to pixel shader whether to use mipmapping or not, by putting u into > 1 range if it is to be disabled
+#if defined(LCE_USE_MESA_GL) || defined(__linux__)
+    float uu = u;
+#else
     float uu = mipmapEnable ? u : (u + 1.0f);
+#endif
 
     // 4J - this format added for 360 to keep memory size of tesselated tiles down -
     // see comments in packCompactQuad() for exact format
@@ -1125,9 +1226,9 @@ void Tesselator::normal(float x, float y, float z)
     int8_t zz = (int8_t)(z * 127);
     _normal = (xx & 0xff) | ((yy & 0xff) << 8) | ((zz & 0xff) << 16);
 #else
-    byte xx = (byte)(x * 127);
-    byte yy = (byte)(y * 127);
-    byte zz = (byte)(z * 127);
+    auto xx = (unsigned char)(x * 127);
+    auto yy = (unsigned char)(y * 127);
+    auto zz = (unsigned char)(z * 127);
     _normal = (xx & 0xff) | ((yy & 0xff) << 8) | ((zz & 0xff) << 16);
 #endif
 }

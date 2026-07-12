@@ -1,8 +1,8 @@
 #include "GhastModel.h"
 #include "../Minecraft.World/Mth.h"
 #include "../Minecraft.World/Random.h"
+#include "GL/gl.h"
 #include "ModelPart.h"
-#include "stdafx.h"
 
 GhastModel::GhastModel() : Model()
 {

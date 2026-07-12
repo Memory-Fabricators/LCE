@@ -84,7 +84,7 @@ MerchantRecipe *MerchantRecipeList::getMatchingRecipeFor(shared_ptr<ItemInstance
 
 void MerchantRecipeList::writeToStream(DataOutputStream *stream)
 {
-    stream->writeByte((byte)(m_recipes.size() & 0xff));
+    stream->writeByte((m_recipes.size() & 0xff));
     for (int i = 0; i < m_recipes.size(); i++)
     {
         MerchantRecipe *r = m_recipes.at(i);

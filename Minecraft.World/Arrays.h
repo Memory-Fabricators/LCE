@@ -30,7 +30,7 @@ class Arrays
         std::fill(arr.data + from, arr.data + to, value);
     }
 
-    static void fill(byteArray arr, unsigned int from, unsigned int to, byte value)
+    static void fill(byteArray arr, unsigned int from, unsigned int to, unsigned char value)
     {
         assert(from >= 0);
         assert(from <= to);
@@ -38,7 +38,7 @@ class Arrays
         std::fill(arr.data + from, arr.data + to, value);
     }
 
-    static void fill(byteArray arr, byte value)
+    static void fill(byteArray arr, unsigned char value)
     {
         std::fill(arr.data, arr.data + arr.length, value);
     }

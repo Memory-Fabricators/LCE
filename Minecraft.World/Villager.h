@@ -91,7 +91,7 @@ class Villager : public AgableMob, public Npc, public Merchant
     void setLastHurtByMob(shared_ptr<Mob> mob);
     void die(DamageSource *source);
 
-    void handleEntityEvent(byte id);
+    void handleEntityEvent(unsigned char id);
 
   private:
     void addParticlesAroundSelf(ePARTICLE_TYPE particle);

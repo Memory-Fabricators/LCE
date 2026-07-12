@@ -4976,13 +4976,13 @@ void Level::checkSession()
     levelStorage->checkSession();
 }
 
-void Level::setTime(__int64 time)
+void Level::setTime(std::int64_t time)
 {
     // 4J : WESTY : Added to track game time played by players for other awards.
     if (time != 0) // Ignore setting time to 0, done at level start and during tutorial.
     {
         // Determine step in time and ensure it is reasonable ( we only have an int to store the player stat).
-        __int64 timeDiff = time - levelData->getTime();
+        std::int64_t timeDiff = time - levelData->getTime();
 
         // debug setting added to keep it at day time
 #ifndef _FINAL_BUILD
@@ -5021,17 +5021,17 @@ void Level::setTime(__int64 time)
     this->levelData->setTime(time);
 }
 
-void Level::setOverrideTimeOfDay(__int64 time)
+void Level::setOverrideTimeOfDay(std::int64_t time)
 {
     m_timeOfDayOverride = time;
 }
 
-__int64 Level::getSeed()
+std::int64_t Level::getSeed()
 {
     return levelData->getSeed();
 }
 
-__int64 Level::getTime()
+std::int64_t Level::getTime()
 {
     return levelData->getTime();
 }
@@ -5078,7 +5078,7 @@ bool Level::mayInteract(shared_ptr<Player> player, int xt, int yt, int zt, int c
     return true;
 }
 
-void Level::broadcastEntityEvent(shared_ptr<Entity> e, byte event)
+void Level::broadcastEntityEvent(shared_ptr<Entity> e, unsigned char event)
 {
 }
 
@@ -5220,7 +5220,7 @@ int Level::getHeight()
 
 Random *Level::getRandomFor(int x, int z, int blend)
 {
-    __int64 seed = (x * 341873128712l + z * 132897987541l) + getLevelData()->getSeed() + blend;
+    std::int64_t seed = (x * 341873128712l + z * 132897987541l) + getLevelData()->getSeed() + blend;
     random->setSeed(seed);
     return random;
 }

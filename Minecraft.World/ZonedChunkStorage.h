@@ -13,25 +13,25 @@ class ZoneIo;
 class ZonedChunkStorage : public ChunkStorage
 {
   public:
-    static const int BIT_TERRAIN_POPULATED;
+    inline static const int BIT_TERRAIN_POPULATED = 0x0000001;
 
-    static const int CHUNKS_PER_ZONE_BITS; // = 32
-    static const int CHUNKS_PER_ZONE;      // ^2
+    inline static const int CHUNKS_PER_ZONE_BITS = 5; // = 32
+    inline static const int CHUNKS_PER_ZONE = 1 << 5; // ^2
 
-    static const int CHUNK_WIDTH;
+    inline static const int CHUNK_WIDTH = 16;
 
-    static const int CHUNK_HEADER_SIZE;
-    static const int CHUNK_SIZE;
-    static const int CHUNK_LAYERS;
-    static const int CHUNK_SIZE_BYTES;
+    inline static const int CHUNK_HEADER_SIZE = 256;
+    inline static const int CHUNK_SIZE = 16 * 16 * 128;
+    inline static const int CHUNK_LAYERS = 3;
+    inline static const int CHUNK_SIZE_BYTES = CHUNK_SIZE * CHUNK_LAYERS + CHUNK_HEADER_SIZE;
 
-    static const ByteOrder BYTEORDER;
+    inline static const ByteOrder BYTEORDER = BIGENDIAN;
 
     File dir;
 
   private:
-    unordered_map<__int64, ZoneFile *> zoneFiles;
-    __int64 tickCount;
+    unordered_map<std::int64_t, ZoneFile *> zoneFiles;
+    std::int64_t tickCount;
 
   public:
     ZonedChunkStorage(File dir);

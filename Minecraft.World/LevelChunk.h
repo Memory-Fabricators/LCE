@@ -1,6 +1,8 @@
 #pragma once
 using namespace std;
 
+#include "TilePos.h"
+
 class DataLayer;
 class TileEntity;
 class Random;
@@ -32,7 +34,7 @@ class LevelChunk
     const int ENTITY_BLOCKS_LENGTH;
     static const int BLOCKS_LENGTH = Level::CHUNK_TILE_COUNT; // 4J added
 
-    static bool touchedSky;
+    static thread_local bool touchedSky;
 
     enum EColumnFlag
     {
@@ -136,8 +138,8 @@ class LevelChunk
     void stopSharingTilesAndData();                 // 4J added
     virtual void reSyncLighting();                  // 4J added
     void startSharingTilesAndData(int forceMs = 0); // 4J added
-    __int64 lastUnsharedTime;                       // 4J added
-    __int64 lastSaveTime;
+    std::int64_t lastUnsharedTime;                  // 4J added
+    std::int64_t lastSaveTime;
     bool seenByPlayer;
 
 #ifdef _LARGE_WORLDS
@@ -215,7 +217,7 @@ class LevelChunk
     virtual bool testSetBlocksAndData(byteArray data, int x0, int y0, int z0, int x1, int y1, int z1, int p);                          // 4J added
     virtual void setCheckAllLight();
 
-    virtual Random *getRandom(__int64 l);
+    virtual Random *getRandom(std::int64_t l);
     virtual bool isEmpty();
     virtual void attemptCompression();
 

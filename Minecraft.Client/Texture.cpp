@@ -65,24 +65,24 @@ void Texture::_init(const wstring &name, int mode, int width, int height, int de
 
     if (mipmapped)
     {
-        // 4J-PB - In the new XDK, the CreateTexture will fail if the number of mipmaps is higher than the width & height passed in will allow!
-        int iWidthMips = 1;
-        int iHeightMips = 1;
-        while ((8 << iWidthMips) < width)
+        int tempW = width;
+        int tempH = height;
+        m_iMipLevels = 1;
+        while (tempW > 1 || tempH > 1)
         {
-            iWidthMips++;
+            m_iMipLevels++;
+            if (tempW > 1)
+            {
+                tempW /= 2;
+            }
+            if (tempH > 1)
+            {
+                tempH /= 2;
+            }
         }
-        while ((8 << iHeightMips) < height)
+        if (m_iMipLevels > 10)
         {
-            iHeightMips++;
-        }
-
-        m_iMipLevels = (iWidthMips < iHeightMips) ? iWidthMips : iHeightMips;
-
-        // TODO - The render libs currently limit max mip map levels to 5
-        if (m_iMipLevels > MAX_MIP_LEVELS)
-        {
-            m_iMipLevels = MAX_MIP_LEVELS;
+            m_iMipLevels = 10;
         }
     }
 
@@ -96,7 +96,7 @@ void Texture::_init(const wstring &name, int mode, int width, int height, int de
 
     if (mode != TM_CONTAINER)
     {
-        glId = glGenTextures();
+        glGenTextures(1, &glId);
 
         glBindTexture(type, glId);
         glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minFilter);
@@ -144,7 +144,12 @@ void Texture::_init(const wstring &name, int mode, int width, int height, int de
                 for (unsigned int level = 1; level < m_iMipLevels; ++level)
                 {
                     int ww = width >> level;
-                    int hh = height >> height;
+                    // Typo bug fix: this was `height >> height` (always 0,
+                    // regardless of level), which starved every mip level's
+                    // byteArray of any bytes and eventually asserted in
+                    // arrayWithLength's ctor (elements != 0) - should mirror
+                    // `ww` on the line above and shift by the mip level.
+                    int hh = height >> level;
 
                     byteArray tempBytes = byteArray(ww * hh * depth * 4);
                     for (int index = 0; index < tempBytes.length; index++)
@@ -213,7 +218,7 @@ Texture::~Texture()
 
     if (glId >= 0)
     {
-        glDeleteTextures(glId);
+        glDeleteTextures(1, &glId);
     }
 }
 
@@ -283,10 +288,10 @@ void Texture::writeAsBMP(const wstring &name)
 	// Write the header
 	outStream->writeShort((short)0x424d);            // 0x0000: ID - 'BM'
 	int byteSize = width * height * 4 + 54;
-	outStream->writeByte((byte)(byteSize >>  0));    // 0x0002: Raw file size
-	outStream->writeByte((byte)(byteSize >>  8));
-	outStream->writeByte((byte)(byteSize >> 16));
-	outStream->writeByte((byte)(byteSize >> 24));
+	outStream->writeByte((byteSize >>  0));    // 0x0002: Raw file size
+	outStream->writeByte((byteSize >>  8));
+	outStream->writeByte((byteSize >> 16));
+	outStream->writeByte((byteSize >> 24));
 	outStream->writeInt(0);                          // 0x0006: Reserved
 	outStream->writeByte(54);                        // 0x000A: Start of pixel data
 	outStream->writeByte(0);
@@ -296,31 +301,31 @@ void Texture::writeAsBMP(const wstring &name)
 	outStream->writeByte(0);
 	outStream->writeByte(0);
 	outStream->writeByte(0);
-	outStream->writeByte((byte)(width >>  0));       // 0x0012: Image width, in pixels
-	outStream->writeByte((byte)(width >>  8));
-	outStream->writeByte((byte)(width >> 16));
-	outStream->writeByte((byte)(width >> 24));
-	outStream->writeByte((byte)(height >>  0));      // 0x0016: Image height, in pixels
-	outStream->writeByte((byte)(height >>  8));
-	outStream->writeByte((byte)(height >> 16));
-	outStream->writeByte((byte)(height >> 24));
+	outStream->writeByte((width >>  0));       // 0x0012: Image width, in pixels
+	outStream->writeByte((width >>  8));
+	outStream->writeByte((width >> 16));
+	outStream->writeByte((width >> 24));
+	outStream->writeByte((height >>  0));      // 0x0016: Image height, in pixels
+	outStream->writeByte((height >>  8));
+	outStream->writeByte((height >> 16));
+	outStream->writeByte((height >> 24));
 	outStream->writeByte(1);                         // 0x001A: Number of color planes, must be 1
 	outStream->writeByte(0);
 	outStream->writeByte(32);                        // 0x001C: Bit depth (32bpp)
 	outStream->writeByte(0);
 	outStream->writeInt(0);                          // 0x001E: Compression mode (BI_RGB, uncompressed)
 	int bufSize = width * height * 4;
-	outStream->writeInt((byte)(bufSize >>  0));      // 0x0022: Raw size of bitmap data
-	outStream->writeInt((byte)(bufSize >>  8));
-	outStream->writeInt((byte)(bufSize >> 16));
-	outStream->writeInt((byte)(bufSize >> 24));
+	outStream->writeInt((bufSize >>  0));      // 0x0022: Raw size of bitmap data
+	outStream->writeInt((bufSize >>  8));
+	outStream->writeInt((bufSize >> 16));
+	outStream->writeInt((bufSize >> 24));
 	outStream->writeInt(0);                          // 0x0026: Horizontal resolution in ppm
 	outStream->writeInt(0);                          // 0x002A: Vertical resolution in ppm
 	outStream->writeInt(0);                          // 0x002E: Palette size (0 to match bit depth)
 	outStream->writeInt(0);                          // 0x0032: Number of important colors, 0 for all
 
 	// Pixels follow in inverted Y order
-	byte[] bytes = new byte[width * height * 4];
+	byte[] bytes = new byte[width * height * 5];
 	data.position(0);
 	data.get(bytes);
 	for (int y = height - 1; y >= 0; y--)
@@ -546,10 +551,10 @@ void Texture::transferFromBuffer(intArray buffer)
             {
                 int texel = column + x * 4;
                 data[0]->position(0);
-                data[0]->put(texel + byteRemap[0], (byte)((buffer[texel >> 2] >> 24) & 0xff));
-                data[0]->put(texel + byteRemap[1], (byte)((buffer[texel >> 2] >> 16) & 0xff));
-                data[0]->put(texel + byteRemap[2], (byte)((buffer[texel >> 2] >> 8) & 0xff));
-                data[0]->put(texel + byteRemap[3], (byte)((buffer[texel >> 2] >> 0) & 0xff));
+                data[0]->put(texel + byteRemap[0], ((buffer[texel >> 2] >> 24) & 0xff));
+                data[0]->put(texel + byteRemap[1], ((buffer[texel >> 2] >> 16) & 0xff));
+                data[0]->put(texel + byteRemap[2], ((buffer[texel >> 2] >> 8) & 0xff));
+                data[0]->put(texel + byteRemap[3], ((buffer[texel >> 2] >> 0) & 0xff));
             }
         }
     }
@@ -605,10 +610,10 @@ void Texture::transferFromImage(BufferedImage *image)
 
             // Pull ARGB bytes into either RGBA or BGRA depending on format
 
-            tempBytes[byteIndex + byteRemap[0]] = (byte)((tempPixels[intIndex] >> 24) & 0xff);
-            tempBytes[byteIndex + byteRemap[1]] = (byte)((tempPixels[intIndex] >> 16) & 0xff);
-            tempBytes[byteIndex + byteRemap[2]] = (byte)((tempPixels[intIndex] >> 8) & 0xff);
-            tempBytes[byteIndex + byteRemap[3]] = (byte)((tempPixels[intIndex] >> 0) & 0xff);
+            tempBytes[byteIndex + byteRemap[0]] = ((tempPixels[intIndex] >> 24) & 0xff);
+            tempBytes[byteIndex + byteRemap[1]] = ((tempPixels[intIndex] >> 16) & 0xff);
+            tempBytes[byteIndex + byteRemap[2]] = ((tempPixels[intIndex] >> 8) & 0xff);
+            tempBytes[byteIndex + byteRemap[3]] = ((tempPixels[intIndex] >> 0) & 0xff);
         }
     }
 
@@ -657,10 +662,10 @@ void Texture::transferFromImage(BufferedImage *image)
 
                         // Pull ARGB bytes into either RGBA or BGRA depending on format
 
-                        tempBytes[byteIndex + byteRemap[0]] = (byte)((tempData[intIndex] >> 24) & 0xff);
-                        tempBytes[byteIndex + byteRemap[1]] = (byte)((tempData[intIndex] >> 16) & 0xff);
-                        tempBytes[byteIndex + byteRemap[2]] = (byte)((tempData[intIndex] >> 8) & 0xff);
-                        tempBytes[byteIndex + byteRemap[3]] = (byte)((tempData[intIndex] >> 0) & 0xff);
+                        tempBytes[byteIndex + byteRemap[0]] = ((tempData[intIndex] >> 24) & 0xff);
+                        tempBytes[byteIndex + byteRemap[1]] = ((tempData[intIndex] >> 16) & 0xff);
+                        tempBytes[byteIndex + byteRemap[2]] = ((tempData[intIndex] >> 8) & 0xff);
+                        tempBytes[byteIndex + byteRemap[3]] = ((tempData[intIndex] >> 0) & 0xff);
                     }
                 }
             }
@@ -693,10 +698,10 @@ void Texture::transferFromImage(BufferedImage *image)
 
                         // Pull ARGB bytes into either RGBA or BGRA depending on format
 
-                        tempBytes[byteIndex + byteRemap[0]] = (byte)((col >> 24) & 0xff);
-                        tempBytes[byteIndex + byteRemap[1]] = (byte)((col >> 16) & 0xff);
-                        tempBytes[byteIndex + byteRemap[2]] = (byte)((col >> 8) & 0xff);
-                        tempBytes[byteIndex + byteRemap[3]] = (byte)((col >> 0) & 0xff);
+                        tempBytes[byteIndex + byteRemap[0]] = ((col >> 24) & 0xff);
+                        tempBytes[byteIndex + byteRemap[1]] = ((col >> 16) & 0xff);
+                        tempBytes[byteIndex + byteRemap[2]] = ((col >> 8) & 0xff);
+                        tempBytes[byteIndex + byteRemap[3]] = ((col >> 0) & 0xff);
                     }
                 }
             }
@@ -819,16 +824,21 @@ void Texture::bind(int mipMapIndex)
 
 void Texture::updateOnGPU()
 {
+    if (mipmapped)
+    {
+        int actualLevels = 1;
+        while (actualLevels < m_iMipLevels && actualLevels < 10 && data[actualLevels] != NULL)
+        {
+            actualLevels++;
+        }
+        m_iMipLevels = actualLevels;
+    }
+
     data[0]->flip();
     if (mipmapped)
     {
         for (int level = 1; level < m_iMipLevels; level++)
         {
-            if (data[level] == NULL)
-            {
-                break;
-            }
-
             data[level]->flip();
         }
     }

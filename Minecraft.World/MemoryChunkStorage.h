@@ -2,6 +2,7 @@
 using namespace std;
 
 #include "ChunkSource.h"
+#include "ChunkStorage.h"
 
 class MemoryChunkStorage : public ChunkStorage
 {

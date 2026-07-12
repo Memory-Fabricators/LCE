@@ -1,6 +1,7 @@
 #include "GuiComponent.h"
 #include "Tesselator.h"
-#include "stdafx.h"
+#include <GL/gl.h>
+#include <cmath>
 
 void GuiComponent::hLine(int x0, int x1, int y, int col)
 {

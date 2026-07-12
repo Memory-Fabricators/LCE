@@ -1,5 +1,6 @@
 #pragma once
 #include "../Minecraft.World/JavaIntHash.h"
+#include "../Minecraft.World/SharedConstants.h"
 #include "../Minecraft.World/net.minecraft.world.level.h"
 class ServerChunkCache;
 class MinecraftServer;
@@ -110,7 +111,7 @@ class ServerLevel : public Level
   public:
     shared_ptr<Entity> getEntity(int id);
     virtual bool addGlobalEntity(shared_ptr<Entity> e);
-    void broadcastEntityEvent(shared_ptr<Entity> e, byte event);
+    void broadcastEntityEvent(shared_ptr<Entity> e, unsigned char event);
     virtual shared_ptr<Explosion> explode(shared_ptr<Entity> source, double x, double y, double z, float r, bool fire, bool destroyBlocks);
     virtual void tileEvent(int x, int y, int z, int tile, int b0, int b1);
 
@@ -127,7 +128,7 @@ class ServerLevel : public Level
   public:
     MinecraftServer *getServer();
     EntityTracker *getTracker();
-    void setTimeAndAdjustTileTicks(__int64 newTime);
+    void setTimeAndAdjustTileTicks(std::int64_t newTime);
     PlayerChunkMap *getChunkMap();
 
     void queueSendTileUpdate(int x, int y, int z); // 4J Added

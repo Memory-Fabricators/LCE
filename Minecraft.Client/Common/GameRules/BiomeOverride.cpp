@@ -1,5 +1,6 @@
 #include "BiomeOverride.h"
 #include "../../../Minecraft.World/StringHelpers.h"
+#include "GameRules/ConsoleGameRulesConstants.h"
 #include "stdafx.h"
 
 BiomeOverride::BiomeOverride()
@@ -13,11 +14,11 @@ void BiomeOverride::writeAttributes(DataOutputStream *dos, UINT numAttrs)
 {
     GameRuleDefinition::writeAttributes(dos, numAttrs + 3);
 
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_biomeId);
+    ::write(dos, GameRuleAttribute::biomeId);
     dos->writeUTF(_toString(m_biomeId));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_tileId);
+    ::write(dos, GameRuleAttribute::tileId);
     dos->writeUTF(_toString(m_tile));
-    ConsoleGameRules::write(dos, ConsoleGameRules::eGameRuleAttr_topTileId);
+    ::write(dos, GameRuleAttribute::topTileId);
     dos->writeUTF(_toString(m_topTile));
 }
 

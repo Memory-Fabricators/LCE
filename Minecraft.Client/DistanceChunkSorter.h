@@ -1,13 +1,17 @@
 #pragma once
+
+#include "Entity.h"
+#include <memory>
+
 class Entity;
 class Chunk;
 
-class DistanceChunkSorter : public std::binary_function<const Chunk *, const Chunk *, bool>
+class DistanceChunkSorter
 {
   private:
     double ix, iy, iz;
 
   public:
-    DistanceChunkSorter(shared_ptr<Entity> player);
+    DistanceChunkSorter(std::shared_ptr<Entity> player);
     bool operator()(const Chunk *a, const Chunk *b) const;
 };

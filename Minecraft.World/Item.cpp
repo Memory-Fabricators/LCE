@@ -1,3 +1,4 @@
+#include "UseAnim.h"
 #include "stdafx.h"
 
 #include "HangingEntityItem.h"
@@ -816,9 +817,9 @@ bool Item::isComplex()
     return false;
 }
 
-UseAnim Item::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
+UseAnimation Item::getUseAnimation(shared_ptr<ItemInstance> itemInstance)
 {
-    return UseAnim_none;
+    return UseAnimation::none;
 }
 
 int Item::getUseDuration(shared_ptr<ItemInstance> itemInstance)

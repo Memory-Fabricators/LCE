@@ -4,7 +4,7 @@
 #include "net.minecraft.world.level.tile.h"
 #include "stdafx.h"
 
-void CanyonFeature::addTunnel(__int64 seed, int xOffs, int zOffs, byteArray blocks, double xCave, double yCave, double zCave, float thickness, float yRot, float xRot, int step, int dist, double yScale)
+void CanyonFeature::addTunnel(std::int64_t seed, int xOffs, int zOffs, byteArray blocks, double xCave, double yCave, double zCave, float thickness, float yRot, float xRot, int step, int dist, double yScale)
 {
     MemSect(49);
     Random *random = new Random(seed);
@@ -174,14 +174,14 @@ void CanyonFeature::addTunnel(__int64 seed, int xOffs, int zOffs, byteArray bloc
                             {
                                 if (yy < 10)
                                 {
-                                    blocks[p] = (byte)Tile::lava_Id;
+                                    blocks[p] = (unsigned char)Tile::lava_Id;
                                 }
                                 else
                                 {
-                                    blocks[p] = (byte)0;
+                                    blocks[p] = (unsigned char)0;
                                     if (hasGrass && blocks[p - 1] == Tile::dirt_Id)
                                     {
-                                        blocks[p - 1] = (byte)level->getBiome(xx + xOffs * 16, zz + zOffs * 16)->topMaterial;
+                                        blocks[p - 1] = (unsigned char)level->getBiome(xx + xOffs * 16, zz + zOffs * 16)->topMaterial;
                                     }
                                 }
                             }

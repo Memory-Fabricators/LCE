@@ -33,7 +33,7 @@ typedef unsigned int UINT;
 typedef unsigned int *PUINT;
 
 typedef unsigned char byte;
-typedef long __int64;
+typedef long std::int64_t;
 typedef unsigned long __uint64;
 typedef unsigned int DWORD;
 typedef int INT;

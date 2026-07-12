@@ -1,6 +1,6 @@
 #include "PlayerEnderChestContainer.h"
 #include "net.minecraft.world.level.tile.entity.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 PlayerEnderChestContainer::PlayerEnderChestContainer() : SimpleContainer(IDS_TILE_ENDERCHEST, 9 * 3)
 {
@@ -38,7 +38,7 @@ ListTag<CompoundTag> *PlayerEnderChestContainer::createTag()
         if (item != NULL)
         {
             CompoundTag *tag = new CompoundTag();
-            tag->putByte(L"Slot", (byte)i);
+            tag->putByte(L"Slot", i);
             item->save(tag);
             items->add(tag);
         }

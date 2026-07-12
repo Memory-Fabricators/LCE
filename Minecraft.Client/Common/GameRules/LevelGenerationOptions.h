@@ -1,8 +1,6 @@
 #pragma once
 using namespace std;
 
-#pragma message("LevelGenerationOptions.h ")
-
 #include "../../../Minecraft.World/StructureFeature.h"
 #include "GameRuleDefinition.h"
 
@@ -145,7 +143,7 @@ class LevelGenerationOptions : public GameRuleDefinition
 
   private:
     // This should match the "MapOptionsRule" definition in the XML schema
-    __int64 m_seed;
+    std::int64_t m_seed;
     bool m_useFlatWorld;
     Pos *m_spawnPos;
     vector<ApplySchematicRuleDefinition *> m_schematicRules;
@@ -165,14 +163,14 @@ class LevelGenerationOptions : public GameRuleDefinition
     LevelGenerationOptions();
     ~LevelGenerationOptions();
 
-    virtual ConsoleGameRules::EGameRuleType getActionType();
+    virtual GameRuleType getActionType();
 
     virtual void writeAttributes(DataOutputStream *dos, UINT numAttributes);
     virtual void getChildren(vector<GameRuleDefinition *> *children);
-    virtual GameRuleDefinition *addChild(ConsoleGameRules::EGameRuleType ruleType);
+    virtual GameRuleDefinition *addChild(GameRuleType ruleType);
     virtual void addAttribute(const wstring &attributeName, const wstring &attributeValue);
 
-    __int64 getLevelSeed();
+    std::int64_t getLevelSeed();
     Pos *getSpawnPos();
     bool getuseFlatWorld();
 

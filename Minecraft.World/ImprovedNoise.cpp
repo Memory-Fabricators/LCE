@@ -212,20 +212,16 @@ void ImprovedNoise::add(doubleArray buffer, double _x, double _y, double _z, int
                 y -= yf;
                 double v = y * y * y * (y * (y * 6 - 15) + 10);
 
-                if (yy == 0 || Y != yOld)
-                {
-                    yOld = Y;
-                    A = p[X] + Y;
-                    AA = p[A] + Z;
-                    AB = p[A + 1] + Z;
-                    B = p[X + 1] + Y;
-                    BA = p[B] + Z;
-                    BB = p[B + 1] + Z;
-                    vv0 = lerp(u, grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z));
-                    vv1 = lerp(u, grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z));
-                    vv2 = lerp(u, grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1));
-                    vv3 = lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1));
-                }
+                A = p[X] + Y;
+                AA = p[A] + Z;
+                AB = p[A + 1] + Z;
+                B = p[X + 1] + Y;
+                BA = p[B] + Z;
+                BB = p[B + 1] + Z;
+                vv0 = lerp(u, grad(p[AA], x, y, z), grad(p[BA], x - 1, y, z));
+                vv1 = lerp(u, grad(p[AB], x, y - 1, z), grad(p[BB], x - 1, y - 1, z));
+                vv2 = lerp(u, grad(p[AA + 1], x, y, z - 1), grad(p[BA + 1], x - 1, y, z - 1));
+                vv3 = lerp(u, grad(p[AB + 1], x, y - 1, z - 1), grad(p[BB + 1], x - 1, y - 1, z - 1));
 
                 double v0 = lerp(v, vv0, vv1);
                 double v1 = lerp(v, vv2, vv3);

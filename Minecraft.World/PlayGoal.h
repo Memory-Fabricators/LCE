@@ -2,6 +2,8 @@
 
 #include "Goal.h"
 
+class Villager;
+
 class PlayGoal : public Goal
 {
   private:

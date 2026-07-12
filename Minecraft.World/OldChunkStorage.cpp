@@ -294,7 +294,7 @@ void OldChunkStorage::save(LevelChunk *lc, Level *level, DataOutputStream *dos)
     vector<TickNextTickData> *ticksInChunk = level->fetchTicksInChunk(lc, false);
     if (ticksInChunk != NULL)
     {
-        __int64 levelTime = level->getTime();
+        std::int64_t levelTime = level->getTime();
 
         ListTag<CompoundTag> *tickTags = new ListTag<CompoundTag>();
         for (int i = 0; i < ticksInChunk->size(); i++)
@@ -383,7 +383,7 @@ void OldChunkStorage::save(LevelChunk *lc, Level *level, CompoundTag *tag)
     vector<TickNextTickData> *ticksInChunk = level->fetchTicksInChunk(lc, false);
     if (ticksInChunk != NULL)
     {
-        __int64 levelTime = level->getTime();
+        std::int64_t levelTime = level->getTime();
 
         ListTag<CompoundTag> *tickTags = new ListTag<CompoundTag>();
         for (int i = 0; i < ticksInChunk->size(); i++)

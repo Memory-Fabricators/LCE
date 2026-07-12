@@ -259,10 +259,10 @@ class Level : public LevelSource
     static const int BLOCKING_SHIFT = 20;
     static const int EMISSION_SHIFT = 16;
 #ifdef _LARGE_WORLDS
-    static const __int64 LIGHTING_WRITEBACK = 0x80000000LL;
-    static const __int64 EMISSION_VALID = 0x40000000LL;
-    static const __int64 BLOCKING_VALID = 0x20000000LL;
-    static const __int64 LIGHTING_VALID = 0x10000000LL;
+    static const std::int64_t LIGHTING_WRITEBACK = 0x80000000LL;
+    static const std::int64_t EMISSION_VALID = 0x40000000LL;
+    static const std::int64_t BLOCKING_VALID = 0x20000000LL;
+    static const std::int64_t LIGHTING_VALID = 0x10000000LL;
     static const lightCache_t POSITION_MASK = 0xffffffff0000ffffLL;
 #else
     static const int LIGHTING_WRITEBACK = 0x80000000;
@@ -453,16 +453,16 @@ class Level : public LevelSource
     void setBlocksAndData(int x, int y, int z, int xs, int ys, int zs, byteArray data, bool includeLighting = true);
     virtual void disconnect(bool sendDisconnect = true);
     void checkSession();
-    void setTime(__int64 time);
-    void setOverrideTimeOfDay(__int64 time); // 4J Added so we can override timeOfDay without changing tick time
-    __int64 getSeed();
-    __int64 getTime();
+    void setTime(std::int64_t time);
+    void setOverrideTimeOfDay(std::int64_t time); // 4J Added so we can override timeOfDay without changing tick time
+    std::int64_t getSeed();
+    std::int64_t getTime();
     Pos *getSharedSpawnPos();
     void setSpawnPos(int x, int y, int z);
     void setSpawnPos(Pos *spawnPos);
     void ensureAdded(shared_ptr<Entity> entity);
     virtual bool mayInteract(shared_ptr<Player> player, int xt, int yt, int zt, int content);
-    virtual void broadcastEntityEvent(shared_ptr<Entity> e, byte event);
+    virtual void broadcastEntityEvent(shared_ptr<Entity> e, unsigned char event);
     ChunkSource *getChunkSource();
     virtual void tileEvent(int x, int y, int z, int tile, int b0, int b1);
     LevelStorage *getLevelStorage();
@@ -499,7 +499,7 @@ class Level : public LevelSource
 
     // 4J added
 
-    __int64 m_timeOfDayOverride;
+    std::int64_t m_timeOfDayOverride;
 
     // 4J - optimisation - keep direct reference of underlying cache here
     LevelChunk **chunkSourceCache;

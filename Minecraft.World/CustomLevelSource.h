@@ -2,6 +2,7 @@
 using namespace std;
 
 #include "ChunkSource.h"
+#include "PerlinNoise.h"
 
 #ifndef _CONTENT_PACKAGE
 #define _OVERRIDE_HEIGHTMAP
@@ -42,7 +43,7 @@ class CustomLevelSource : public ChunkSource
     const bool generateStructures;
 
   public:
-    CustomLevelSource(Level *level, __int64 seed, bool generateStructures);
+    CustomLevelSource(Level *level, std::int64_t seed, bool generateStructures);
     ~CustomLevelSource();
 
   public:

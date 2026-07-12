@@ -69,7 +69,7 @@ class PlayerChunkMap
     vector<shared_ptr<ServerPlayer>> players;
     void flagEntitiesToBeRemoved(unsigned int *flags, bool *removedFound); // 4J added
   private:
-    unordered_map<__int64, PlayerChunk *, LongKeyHash, LongKeyEq> chunks; // 4J - was LongHashMap
+    unordered_map<std::int64_t, PlayerChunk *, LongKeyHash, LongKeyEq> chunks; // 4J - was LongHashMap
     vector<PlayerChunk *> changedChunks;
     vector<PlayerChunkAddRequest> addRequests;             // 4J added
     void tickAddRequests(shared_ptr<ServerPlayer> player); // 4J added

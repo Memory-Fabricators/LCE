@@ -9,7 +9,7 @@ ChunkStorageProfilerDecorator::ChunkStorageProfilerDecorator(ChunkStorage *capsu
 
 LevelChunk *ChunkStorageProfilerDecorator::load(Level *level, int x, int z)
 {
-    __int64 nanoTime = System::nanoTime();
+    std::int64_t nanoTime = System::nanoTime();
     LevelChunk *chunk = capsulated->load(level, x, z);
     timeSpentLoading += System::nanoTime() - nanoTime;
     loadCount++;
@@ -19,7 +19,7 @@ LevelChunk *ChunkStorageProfilerDecorator::load(Level *level, int x, int z)
 
 void ChunkStorageProfilerDecorator::save(Level *level, LevelChunk *levelChunk)
 {
-    __int64 nanoTime = System::nanoTime();
+    std::int64_t nanoTime = System::nanoTime();
     capsulated->save(level, levelChunk);
     timeSpentSaving += System::nanoTime() - nanoTime;
     saveCount++;
@@ -44,7 +44,7 @@ void ChunkStorageProfilerDecorator::tick()
 #ifdef __PSVITA__
             sprintf(buf, "Average load time: %f (%lld)", 0.000001 * (double)timeSpentLoading / (double)loadCount, loadCount);
 #else
-            sprintf(buf, "Average load time: %f (%I64d)", 0.000001 * (double)timeSpentLoading / (double)loadCount, loadCount);
+            sprintf(buf, "Average load time: %f (%d)", 0.000001 * (double)timeSpentLoading / (double)loadCount, loadCount);
 #endif
             app.DebugPrintf(buf);
 #endif
@@ -55,7 +55,7 @@ void ChunkStorageProfilerDecorator::tick()
 #ifdef __PSVITA__
             sprintf(buf, "Average save time: %f (%lld)", 0.000001 * (double)timeSpentSaving / (double)loadCount, loadCount);
 #else
-            sprintf(buf, "Average save time: %f (%I64d)", 0.000001 * (double)timeSpentSaving / (double)loadCount, loadCount);
+            sprintf(buf, "Average save time: %f (%d)", 0.000001 * (double)timeSpentSaving / (double)loadCount, loadCount);
 #endif
             app.DebugPrintf(buf);
 #endif

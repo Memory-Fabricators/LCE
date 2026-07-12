@@ -2,6 +2,8 @@
 
 #include "../Minecraft.World/Command.h"
 
+class GameCommandPacket;
+
 class TeleportCommand : public Command
 {
   public:

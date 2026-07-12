@@ -13,25 +13,25 @@ using namespace std;
 
 class System
 {
+  public:
     template <class T>
     static void arraycopy(arrayWithLength<T> src, unsigned int srcPos, arrayWithLength<T> *dst, unsigned int dstPos, unsigned int length);
 
-  public:
-    ArrayCopyFunctionDeclaration(byte)
+    ArrayCopyFunctionDeclaration(unsigned char)
         ArrayCopyFunctionDeclaration(Node *)
             ArrayCopyFunctionDeclaration(Biome *)
                 ArrayCopyFunctionDeclaration(int)
 
-                    static __int64 nanoTime();
-    static __int64 currentTimeMillis();
-    static __int64 currentRealTimeMillis(); // 4J Added to get real-world time for timestamps in saves
+                    static std::int64_t nanoTime();
+    static std::int64_t currentTimeMillis();
+    static std::int64_t currentRealTimeMillis(); // 4J Added to get real-world time for timestamps in saves
 
     static void ReverseUSHORT(unsigned short *pusVal);
     static void ReverseSHORT(short *psVal);
     static void ReverseULONG(unsigned long *pulVal);
     static void ReverseULONG(unsigned int *pulVal);
     static void ReverseINT(int *piVal);
-    static void ReverseULONGLONG(__int64 *pullVal);
+    static void ReverseULONGLONG(std::int64_t *pullVal);
     static void ReverseWCHARA(WCHAR *pwch, int iLen);
 };
 

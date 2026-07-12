@@ -1786,7 +1786,7 @@ shared_ptr<ItemInstance> Mob::getArmor(int pos)
     // return equipment[pos + 1];
 }
 
-void Mob::handleEntityEvent(byte id)
+void Mob::handleEntityEvent(unsigned char id)
 {
     if (id == EntityEvent::HURT)
     {

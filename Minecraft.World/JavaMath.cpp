@@ -34,9 +34,9 @@ double Math::random()
 // a - a floating-point value to be rounded to a long.
 // Returns:
 // the value of the argument rounded to the nearest long value.
-__int64 Math::round(double d)
+std::int64_t Math::round(double d)
 {
-    return (__int64)floor(d + 0.5);
+    return (std::int64_t)floor(d + 0.5);
 }
 
 int Math::_max(int a, int b)

@@ -12,12 +12,12 @@ class ChunkTilesUpdatePacket : public Packet, public enable_shared_from_this<Chu
     shortArray positions;
     byteArray blocks;
     byteArray data;
-    byte count; // 4J Was int but never has a value higher than 10
+    unsigned char count; // 4J Was int but never has a value higher than 10
     int levelIdx;
 
     ChunkTilesUpdatePacket();
     ~ChunkTilesUpdatePacket();
-    ChunkTilesUpdatePacket(int xc, int zc, shortArray positions, byte count, Level *level);
+    ChunkTilesUpdatePacket(int xc, int zc, shortArray positions, unsigned char count, Level *level);
 
     virtual void read(DataInputStream *dis);
     virtual void write(DataOutputStream *dos);

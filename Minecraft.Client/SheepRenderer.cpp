@@ -1,7 +1,7 @@
 #include "SheepRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.animal.h"
 #include "MultiPlayerLocalPlayer.h"
-#include "stdafx.h"
+#include <GL/gl.h>
 
 SheepRenderer::SheepRenderer(Model *model, Model *armor, float shadow) : MobRenderer(model, shadow)
 {
