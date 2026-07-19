@@ -33,7 +33,7 @@
 #include "TitleScreen.h"
 #include "User.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <SDL3/SDL3_Input.h>
 
 #include "../Minecraft.World/ByteBuffer.h"
@@ -1637,7 +1637,9 @@ void Minecraft::run_middle()
 #ifdef __ORBIS__
                             if (InputManager.ButtonPressed(i, ACTION_MENU_A))
 #else
-                            if (InputManager.ButtonPressed(i, MINECRAFT_ACTION_PAUSEMENU))
+                            // TODO: port split screen to winit
+                            // if (InputManager.ButtonPressed(i, MINECRAFT_ACTION_PAUSEMENU))
+                            if (false)
 #endif
                             {
                                 // Let them join

@@ -1,9 +1,0 @@
-[wrap-file]
-directory = mimalloc-3.4.1
-source_url = https://github.com/microsoft/mimalloc/archive/refs/tags/v3.4.1.tar.gz
-source_filename = mimalloc-3.4.1.tar.gz
-source_hash = 37107a52c16baa80c5f74861dddda7b27bb9949e41a6637691867a94c88ca446
-patch_directory = mimalloc
-
-[provide]
-dependency_names = mimalloc

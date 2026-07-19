@@ -7,7 +7,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "EntityRenderDispatcher.h"
 #include "EntityRenderer.h"
-#include "GL/gl.h"
+#include "angle_wgpu.h"
 #include "Lighting.h"
 #include "Minimap.h"
 #include "MultiPlayerLevel.h"

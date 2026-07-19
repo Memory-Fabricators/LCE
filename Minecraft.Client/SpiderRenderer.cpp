@@ -2,7 +2,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
 #include "SpiderModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 SpiderRenderer::SpiderRenderer() : MobRenderer(new SpiderModel(), 1.0f)
 {

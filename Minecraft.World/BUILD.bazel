@@ -1,0 +1,33 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "Minecraft.World",
+    srcs = glob(
+        ["*.cpp"],
+        exclude = ["ZonedChunkStorage.cpp"],
+    ),
+    hdrs = glob([
+        "*.h",
+        "x64headers/**/*.h",
+        "pch/**/*.h",
+    ]),
+    copts = [
+        "-std=c++26",
+        "-D_SDL3",
+        "-DGL_GLES_PROTOTYPES",
+        "-DGL_GLEXT_PROTOTYPES",
+        "-include",
+        "Minecraft.World/stdafx.h",
+    ],
+    includes = [
+        ".",
+        "x64headers",
+    ],
+    deps = [
+        "//Minecraft.Client:Minecraft.Client.headers",
+        "@mimalloc",
+        "@zlib-ng//:zlib",
+    ],
+)

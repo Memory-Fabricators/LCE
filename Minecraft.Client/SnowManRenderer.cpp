@@ -5,7 +5,7 @@
 #include "EntityRenderDispatcher.h"
 #include "ModelPart.h"
 #include "SnowManModel.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 SnowManRenderer::SnowManRenderer() : MobRenderer(new SnowManModel(), 0.5f)
 {

@@ -1,6 +1,6 @@
 #include "PlayerEnderChestContainer.h"
 #include "net.minecraft.world.level.tile.entity.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 PlayerEnderChestContainer::PlayerEnderChestContainer() : SimpleContainer(IDS_TILE_ENDERCHEST, 9 * 3)
 {

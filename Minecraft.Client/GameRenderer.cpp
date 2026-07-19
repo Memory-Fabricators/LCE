@@ -28,7 +28,7 @@
 #include "CreativeMode.h"
 #include "Frustum.h"
 #include "FrustumCuller.h"
-#include "GL/gl.h"
+#include "angle_wgpu.h"
 #include "GameMode.h"
 #include "GuiParticles.h"
 #include "HumanoidModel.h"
@@ -48,7 +48,7 @@
 #include "Textures.h"
 #include "WaterDropParticle.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 bool GameRenderer::anaglyph3d = false;
 int GameRenderer::anaglyphPass = 0;

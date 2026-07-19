@@ -1,0 +1,45 @@
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+load("@rules_rs//rs:rust_library.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "angle_wgpu",
+    srcs = glob(["src/**/*.rs"]),
+    edition = "2021",
+    deps = [
+        "@crates//:bytemuck-1.25.2",
+        "@crates//:glam-0.33.3",
+        "@crates//:log-0.4.33",
+        "@crates//:parking_lot-0.12.5",
+        "@crates//:raw-window-handle",
+        "@crates//:wgpu",
+        "@crates//:winit",
+        "@crates//:x11-dl-2.21.0",
+        "@crates//:zune-core",
+        "@crates//:zune-png",
+    ],
+)
+
+genrule(
+    name = "angle_wgpu_header",
+    srcs = glob(["src/**/*.rs"]) + ["cbindgen.toml"],
+    outs = ["angle_wgpu.h"],
+    cmd = "$(execpath @crates//:cbindgen__cbindgen) --config $(location cbindgen.toml) --output $@ $(location src/lib.rs)",
+    tools = ["@crates//:cbindgen__cbindgen"],
+)
+
+cc_library(
+    name = "angle_wgpu_cc",
+    hdrs = [":angle_wgpu_header"],
+    includes = ["."],
+    deps = [":angle_wgpu"],
+)
+
+cc_test(
+    name = "angle_wgpu_test",
+    srcs = ["test_main.cpp"],
+    deps = [
+        ":angle_wgpu_cc",
+    ],
+)

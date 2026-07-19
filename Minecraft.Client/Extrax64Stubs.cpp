@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <tracy/Tracy.hpp>
 #ifndef __PS3__
 // #include <compressapi.h>
 #endif // __PS3__

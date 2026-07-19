@@ -5,11 +5,7 @@
 // interface + Windows-compat types, not the full game header chain.
 #include "../inc/4J_Render.h"
 #include "../../WindowsTypes.h"
-#include <GL/gl.h>
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_video.h>
-#include <SDL3_image/SDL_image.h>
+#include "4J_RenderImpl.h"
 #include <algorithm>
 #include <atomic>
 #include <cmath>
@@ -268,57 +264,57 @@ static GLenum ToGLDepthFunc(int func)
 // Initialisation
 // ============================================================================
 
-void C4JRender::Initialise(SDL_Window *window)
+void C4JRender::Initialise(WinitApp *app)
 {
-    g_render.window = window;
-    // Chunk-rebuild worker threads each get their own GL context (see
-    // InitialiseContext() below) so they can compile real display lists off
-    // the main thread; this makes every subsequently created context share
-    // display lists/textures/etc. with whichever context is current when it
-    // is created.
-    SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-    g_render.glContext = SDL_GL_CreateContext(window);
-    if (!g_render.glContext)
+    g_render.app = app;
+    g_render.eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    EGLint major = 0, minor = 0;
+    eglInitialize(g_render.eglDisplay, &major, &minor);
+
+    EGLint configAttribs[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_ALPHA_SIZE, 8,
+        EGL_DEPTH_SIZE, 24,
+        EGL_STENCIL_SIZE, 8,
+        EGL_NONE
+    };
+    EGLConfig config = nullptr;
+    EGLint numConfigs = 0;
+    eglChooseConfig(g_render.eglDisplay, configAttribs, &config, 1, &numConfigs);
+
+    if (app)
     {
-        std::println("OpenGL Context Error: {}", SDL_GetError());
-        SDL_DestroyWindow(window);
+        g_render.eglSurface = winit_app_create_egl_surface(app, g_render.eglDisplay, config);
+    }
+    else
+    {
+        EGLint pbufferAttribs[] = {
+            EGL_WIDTH, 1280,
+            EGL_HEIGHT, 720,
+            EGL_NONE
+        };
+        g_render.eglSurface = eglCreatePbufferSurface(g_render.eglDisplay, config, pbufferAttribs);
     }
 
-    SDL_GL_MakeCurrent(g_render.window, g_render.glContext);
+    EGLint contextAttribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_NONE
+    };
+    g_render.eglContext = eglCreateContext(g_render.eglDisplay, config, EGL_NO_CONTEXT, contextAttribs);
+    eglMakeCurrent(g_render.eglDisplay, g_render.eglSurface, g_render.eglSurface, g_render.eglContext);
 
-    // Pre-create the pool of worker contexts on the main thread where the main GL context is current.
-    // This ensures that all worker contexts correctly share resources (display lists and textures)
-    // with the main context and with each other.
     for (int i = 0; i < 8; i++)
     {
-        g_render.workerContexts[i] = SDL_GL_CreateContext(window);
-        if (!g_render.workerContexts[i])
-        {
-            fprintf(stderr, "[GL] Failed to pre-create worker context %d: %s\n", i, SDL_GetError());
-        }
+        g_render.workerContexts[i] = eglCreateContext(g_render.eglDisplay, config, g_render.eglContext, contextAttribs);
     }
 
-    // s_eglSurface = eglCreateWindowSurface(s_eglDisplay, config, nativeWindow, NULL);
-    // if (s_eglSurface == EGL_NO_SURFACE)
-    // {
-    //     fprintf(stderr, "[GL] eglCreateWindowSurface failed: 0x%x\n", eglGetError());
-    //     exit(1);
-    // }
-
-    // if (!eglMakeCurrent(s_eglDisplay, s_eglSurface, s_eglSurface, s_eglContext))
-    // {
-    //     fprintf(stderr, "[GL] eglMakeCurrent failed: 0x%x\n", eglGetError());
-    //     exit(1);
-    // }
-
-    // EGLint surfW = 0, surfH = 0;
-    // eglQuerySurface(s_eglDisplay, s_eglSurface, EGL_WIDTH, &surfW);
-    // eglQuerySurface(s_eglDisplay, s_eglSurface, EGL_HEIGHT, &surfH);
-    // fprintf(stderr, "[GL] EGL surface size: %dx%d\n", surfW, surfH);
-
-    fprintf(stderr, "[GL] Vendor: %s\n", glGetString(GL_VENDOR));
-    fprintf(stderr, "[GL] Renderer: %s\n", glGetString(GL_RENDERER));
-    fprintf(stderr, "[GL] Version: %s\n", glGetString(GL_VERSION));
+    fprintf(stderr, "[angle_wgpu] Vendor: %s\n", glGetString(GL_VENDOR));
+    fprintf(stderr, "[angle_wgpu] Renderer: %s\n", glGetString(GL_RENDERER));
+    fprintf(stderr, "[angle_wgpu] Version: %s\n", glGetString(GL_VERSION));
 
     // Enable default state
     glEnable(GL_DEPTH_TEST);
@@ -337,15 +333,10 @@ void C4JRender::Initialise(SDL_Window *window)
     t_matrix.mode = 0;
 
     // Set up projection matrix for initial viewport
-    int width = 0, height = 0;
-    SDL_GetWindowSizeInPixels(g_render.window, &width, &height);
-    if (width <= 0)
+    uint32_t width = 1280, height = 720;
+    if (app)
     {
-        width = 1280;
-    }
-    if (height <= 0)
-    {
-        height = 720;
+        winit_app_get_size(app, &width, &height);
     }
     g_render.surfaceWidth = width;
     g_render.surfaceHeight = height;
@@ -355,34 +346,32 @@ void C4JRender::Initialise(SDL_Window *window)
                  g_render.clearColour[2], g_render.clearColour[3]);
 }
 
+void C4JRender::Initialise(SDL_Window *)
+{
+    Initialise(static_cast<WinitApp *>(nullptr));
+}
+
 void C4JRender::InitialiseContext()
 {
-    // Called once per chunk-rebuild worker thread (see
-    // LevelRenderer::rebuildChunkThreadProc). Each needs its own current GL
-    // context to compile real GL_COMPILE display lists (see CBuffStart).
-    // In order for resource sharing to work reliably on all platforms/drivers,
-    // these contexts were pre-created on the main thread when the main context was current,
-    // and we thread-safely assign one to each worker thread here.
     static std::atomic<int> s_contextIndex(0);
     int idx = s_contextIndex.fetch_add(1);
     if (idx < 8 && g_render.workerContexts[idx])
     {
-        SDL_GL_MakeCurrent(g_render.window, g_render.workerContexts[idx]);
+        eglMakeCurrent(g_render.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, g_render.workerContexts[idx]);
     }
     else
     {
-        fprintf(stderr, "[GL] Warning: Worker context pool exhausted (idx=%d), creating unshared context fallback!\n", idx);
-        SDL_GLContext ctx = SDL_GL_CreateContext(g_render.window);
+        EGLint contextAttribs[] = {
+            EGL_CONTEXT_CLIENT_VERSION, 2,
+            EGL_NONE
+        };
+        EGLContext ctx = eglCreateContext(g_render.eglDisplay, nullptr, g_render.eglContext, contextAttribs);
         if (ctx)
         {
-            SDL_GL_MakeCurrent(g_render.window, ctx);
+            eglMakeCurrent(g_render.eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, ctx);
         }
     }
 }
-
-// ============================================================================
-// Frame management
-// ============================================================================
 
 void C4JRender::Tick()
 {
@@ -394,16 +383,18 @@ void C4JRender::UpdateGamma(unsigned short)
 
 void C4JRender::StartFrame()
 {
-    int width = 0, height = 0;
-    SDL_GetWindowSizeInPixels(g_render.window, &width, &height);
-    if (width > 0 && height > 0 &&
-        (width != g_render.surfaceWidth || height != g_render.surfaceHeight))
+    if (g_render.app)
     {
-        g_render.surfaceWidth = width;
-        g_render.surfaceHeight = height;
-        glViewport(0, 0, width, height);
+        uint32_t width = 0, height = 0;
+        winit_app_get_size(g_render.app, &width, &height);
+        if (width > 0 && height > 0 &&
+            (width != (uint32_t)g_render.surfaceWidth || height != (uint32_t)g_render.surfaceHeight))
+        {
+            g_render.surfaceWidth = width;
+            g_render.surfaceHeight = height;
+            glViewport(0, 0, width, height);
+        }
     }
-
     g_render.frameActive = true;
 }
 
@@ -417,86 +408,30 @@ void C4JRender::Present()
     {
         return;
     }
-
-    // TEMP DIAGNOSTIC: force a full-viewport magenta clear immediately before
-    // swap, bypassing all game render state. If the window shows magenta,
-    // presentation works and the black screen is a game render-state problem;
-    // if it stays black, presentation itself is broken.
-    if (getenv("LCE_FORCE_CLEAR"))
-    {
-        glDisable(GL_SCISSOR_TEST);
-        glViewport(0, 0, g_render.surfaceWidth, g_render.surfaceHeight);
-        glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-    static int s_frameCount = 0;
-    static int s_drawCallsThisFrame = 0;
-    if (getenv("LCE_DUMP_FRAME") && atoi(getenv("LCE_DUMP_FRAME")) == s_frameCount)
-    {
-        int w = g_render.surfaceWidth, h = g_render.surfaceHeight;
-        std::vector<unsigned char> pixels((size_t)w * h * 3);
-        glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, pixels.data());
-        FILE *f = fopen("/tmp/lce_frame.ppm", "wb");
-        if (f)
-        {
-            fprintf(f, "P6\n%d %d\n255\n", w, h);
-            for (int y = h - 1; y >= 0; y--)
-            {
-                fwrite(pixels.data() + (size_t)y * w * 3, 1, (size_t)w * 3, f);
-            }
-            fclose(f);
-            fprintf(stderr, "[GL] Dumped frame %d to /tmp/lce_frame.ppm\n", s_frameCount);
-        }
-    }
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR)
-    {
-        fprintf(stderr, "[GL] glGetError before swap: 0x%x (frame %d)\n", err, s_frameCount);
-    }
-
-    if (!SDL_GL_SwapWindow(g_render.window))
-    {
-        fprintf(stderr, "[GL] eglSwapBuffers failed: 0x%s (frame %d)\n", SDL_GetError(), s_frameCount);
-    }
-
+    eglSwapBuffers(g_render.eglDisplay, g_render.eglSurface);
     g_render.debugDrawCallsThisFrame = 0;
-    s_frameCount++;
-
     g_render.frameActive = false;
 }
-
 void C4JRender::Clear(int flags, void *)
 {
-    //     GLbitfield mask = 0;
-    //     if (flags & CLEAR_DEPTH_FLAG)
-    //     {
-    //         mask |= GL_DEPTH_BUFFER_BIT;
-    // #if defined(LCE_USE_MESA_GL)
-    //         glClearDepth(1.0);
-    // #else
-    //         glClearDepthf(1.0f);
-    // #endif
-    //     }
-    //     if (flags & CLEAR_COLOUR_FLAG)
-    //     {
-    //         mask |= GL_COLOR_BUFFER_BIT;
-    //         // TEMP DIAGNOSTIC: force the game's own clear colour to magenta so we
-    //         // can tell "cleared but nothing drew" (magenta) from "drew black over
-    //         // the clear" (black). Uses the game's normal clear call/timing.
-    //         if (getenv("LCE_CLEAR_MAGENTA"))
-    //         {
-    //             glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
-    //         }
-    //         else
-    //         {
-    //             glClearColor(g_render.clearColour[0], g_render.clearColour[1],
-    //                          g_render.clearColour[2], g_render.clearColour[3]);
-    //         }
-    //     }
-    //     if (mask)
-    //     {
-    //         glClear(mask);
-    //     }
+    constexpr int kClearDepth = 1;
+    constexpr int kClearColour = 2;
+    GLbitfield mask = 0;
+    if (flags & kClearDepth)
+    {
+        mask |= GL_DEPTH_BUFFER_BIT;
+        glClearDepthf(1.0f);
+    }
+    if (flags & kClearColour)
+    {
+        mask |= GL_COLOR_BUFFER_BIT;
+        glClearColor(g_render.clearColour[0], g_render.clearColour[1],
+                     g_render.clearColour[2], 1.0f);
+    }
+    if (mask)
+    {
+        glClear(mask);
+    }
 }
 
 void C4JRender::SetClearColour(const float colourRGBA[4])
@@ -509,8 +444,7 @@ void C4JRender::SetClearColour(const float colourRGBA[4])
 
 bool C4JRender::IsWidescreen()
 {
-    int width = 0, height = 0;
-    SDL_GetWindowSizeInPixels(g_render.window, &width, &height);
+    int width = g_render.surfaceWidth, height = g_render.surfaceHeight;
     if (height <= 0)
     {
         return true;
@@ -520,8 +454,7 @@ bool C4JRender::IsWidescreen()
 
 bool C4JRender::IsHiDef()
 {
-    int width = 0, height = 0;
-    SDL_GetWindowSizeInPixels(g_render.window, &width, &height);
+    int width = g_render.surfaceWidth, height = g_render.surfaceHeight;
     return width >= 1280 && height >= 720;
 }
 
@@ -955,49 +888,6 @@ void C4JRender::TextureDynamicUpdateStart()
 
 void C4JRender::TextureDynamicUpdateEnd()
 {
-}
-
-// Decodes an image via SDL3_image into the ARGB8888 pixel layout expected by
-// BufferedImage. The returned surface is owned by the caller.
-static std::expected<SDL_Surface *, std::string> DecodeImageSurface(SDL_Surface *loaded)
-{
-    if (!loaded)
-    {
-        return std::unexpected(SDL_GetError());
-    }
-
-    SDL_Surface *argb = SDL_ConvertSurface(loaded, SDL_PIXELFORMAT_ARGB8888);
-    SDL_DestroySurface(loaded);
-    if (!argb)
-    {
-        return std::unexpected(SDL_GetError());
-    }
-
-    return argb;
-}
-
-std::expected<SDL_Surface *, std::string> C4JRender::LoadTextureData(const char *szFilename)
-{
-    return DecodeImageSurface(IMG_Load(szFilename));
-}
-
-std::expected<SDL_Surface *, std::string> C4JRender::LoadTextureData(const void *data, std::size_t size)
-{
-    SDL_IOStream *io = SDL_IOFromConstMem(data, size);
-    if (!io)
-    {
-        return std::unexpected(SDL_GetError());
-    }
-    return DecodeImageSurface(IMG_Load_IO(io, true));
-}
-
-std::expected<void, std::string> C4JRender::SaveTextureData(const char *szFilename, SDL_Surface *surface)
-{
-    if (!IMG_SavePNG(surface, szFilename))
-    {
-        return std::unexpected(SDL_GetError());
-    }
-    return {};
 }
 
 void C4JRender::TextureGetStats()

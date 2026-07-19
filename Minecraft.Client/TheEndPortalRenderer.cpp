@@ -5,7 +5,7 @@
 #include "Camera.h"
 #include "Tesselator.h"
 #include "TileEntityRenderDispatcher.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void TheEndPortalRenderer::render(shared_ptr<TileEntity> _table, double x, double y, double z, float a, bool setColor, float alpha, bool useCompiled)
 {

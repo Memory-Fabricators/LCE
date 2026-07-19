@@ -58,7 +58,7 @@
 #include "Textures.h"
 #include "TileEntityRenderDispatcher.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 #ifdef __PS3__
 #include "C4JSpursJob.h"

@@ -1,7 +1,7 @@
 #include "Frustum.h"
 #include "../Minecraft.World/FloatBuffer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 Frustum *Frustum::frustum = new Frustum();

@@ -6,7 +6,7 @@
 #include "../Minecraft.World/net.minecraft.world.phys.h"
 #include "EntityRenderDispatcher.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 FireballRenderer::FireballRenderer(float scale)
 {

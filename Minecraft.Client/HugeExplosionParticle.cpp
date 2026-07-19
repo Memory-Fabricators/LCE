@@ -4,7 +4,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 HugeExplosionParticle::HugeExplosionParticle(Textures *textures, Level *level, double x, double y, double z, double xa, double ya, double za) : Particle(level, x, y, z, 0, 0, 0)
 {

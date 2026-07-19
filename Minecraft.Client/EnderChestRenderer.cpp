@@ -2,7 +2,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.entity.h"
 #include "ModelPart.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void EnderChestRenderer::render(shared_ptr<TileEntity> _chest, double x, double y, double z, float a, bool setColor, float alpha, bool useCompiled)
 {

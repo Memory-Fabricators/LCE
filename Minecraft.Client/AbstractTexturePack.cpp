@@ -3,7 +3,7 @@
 #include "../Minecraft.World/StringHelpers.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 AbstractTexturePack::AbstractTexturePack(DWORD id, File *file, const wstring &name, TexturePack *fallback) : id(id), name(name)
 {
@@ -262,7 +262,6 @@ void AbstractTexturePack::loadDefaultColourTable()
     bool bExists = coloursFile.exists();
     for (int attempt = 0; !bExists && attempt < 3; attempt++)
     {
-        SDL_Delay(50);
         bExists = coloursFile.exists();
     }
 #else

@@ -3,21 +3,10 @@
 #include "../Minecraft.World/StringHelpers.h"
 #include "Textures.h"
 #include "stdafx.h"
+#include "angle_wgpu.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-
-static int *CopyImagePixels(const SDL_Surface *surface)
-{
-    int *pixels = new int[static_cast<std::size_t>(surface->w) * surface->h];
-    for (int y = 0; y < surface->h; ++y)
-    {
-        const auto *row = static_cast<const std::uint8_t *>(surface->pixels) + static_cast<std::size_t>(y) * surface->pitch;
-        memcpy(pixels + static_cast<std::size_t>(y) * surface->w, row, static_cast<std::size_t>(surface->w) * sizeof(*pixels));
-    }
-    return pixels;
-}
-
 #ifdef _XBOX
 typedef struct
 {
@@ -178,9 +167,8 @@ BufferedImage::BufferedImage(const wstring &File, bool filenameHasExtension /*=f
 #ifdef _DEBUG
         app.DebugPrintf("\n--- Loading TEXTURE - %s\n\n", pchTextureName);
 #endif
-
-        auto image = RenderManager.LoadTextureData(pchTextureName);
-        if (!image)
+        DecodedImage decoded = {};
+        if (!angle_wgpu_decode_png_file(pchTextureName, &decoded))
         {
             // 4J - If we haven't loaded the non-mipmap version then exit the game
             if (l == 0)
@@ -190,14 +178,14 @@ BufferedImage::BufferedImage(const wstring &File, bool filenameHasExtension /*=f
             return;
         }
 
-        SDL_Surface *surface = *image;
-        data[l] = CopyImagePixels(surface);
+        data[l] = new int[decoded.width * decoded.height];
+        memcpy(data[l], decoded.pixels, decoded.width * decoded.height * sizeof(int));
         if (l == 0)
         {
-            width = surface->w;
-            height = surface->h;
+            width = decoded.width;
+            height = decoded.height;
         }
-        SDL_DestroySurface(surface);
+        angle_wgpu_free_decoded_image(&decoded);
     }
 }
 BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenameHasExtension /*= false*/)
@@ -251,8 +239,8 @@ BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenam
             return;
         }
 
-        auto image = RenderManager.LoadTextureData(pbData, dwBytes);
-        if (!image)
+        DecodedImage decoded = {};
+        if (!angle_wgpu_decode_png_memory(pbData, dwBytes, &decoded))
         {
             // 4J - If we haven't loaded the non-mipmap version then exit the game
             if (l == 0)
@@ -262,14 +250,14 @@ BufferedImage::BufferedImage(DLCPack *dlcPack, const wstring &File, bool filenam
             return;
         }
 
-        SDL_Surface *surface = *image;
-        data[l] = CopyImagePixels(surface);
+        data[l] = new int[decoded.width * decoded.height];
+        memcpy(data[l], decoded.pixels, decoded.width * decoded.height * sizeof(int));
         if (l == 0)
         {
-            width = surface->w;
-            height = surface->h;
+            width = decoded.width;
+            height = decoded.height;
         }
-        SDL_DestroySurface(surface);
+        angle_wgpu_free_decoded_image(&decoded);
     }
 }
 
@@ -281,14 +269,14 @@ BufferedImage::BufferedImage(BYTE *pbData, DWORD dwBytes)
         data[l] = NULL;
     }
 
-    auto image = RenderManager.LoadTextureData(pbData, dwBytes);
-    if (image)
+    DecodedImage decoded = {};
+    if (angle_wgpu_decode_png_memory(pbData, dwBytes, &decoded))
     {
-        SDL_Surface *surface = *image;
-        data[0] = CopyImagePixels(surface);
-        width = surface->w;
-        height = surface->h;
-        SDL_DestroySurface(surface);
+        data[0] = new int[decoded.width * decoded.height];
+        memcpy(data[0], decoded.pixels, decoded.width * decoded.height * sizeof(int));
+        width = decoded.width;
+        height = decoded.height;
+        angle_wgpu_free_decoded_image(&decoded);
     }
     else
     {

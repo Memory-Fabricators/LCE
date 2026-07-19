@@ -1,6 +1,6 @@
 #include "SquidRenderer.h"
 #include "Squid.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 SquidRenderer::SquidRenderer(Model *model, float shadow) : MobRenderer(model, shadow)
 {

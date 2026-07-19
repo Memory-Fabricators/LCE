@@ -1,0 +1,26 @@
+[package]
+name = "rust-third-party"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "dummy"
+path = "/dev/null"
+
+[dependencies]
+cbindgen = "0.29.4"
+ruffle_core = { git = "https://github.com/ruffle-rs/ruffle", rev = "74aac3ab385da8e70c59e18b0283d766c07244be" }
+ruffle_render = { git = "https://github.com/ruffle-rs/ruffle", rev = "74aac3ab385da8e70c59e18b0283d766c07244be", default-features = false, features = ["tessellator"] }
+swf = { git = "https://github.com/ruffle-rs/ruffle", rev = "74aac3ab385da8e70c59e18b0283d766c07244be" }
+wgpu = { git = "https://github.com/gfx-rs/wgpu", default-features = false, features = ["wgsl", "vulkan", "gles", "metal"] }
+raw-window-handle = { version = "0.6.2", default-features = false }
+url = "2"
+glam = "0.33.3"
+async-channel = "2"
+indexmap = "2"
+winit = "0.31.0-beta.2"
+bytemuck = { version = "1.25.2", features = ["derive"] }
+parking_lot = "0.12.5"
+log = "0.4.33"
+zune-png = { git = "https://github.com/etemesi254/zune-image", rev = "fac516c47cf05b07a2625954beecfa354ac14017", default-features = false, features = ["sse", "std"] }
+zune-core = { git = "https://github.com/etemesi254/zune-image", rev = "fac516c47cf05b07a2625954beecfa354ac14017", default-features = false, features = [] }

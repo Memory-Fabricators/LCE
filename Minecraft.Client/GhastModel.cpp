@@ -1,7 +1,7 @@
 #include "GhastModel.h"
 #include "../Minecraft.World/Mth.h"
 #include "../Minecraft.World/Random.h"
-#include "GL/gl.h"
+#include "angle_wgpu.h"
 #include "ModelPart.h"
 
 GhastModel::GhastModel() : Model()

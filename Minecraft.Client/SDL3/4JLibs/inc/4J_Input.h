@@ -1,6 +1,5 @@
 #pragma once
 
-#include <SDL3/SDL.h>
 
 #define MAP_STYLE_0 0
 #define MAP_STYLE_1 1

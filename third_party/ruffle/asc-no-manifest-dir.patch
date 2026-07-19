@@ -1,0 +1,13 @@
+diff --git a/tools/asc/src/lib.rs b/tools/asc/src/lib.rs
+index 1234567..89abcdef 100644
+--- a/tools/asc/src/lib.rs
++++ b/tools/asc/src/lib.rs
+@@ -27,7 +27,7 @@ impl AscConfig {
+ }
+ 
+ pub fn run_asc(config: AscConfig) -> anyhow::Result<()> {
+-    let asc_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("asc.jar");
++    let asc_path = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default()).join("asc.jar");
+ 
+     let mut cli_args: Vec<String> = vec![
+         "-classpath".to_string(),

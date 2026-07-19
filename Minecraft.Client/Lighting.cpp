@@ -1,7 +1,7 @@
 #include "Lighting.h"
 #include "../Minecraft.World/FloatBuffer.h"
 #include "../Minecraft.World/Vec3.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 FloatBuffer *Lighting::lb = new FloatBuffer(16);
 

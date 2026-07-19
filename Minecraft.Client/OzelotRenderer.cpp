@@ -1,6 +1,6 @@
 #include "OzelotRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.animal.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 OzelotRenderer::OzelotRenderer(Model *model, float shadow) : MobRenderer(model, shadow)
 {

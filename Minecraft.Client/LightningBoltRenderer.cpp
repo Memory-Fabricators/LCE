@@ -1,7 +1,7 @@
 #include "LightningBoltRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.global.h"
 #include "Tesselator.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void LightningBoltRenderer::render(shared_ptr<Entity> _bolt, double x, double y, double z, float rot, float a)
 {

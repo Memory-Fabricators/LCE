@@ -5,7 +5,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "MemoryTracker.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 float Camera::xPlayerOffs = 0.0f;
 float Camera::yPlayerOffs = 0.0f;

@@ -1,7 +1,7 @@
 #include "ModelPart.h"
 #include "Cube.h"
 #include "TexOffs.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 const float ModelPart::RAD = (180.0f / PI);
 

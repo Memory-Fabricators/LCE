@@ -1,0 +1,8 @@
+language = "C"
+include_guard = "ANGLE_WGPU_H"
+pragma_once = true
+usize_is_size_t = true
+no_includes = false
+tab_width = 4
+documentation = true
+cpp_compat = true

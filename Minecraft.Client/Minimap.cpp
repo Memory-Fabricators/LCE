@@ -7,7 +7,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 #ifdef __ORBIS__

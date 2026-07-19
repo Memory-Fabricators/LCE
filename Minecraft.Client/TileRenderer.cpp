@@ -12,7 +12,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "TileRenderer.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 bool TileRenderer::fancy = true;
 

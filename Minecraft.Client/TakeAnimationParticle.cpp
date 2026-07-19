@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.item.h"
 #include "../Minecraft.World/net.minecraft.world.level.h"
 #include "EntityRenderDispatcher.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 TakeAnimationParticle::TakeAnimationParticle(Level *level, shared_ptr<Entity> item, shared_ptr<Entity> target, float yOffs) : Particle(level, item->x, item->y, item->z, item->xd, item->yd, item->zd)
 {

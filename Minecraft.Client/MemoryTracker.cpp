@@ -3,7 +3,7 @@
 #include "../Minecraft.World/FloatBuffer.h"
 #include "../Minecraft.World/IntBuffer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 unordered_map<int, int> MemoryTracker::GL_LIST_IDS;
 vector<int> MemoryTracker::TEXTURE_IDS;

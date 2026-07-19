@@ -13,7 +13,7 @@
 #include "SkullTileRenderer.h"
 #include "UseAnim.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 const unsigned int PlayerRenderer::s_nametagColors[MINECRAFT_NET_MAX_PLAYERS] =
     {

@@ -1,0 +1,5 @@
+language = "C"
+include_guard = "LCE_RUFFLE_BRIDGE_H"
+pragma_once = true
+usize_is_size_t = true
+cpp_compat = true

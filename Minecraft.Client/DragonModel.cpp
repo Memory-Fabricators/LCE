@@ -2,7 +2,7 @@
 #include "../Minecraft.World/EnderDragon.h"
 #include "../Minecraft.World/Mth.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 DragonModel::DragonModel(float g) : Model()
 {

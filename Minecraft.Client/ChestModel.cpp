@@ -1,6 +1,6 @@
 #include "ChestModel.h"
 #include "ModelPart.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 ChestModel::ChestModel()
 {

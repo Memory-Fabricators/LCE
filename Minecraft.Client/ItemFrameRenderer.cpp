@@ -1,5 +1,5 @@
 #include "EntityRenderDispatcher.h"
-#include "GL/gl.h"
+#include "angle_wgpu.h"
 #include "ItemRenderer.h"
 #include "TileRenderer.h"
 // #include "ItemFrame"

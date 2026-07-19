@@ -1,9 +1,12 @@
 #include "WindowsTypes.h"
-#include "SDL3/SDL.h"
+#include <chrono>
 #include <fstream>
 #include <pthread.h>
 #include <stdlib.h>
+#include <string.h>
 #include <string>
+#include <thread>
+#include <unistd.h>
 
 // TLS implementation using pthreads
 static pthread_key_t s_tlsKeys[64];
@@ -42,17 +45,16 @@ static pthread_mutex_t *GetOrCreateMutex(CRITICAL_SECTION *cs)
 
 void InitializeCriticalSection(CRITICAL_SECTION *cs)
 {
-    SDL_zerop(cs);
+    memset(cs, 0, sizeof(*cs));
     GetOrCreateMutex(cs);
 }
 
 void InitializeCriticalSectionAndSpinCount(CRITICAL_SECTION *cs, DWORD spinCount)
 {
-    SDL_zerop(cs);
+    memset(cs, 0, sizeof(*cs));
     cs->spinCount = spinCount;
     GetOrCreateMutex(cs);
 }
-
 void DeleteCriticalSection(CRITICAL_SECTION *cs)
 {
     if (cs->debug != NULL)
@@ -352,9 +354,8 @@ BOOL GetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode)
 
 void Sleep(DWORD dwMilliseconds)
 {
-    SDL_Delay(dwMilliseconds);
+    std::this_thread::sleep_for(std::chrono::milliseconds(dwMilliseconds));
 }
-
 static HANDLE CreateEventCommon(BOOL bManualReset, BOOL bInitialState)
 {
     Win32Object *obj = new Win32Object();

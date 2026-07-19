@@ -1,6 +1,6 @@
 #pragma once
 #include "../Minecraft.World/ArrayWithLength.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 class DynamicTexture;
 class BufferedImage;

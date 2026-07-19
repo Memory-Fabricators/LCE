@@ -18,14 +18,13 @@
 #include "../User.h"
 #include "SDL3_App.h"
 #include "SDL3_Input.h"
+#include "SDL3_RuffleBridge.h"
 #include "SDL3_UIController.h"
-
-#include <SDL3/SDL.h>
-#include <SDL3/SDL_main.h>
-#include <SDL3/SDL_video.h>
+#include "angle_wgpu.h"
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <unistd.h>
-
 #include "4JLibs/inc/4J_Render.h"
 
 // Default (and, for now, only) keyboard+mouse control scheme. Mirrors
@@ -102,14 +101,14 @@ static bool TryChdirToAssetsDir(const char *dir)
     }
 
     char probePath[1024];
-    SDL_snprintf(probePath, sizeof(probePath), "%s/Common/Media/MediaWindows64.arc", dir);
-    if (SDL_GetPathInfo(probePath, NULL))
+    snprintf(probePath, sizeof(probePath), "%s/Common/Media/MediaWindows64.arc", dir);
+    if (access(probePath, F_OK) == 0)
     {
         if (chdir(dir) == 0)
         {
             return true;
         }
-        SDL_Log("Warning: found assets at '%s' but chdir() failed", dir);
+        fprintf(stderr, "Warning: found assets at '%s' but chdir() failed\n", dir);
     }
     return false;
 }
@@ -139,96 +138,97 @@ static bool TryChdirToAssetsDir(const char *dir)
 //     failure to load the media archive.
 static void ResolveAssetsDir(void)
 {
-    const char *envDir = SDL_getenv("LCE_ASSETS_DIR");
+    const char *envDir = getenv("LCE_ASSETS_DIR");
     if (TryChdirToAssetsDir(envDir))
     {
         return;
     }
-    if (envDir && envDir[0] != '\0')
+
+    const char *buildWorkDir = getenv("BUILD_WORKING_DIRECTORY");
+    if (buildWorkDir)
     {
-        SDL_Log("Warning: LCE_ASSETS_DIR='%s' doesn't look like a valid assets "
-                "root (no Common/Media/MediaWindows64.arc found); ignoring it",
-                envDir);
+        char candidate[1024];
+        snprintf(candidate, sizeof(candidate), "%s/Minecraft.Client", buildWorkDir);
+        if (TryChdirToAssetsDir(candidate))
+        {
+            return;
+        }
+        if (TryChdirToAssetsDir(buildWorkDir))
+        {
+            return;
+        }
     }
 
-#ifdef LCE_ASSETS_DIR_DEFAULT
-    if (TryChdirToAssetsDir(LCE_ASSETS_DIR_DEFAULT))
+    if (TryChdirToAssetsDir("Minecraft.Client"))
     {
         return;
     }
-#endif
-
-    const char *basePath = SDL_GetBasePath();
-    if (basePath != NULL)
+    if (TryChdirToAssetsDir("."))
     {
-        char candidate[1024];
+        return;
+    }
 
-        // Binary sitting directly in the assets root (e.g. a dev build run
-        // in-place from Minecraft.Client/, or an install layout that copies
-        // assets next to the executable).
-        SDL_snprintf(candidate, sizeof(candidate), "%s", basePath);
-        if (TryChdirToAssetsDir(candidate))
+#ifdef LCE_ASSETS_DIR_DEFAULT
+#define STR_INNER(x) #x
+#define STR(x) STR_INNER(x)
+    if (TryChdirToAssetsDir(STR(LCE_ASSETS_DIR_DEFAULT)))
+    {
+        return;
+    }
+#undef STR
+#undef STR_INNER
+#endif
+    char exePath[1024] = {};
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len > 0)
+    {
+        exePath[len] = '\0';
+        char *lastSlash = strrchr(exePath, '/');
+        if (lastSlash)
         {
-            return;
-        }
-
-        // Binary sitting next to a Minecraft.Client/ directory (e.g. running
-        // straight out of a build directory that mirrors the source tree
-        // layout, such as this project's own meson build/ output).
-        SDL_snprintf(candidate, sizeof(candidate), "%sMinecraft.Client", basePath);
-        if (TryChdirToAssetsDir(candidate))
-        {
-            return;
+            *(lastSlash + 1) = '\0';
+            if (TryChdirToAssetsDir(exePath))
+            {
+                return;
+            }
+            char candidate[1024];
+            snprintf(candidate, sizeof(candidate), "%sMinecraft.Client", exePath);
+            if (TryChdirToAssetsDir(candidate))
+            {
+                return;
+            }
         }
     }
 
-    SDL_Log("Warning: could not locate an assets directory (checked "
-            "LCE_ASSETS_DIR, the build-time default, and paths relative to "
-            "the executable); running from the current working directory "
-            "and hoping for the best. Set LCE_ASSETS_DIR to override.");
+    fprintf(stderr, "Warning: could not locate an assets directory; running from CWD.\n");
 }
 
 int main(int argc, char *argv[])
 {
     ResolveAssetsDir();
 
-    if (!SDL_Init(SDL_INIT_VIDEO))
+
+    WinitApp *winitApp = winit_app_create("Minecraft", 1280, 720, true);
+    if (!winitApp)
     {
-        SDL_Log("SDL_Init failed: %s", SDL_GetError());
+        fprintf(stderr, "Failed to create Winit window/app\n");
         return 1;
     }
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    // Hand the window to the keyboard/mouse backend
+    SDL3Input::Init(winitApp);
 
-    // Request a double-buffered 24-bit color depth setup
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-    // Rendering goes through ANGLE/EGL directly (4J_Render.cpp), not SDL's own
-    // GL context - SDL_WINDOW_OPENGL would make SDL attach its own (unused)
-    // GL-backed layer to the window, which can end up as what's actually
-    // presented instead of the Metal/EGL layer ANGLE renders into. Request the
-    // native surface type each backend actually needs instead.
-    Uint32 windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
-    SDL_Window *window = SDL_CreateWindow("Minecraft", 1280, 720, windowFlags);
-    if (!window)
-    {
-        SDL_Log("SDL_CreateWindow failed: %s", SDL_GetError());
-        SDL_Quit();
-        return 1;
-    }
-
-    // Hand the window to the keyboard/mouse backend (Keyboard/Mouse's
-    // isKeyDown/isButtonDown/event-queue implementations in SDL3_Input.cpp,
-    // and the mouse-look relative-capture toggle below).
-    SDL3Input::Init(window);
-
-    // Initialise render manager (creates EGL context, etc.)
-    RenderManager.Initialise(window);
-    RenderManager.InitialiseContext();
-
+    // Initialise render manager (creates EGL context, etc.) - this already
+    // makes the main thread's context current with the real window
+    // surface. Do NOT also call InitialiseContext() here: it hands out
+    // g_render.workerContexts[] by a shared atomic index intended
+    // one-per-worker-thread (see rebuildChunkThreadProc/runUpdate below),
+    // and calling it here would steal slot 0 *and* rebind this thread to a
+    // surfaceless worker context, breaking all rendering from the main
+    // thread.
+    RenderManager.Initialise(winitApp);
+    RuffleBridge ruffleBridge;
+    ruffleBridge.Initialise(winitApp);
     // Initialise thread-local storage (mirrors Windows64_Minecraft.cpp)
     Tesselator::CreateNewThreadStorage(1024 * 1024);
     AABB::CreateNewThreadStorage();
@@ -277,17 +277,12 @@ int main(int argc, char *argv[])
     bool running = true;
     while (running)
     {
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
+        SDL3Input::PumpEvents(winitApp);
+        if (winit_app_should_close(winitApp))
         {
-            SDL3Input::PumpEvent(event);
-
-            if (event.type == SDL_EVENT_QUIT ||
-                event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED)
-            {
-                running = false;
-            }
+            running = false;
         }
+
 
         // Mouse-look (relative capture) only while there's no menu/UI screen
         // up to click around in - matches every other platform's "gameplay
@@ -321,6 +316,7 @@ int main(int argc, char *argv[])
         // sequence so it starts doing something the moment that lands.
         ui.tick();
         ui.render();
+        ruffleBridge.Tick();
 
         RenderManager.Present();
 

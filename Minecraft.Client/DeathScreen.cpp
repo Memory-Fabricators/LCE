@@ -4,7 +4,7 @@
 #include "MultiPlayerLocalPlayer.h"
 #include "TitleScreen.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void DeathScreen::init()
 {

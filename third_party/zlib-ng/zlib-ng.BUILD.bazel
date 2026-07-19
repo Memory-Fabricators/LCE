@@ -1,0 +1,171 @@
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+copy_file(
+    name = "zconf_gen",
+    src = "zconf.h.in",
+    out = "zconf.h",
+    allow_symlink = True,
+)
+
+expand_template(
+    name = "zlib_gen",
+    out = "zlib.h",
+    substitutions = {"@ZLIB_SYMBOL_PREFIX@": ""},
+    template = "zlib.h.in",
+)
+
+copy_file(
+    name = "zlib_name_mangling_gen",
+    src = "zlib_name_mangling.h.empty",
+    out = "zlib_name_mangling.h",
+    allow_symlink = True,
+)
+
+expand_template(
+    name = "gzread_gen",
+    out = "gzread_mangle.h",
+    substitutions = {"@ZLIB_SYMBOL_PREFIX@": ""},
+    template = "gzread_mangle.h.in",
+)
+
+_MSVC_COPTS = [
+    "/wd4127",
+    "/wd4131",
+    "/wd4244",
+    "/wd4245",
+    "/wd4267",
+    "/wd4996",
+]
+
+_GNU_COPTS = [
+    "-std=c11",
+    "-Wno-deprecated-non-prototype",
+    "-Wno-implicit-function-declaration",
+    "-Wno-unused-variable",
+]
+
+_COPTS = select({
+    "@rules_cc//cc/compiler:clang-cl": _MSVC_COPTS,
+    "@rules_cc//cc/compiler:msvc-cl": _MSVC_COPTS,
+    "//conditions:default": _GNU_COPTS,
+})
+
+_BASE_SRCS = [
+    "adler32.c",
+    "compress.c",
+    "cpu_features.c",
+    "crc32.c",
+    "crc32_braid_comb.c",
+    "deflate.c",
+    "deflate_fast.c",
+    "deflate_huff.c",
+    "deflate_medium.c",
+    "deflate_quick.c",
+    "deflate_rle.c",
+    "deflate_slow.c",
+    "deflate_stored.c",
+    "functable.c",
+    "gzlib.c",
+    "gzread.c",
+    "gzwrite.c",
+    "infback.c",
+    "inflate.c",
+    "inftrees.c",
+    "insert_string.c",
+    "trees.c",
+    "uncompr.c",
+    "zutil.c",
+    "arch/generic/adler32_c.c",
+    "arch/generic/chunkset_c.c",
+    "arch/generic/compare256_c.c",
+    "arch/generic/crc32_braid_c.c",
+    "arch/generic/crc32_chorba_c.c",
+    "arch/generic/slide_hash_c.c",
+    ":gzread_gen",
+    ":zconf_gen",
+    ":zlib_name_mangling_gen",
+]
+
+_ARM_SRCS = [
+    "arch/arm/adler32_neon.c",
+    "arch/arm/adler32_neon_dotprod.c",
+    "arch/arm/arm_features.c",
+    "arch/arm/chunkset_neon.c",
+    "arch/arm/compare256_neon.c",
+    "arch/arm/crc32_armv8.c",
+    "arch/arm/crc32_armv8_pmull_eor3.c",
+    "arch/arm/slide_hash_armv6.c",
+    "arch/arm/slide_hash_neon.c",
+]
+
+_X86_SRCS = [
+    "arch/x86/adler32_avx2.c",
+    "arch/x86/adler32_avx2_vnni.c",
+    "arch/x86/adler32_avx512.c",
+    "arch/x86/adler32_avx512_vnni.c",
+    "arch/x86/adler32_sse42.c",
+    "arch/x86/adler32_ssse3.c",
+    "arch/x86/chunkset_avx2.c",
+    "arch/x86/chunkset_avx512.c",
+    "arch/x86/chunkset_sse2.c",
+    "arch/x86/chunkset_ssse3.c",
+    "arch/x86/compare256_avx2.c",
+    "arch/x86/compare256_avx512.c",
+    "arch/x86/compare256_sse2.c",
+    "arch/x86/crc32_chorba_sse2.c",
+    "arch/x86/crc32_chorba_sse41.c",
+    "arch/x86/crc32_pclmulqdq.c",
+    "arch/x86/crc32_vpclmulqdq_avx2.c",
+    "arch/x86/crc32_vpclmulqdq_avx512.c",
+    "arch/x86/slide_hash_avx2.c",
+    "arch/x86/slide_hash_sse2.c",
+    "arch/x86/x86_features.c",
+]
+
+cc_library(
+    name = "zlib-ng",
+    srcs = _BASE_SRCS + glob(
+        ["**/*.h"],
+        allow_empty = True,
+    ) + select({
+        "@platforms//cpu:aarch64": _ARM_SRCS,
+        "@platforms//cpu:arm": _ARM_SRCS,
+        "@platforms//cpu:armv7": _ARM_SRCS,
+        "@platforms//cpu:x86_64": _X86_SRCS,
+        "@platforms//cpu:i386": _X86_SRCS,
+        "//conditions:default": [],
+    }),
+    hdrs = [
+        ":zlib_gen",
+    ],
+    copts = _COPTS,
+    features = ["-parse_headers"],
+    includes = ["."],
+    local_defines = [
+        "ZLIB_COMPAT",
+        "WITH_GZFILEOP",
+        "WITH_OPTIM",
+        "WITH_NEW_STRATEGIES",
+        "WITH_ALL_FALLBACKS",
+    ] + select({
+        "@platforms//cpu:aarch64": ["ARM_FEATURES"],
+        "@platforms//cpu:arm": ["ARM_FEATURES"],
+        "@platforms//cpu:armv7": ["ARM_FEATURES"],
+        "@platforms//cpu:x86_64": ["X86_FEATURES"],
+        "@platforms//cpu:i386": ["X86_FEATURES"],
+        "//conditions:default": [],
+    }) + select({
+        "@platforms//os:windows": ["_CRT_NONSTDC_NO_WARNINGS"],
+        "//conditions:default": [],
+    }),
+    strip_include_prefix = ".",
+)
+
+alias(
+    name = "zlib",
+    actual = ":zlib-ng",
+)

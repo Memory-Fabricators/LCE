@@ -7,7 +7,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 Font::Font(Options *options, const wstring &name, Textures *textures, bool enforceUnicode, TEXTURE_NAME textureName, int cols, int rows, int charWidth, int charHeight, unsigned short charMap[] /* = nullptr */) : textures(textures)
 {

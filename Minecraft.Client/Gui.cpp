@@ -27,7 +27,7 @@
 #include "Options.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 #define RENDER_HUD 0
 // #ifndef _XBOX

@@ -1,6 +1,6 @@
 #include "OffsettedRenderList.h"
 #include "../Minecraft.World/IntBuffer.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 // 4J added
 OffsettedRenderList::OffsettedRenderList()

@@ -10,7 +10,7 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 ParticleEngine::ParticleEngine(Level *level, Textures *textures)
 {

@@ -2,7 +2,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
 #include "GhastModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 GhastRenderer::GhastRenderer() : MobRenderer(new GhastModel(), 0.5f)
 {

@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.item.h"
 #include "BoatModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 BoatRenderer::BoatRenderer() : EntityRenderer()
 {

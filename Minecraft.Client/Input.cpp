@@ -16,8 +16,16 @@ Input::Input()
     jumping = false;
     sneaking = false;
 
-    lReset = false;
-    rReset = false;
+    // This latch exists so a physical analog stick resting slightly off
+    // center at power-on doesn't cause an unwanted turn/move the instant
+    // gameplay starts: it withholds input until one tick reports an exact
+    // (0,0) reading. Mouse/keyboard deltas are inherently zero at rest
+    // (no calibration drift), so start pre-tripped - waiting on an exact
+    // `== 0.0f` float match is a footgun: any tick where device-event
+    // noise leaves a nonzero residual keeps it perpetually false, which
+    // permanently zeroes look/move input.
+    lReset = true;
+    rReset = true;
 }
 
 void Input::tick(LocalPlayer *player)

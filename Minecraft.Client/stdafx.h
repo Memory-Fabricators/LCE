@@ -76,8 +76,7 @@
 #include <vector>
 #elif defined _SDL3
 #define AUTO_VAR(_var, _val) auto _var = _val
-#include "../Minecraft.Client/SDL3/WindowsTypes.h"
-#include "SDL3/SDL.h"
+#include "SDL3/WindowsTypes.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

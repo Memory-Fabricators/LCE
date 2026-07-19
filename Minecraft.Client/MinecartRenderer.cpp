@@ -2,7 +2,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.item.h"
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "MinecartModel.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 MinecartRenderer::MinecartRenderer()
 {

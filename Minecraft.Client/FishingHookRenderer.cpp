@@ -7,7 +7,7 @@
 #include "MultiPlayerLocalPlayer.h"
 #include "Options.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 void FishingHookRenderer::render(shared_ptr<Entity> _hook, double x, double y, double z, float rot, float a)

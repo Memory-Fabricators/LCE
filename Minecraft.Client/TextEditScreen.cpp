@@ -9,7 +9,7 @@
 #include "MultiPlayerLevel.h"
 #include "TileEntityRenderDispatcher.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <SDL3/SDL3_Input.h>
 
 const wstring TextEditScreen::allowedChars = SharedConstants::acceptableLetters;

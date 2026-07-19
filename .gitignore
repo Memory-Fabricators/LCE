@@ -2,6 +2,8 @@
 .cache
 .DS_Store
 target/
-/subprojects/*
-!/subprojects/packagefiles
-!/subprojects/*.wrap
+/bazel-*
+rust-project.json
+.rules_rust_analyzer/
+compile_commands.json
+/external

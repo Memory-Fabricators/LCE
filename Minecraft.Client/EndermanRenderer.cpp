@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.level.tile.h"
 #include "EndermanModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 EndermanRenderer::EndermanRenderer() : MobRenderer(new EndermanModel(), 0.5f)
 {

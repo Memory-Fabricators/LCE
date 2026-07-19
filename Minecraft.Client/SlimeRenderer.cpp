@@ -1,6 +1,6 @@
 #include "SlimeRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 SlimeRenderer::SlimeRenderer(Model *model, Model *armor, float shadow) : MobRenderer(model, shadow)
 {

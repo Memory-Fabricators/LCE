@@ -1,0 +1,9 @@
+startup --host_jvm_args=-XX:+UseZGC
+
+common --enable_platform_specific_config
+common:windows --host_platform=//platforms:local_windows_msvc
+build --action_env=RUSTC_BOOTSTRAP=1
+
+common -c opt
+common:release --features=thin_lto
+common --@rules_rust//rust/settings:experimental_use_allocator_libraries_with_mangled_symbols

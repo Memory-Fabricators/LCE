@@ -1,22 +1,14 @@
 #pragma once
 
-// Private implementation state for C4JRender's OpenGL ES / ANGLE backend.
+// Private implementation state for C4JRender's angle_wgpu backend.
 // Only 4J_Render.cpp includes this - GL types must never leak into
 // the public 4J_Render.h, which is included transitively by a lot of
 // gameplay code that doesn't need to know about the render backend.
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <SDL3/SDL.h>
+#include "angle_wgpu.h"
 
 #include <unordered_map>
 #include <vector>
-
-// EGL for context management
-#include <EGL/egl.h>
-#include <EGL/eglext.h>
-
-// Maximum number of texture units we track
 static const int MAX_TEXTURE_UNITS = 8;
 
 // Vertex format sizes (in floats)
@@ -34,10 +26,11 @@ struct TextureState
 
 struct C4JRenderState
 {
-    SDL_Window *window = nullptr;
-    SDL_GLContext glContext = nullptr;
-    SDL_GLContext workerContexts[8] = {nullptr};
-
+    WinitApp *app = nullptr;
+    EGLDisplay eglDisplay = EGL_NO_DISPLAY;
+    EGLSurface eglSurface = EGL_NO_SURFACE;
+    EGLContext eglContext = EGL_NO_CONTEXT;
+    EGLContext workerContexts[8] = {EGL_NO_CONTEXT};
     int surfaceWidth = 0;
     int surfaceHeight = 0;
 

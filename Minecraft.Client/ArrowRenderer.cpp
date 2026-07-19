@@ -2,7 +2,7 @@
 #include "../Minecraft.World/Mth.h"
 #include "../Minecraft.World/net.minecraft.world.entity.projectile.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void ArrowRenderer::render(shared_ptr<Entity> _arrow, double x, double y, double z, float rot, float a)
 {

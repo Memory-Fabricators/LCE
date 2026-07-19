@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string>
 
-#include "../../Minecraft.Client/SkinBox.h"
 #include "WindowsTypes.h"
 
 #include <vector>

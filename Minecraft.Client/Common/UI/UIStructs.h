@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma message("UIStructs.h")
-
 #include "UIEnums.h"
 
 class Container;

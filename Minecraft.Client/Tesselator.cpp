@@ -4,8 +4,8 @@
 #include "../Minecraft.World/FloatBuffer.h"
 #include "../Minecraft.World/IntBuffer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "angle_wgpu.h"
+#include "angle_wgpu.h"
 #include <cstdint>
 #include <cstring>
 #include <vector>

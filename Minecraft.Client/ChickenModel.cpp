@@ -1,6 +1,6 @@
 #include "ChickenModel.h"
 #include "../Minecraft.World/Mth.h"
-#include "GL/gl.h"
+#include "angle_wgpu.h"
 #include "ModelPart.h"
 
 ChickenModel::ChickenModel() : Model()

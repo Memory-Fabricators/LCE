@@ -2,7 +2,7 @@
 #include "../Minecraft.World/Entity.h"
 #include "../Minecraft.World/Mth.h"
 #include "ModelPart.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 // 4J added

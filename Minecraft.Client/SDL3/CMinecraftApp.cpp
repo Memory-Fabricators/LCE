@@ -1268,35 +1268,28 @@ void CMinecraftApp::LocaleAndLanguageInit()
 // misses.
 void CMinecraftApp::getLocale(vector<wstring> &vecWstrLocales)
 {
-    int count = 0;
-    SDL_Locale **locales = SDL_GetPreferredLocales(&count);
-
-    if (locales != NULL)
+    const char *lang = getenv("LANG");
+    if (lang && lang[0])
     {
-        for (int i = 0; i < count; i++)
+        char langBuf[32] = {};
+        snprintf(langBuf, sizeof(langBuf), "%s", lang);
+        char *dot = strchr(langBuf, '.');
+        if (dot)
         {
-            if (locales[i]->language == NULL)
-            {
-                continue;
-            }
-
-            wchar_t tag[16];
-            if (locales[i]->country != NULL)
-            {
-                swprintf(tag, 16, L"%hs-%hs", locales[i]->language, locales[i]->country);
-            }
-            else
-            {
-                swprintf(tag, 16, L"%hs", locales[i]->language);
-            }
-
-            AUTO_VAR(it, m_eMCLangA.find(tag));
-            if (it != m_eMCLangA.end())
-            {
-                vecWstrLocales.push_back(m_localeA[(eMCLang)it->second]);
-            }
+            *dot = '\0';
         }
-        SDL_free(locales);
+        char *underscore = strchr(langBuf, '_');
+        if (underscore)
+        {
+            *underscore = '-';
+        }
+        wchar_t tag[32] = {};
+        swprintf(tag, 32, L"%hs", langBuf);
+        AUTO_VAR(it, m_eMCLangA.find(tag));
+        if (it != m_eMCLangA.end())
+        {
+            vecWstrLocales.push_back(m_localeA[(eMCLang)it->second]);
+        }
     }
 
     vecWstrLocales.push_back(m_localeA[eMCLang_enUS]);

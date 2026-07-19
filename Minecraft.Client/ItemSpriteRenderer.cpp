@@ -5,7 +5,7 @@
 #include "../Minecraft.World/net.minecraft.world.item.h"
 #include "EntityRenderDispatcher.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 ItemSpriteRenderer::ItemSpriteRenderer(Item *sourceItem, int sourceItemAuxValue /*= 0*/) : EntityRenderer()
 {

@@ -1,0 +1,24 @@
+diff --git a/core/src/loader.rs b/core/src/loader.rs
+index 3023b045c..4ddc84e44 100644
+--- a/core/src/loader.rs
++++ b/core/src/loader.rs
+@@ -368,6 +368,19 @@ impl<'gc> LoadManager<'gc> {
+                             // Create library for exports before preloading
+                             uc.library.library_for_movie_mut(clip.movie());
+                             let res = clip.preload(uc, &mut execution_limit);
++                            // LCE PATCH: `preload()` alone parses the companion's tag
++                            // stream and installs exported characters, but its
++                            // `DoAbc`/`DoAbc2` script initializers and `SymbolClass`
++                            // registrations only run via `run_abc_and_symbol_tags`,
++                            // which is otherwise only invoked from real per-frame
++                            // execution (`run_frame_internal`/`run_goto`). An
++                            // `ImportAssets` companion is never attached to any
++                            // display list, so it would never receive a frame tick,
++                            // and any class it defines/exports (e.g. via
++                            // `Object.registerClass`) would never become visible to
++                            // the importing movie's own `PlaceObject` class-name
++                            // lookups. Force that side effect once here.
++                            clip.run_first_frame_scripts(uc);
+                             tracing::debug!(
+                                 "Preloaded swf to run exports result {:?} {}",
+                                 url,

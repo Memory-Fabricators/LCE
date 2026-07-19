@@ -1,0 +1,50 @@
+diff -uNr a/rs/private/resolver.bzl b/rs/private/resolver.bzl
+--- a/rs/private/resolver.bzl	2026-08-18 00:00:00.000000000 -0700
++++ b/rs/private/resolver.bzl	2026-08-18 00:00:00.000000000 -0700
+@@ -152,18 +152,38 @@
+                     optional_marker = True
+                     dep_name = dep_name[:-1]
+ 
++                # A package can appear in multiple Cargo.toml dependency
++                # tables for the same target (e.g. an unconditional
++                # `[dependencies]` entry marking it optional, plus a
++                # `[target.cfg(...).dependencies]` entry - matching this
++                # triple - that omits `optional` and thus defaults to
++                # mandatory). Cargo resolves these per-target by merging
++                # them: if *any* matching entry is non-optional, the
++                # dependency is mandatory for that target, regardless of
++                # other (non-matching-target) declarations. Picking merely
++                # the first matching entry can pick a stale "optional=true"
++                # declaration and incorrectly suppress `dep?/feature`
++                # (weak dependency feature) propagation.
+                 found = False
++                matched_dep = None
++                dep_optional = True
+                 for dep in feature_resolutions.possible_deps:
+                     if dep_name == dep["name"] and _dep_target_matches_triple(dep, triple, feature_set, cfg_attrs_by_triple):
+                         found = True
+-                        dep_optional = dep.get("optional", False)
+-                        if not optional_marker or not dep_optional or dep_name in feature_set or ("dep:" + dep_name) in feature_set:
+-                            dep_feature_resolutions = dep["feature_resolutions"]
+-                            triple_features = dep_feature_resolutions.features_enabled[triple]
+-                            if dep_feature not in triple_features:
+-                                triple_features.add(dep_feature)
+-                                dirty_package_indices.add(dep_feature_resolutions.package_index)
+-                        break
++                        this_optional = dep.get("optional", False)
++                        if matched_dep == None or (dep_optional and not this_optional):
++                            matched_dep = dep
++                            dep_optional = this_optional
++                        if not this_optional:
++                            break
++                if matched_dep != None:
++                    dep = matched_dep
++                    if not optional_marker or not dep_optional or dep_name in feature_set or ("dep:" + dep_name) in feature_set:
++                        dep_feature_resolutions = dep["feature_resolutions"]
++                        triple_features = dep_feature_resolutions.features_enabled[triple]
++                        if dep_feature not in triple_features:
++                            triple_features.add(dep_feature)
++                            dirty_package_indices.add(dep_feature_resolutions.package_index)
+ 
+                 # Only optional deps need to be explicitly enabled when a subfeature is toggled.
+                 if dep_optional and (not optional_marker) and dep_name not in feature_set:

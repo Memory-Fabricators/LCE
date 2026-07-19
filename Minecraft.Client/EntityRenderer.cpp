@@ -11,7 +11,7 @@
 #include "LocalPlayer.h"
 #include "Options.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 // 4J - added
 EntityRenderer::EntityRenderer()

@@ -1,12 +1,14 @@
 #pragma once
 
-#include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <expected>
 #include <string>
 
+struct WinitApp;
+struct SDL_Window;
+struct SDL_Surface;
 class FloatBuffer;
 class IntBuffer;
 
@@ -35,7 +37,7 @@ class ImageFileBuffer
     }
     void Release()
     {
-        SDL_free(m_pBuffer);
+        free(m_pBuffer);
         m_pBuffer = NULL;
     }
     bool Allocated()
@@ -71,6 +73,7 @@ class C4JRender
     const float *MatrixGet(int type);
     void Set_matrixDirty();
 
+    void Initialise(WinitApp *app);
     void Initialise(SDL_Window *window);
     void InitialiseContext();
     void StartFrame();
@@ -161,9 +164,6 @@ class C4JRender
     void TextureDynamicUpdateStart();
     void TextureDynamicUpdateEnd();
 
-    std::expected<SDL_Surface *, std::string> LoadTextureData(const char *szFilename);
-    std::expected<SDL_Surface *, std::string> LoadTextureData(const void *data, std::size_t size);
-    std::expected<void, std::string> SaveTextureData(const char *szFilename, SDL_Surface *surface);
     void TextureGetStats();
     void *TextureGetTexture(int idx);
 

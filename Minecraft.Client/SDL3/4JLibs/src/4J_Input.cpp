@@ -36,9 +36,7 @@ float s_stickRX = 0.0f;
 float s_stickRY = 0.0f;
 
 // Input.cpp applies the user sensitivity and a 50-degree full-stick turn.
-// Keep one physical pixel well below full-stick magnitude: the previous
-// mapping saturated after only a few pixels and turned modest motion into a snap.
-constexpr float kMouseLookScale = 1.0f / 50.0f;
+constexpr float kMouseLookScale = 1.0f / 12.5f;
 
 float Clamp(float v, float lo, float hi)
 {
@@ -69,60 +67,55 @@ void C_4JInput::Tick(void)
 {
     s_buttonsDownPrev = s_buttonsDown;
 
-    int numKeys = 0;
-    const bool *keys = SDL_GetKeyboardState(&numKeys);
-    auto down = [&](SDL_Scancode sc) { return keys != nullptr && sc < numKeys && keys[sc]; };
-
-    SDL_MouseButtonFlags mouseButtons = SDL_GetMouseState(nullptr, nullptr);
-    bool lmb = (mouseButtons & SDL_BUTTON_MASK(SDL_BUTTON_LEFT)) != 0;
-    bool rmb = (mouseButtons & SDL_BUTTON_MASK(SDL_BUTTON_RIGHT)) != 0;
+    bool lmb = Mouse::isButtonDown(0);
+    bool rmb = Mouse::isButtonDown(1);
 
     unsigned int buttons = 0;
-    if (down(SDL_SCANCODE_SPACE) || down(SDL_SCANCODE_RETURN))
+    if (Keyboard::isKeyDown(Keyboard::KEY_SPACE) || Keyboard::isKeyDown(Keyboard::KEY_RETURN))
     {
         buttons |= _360_JOY_BUTTON_A;
     }
-    if (down(SDL_SCANCODE_LSHIFT) || down(SDL_SCANCODE_RSHIFT))
+    if (Keyboard::isKeyDown(Keyboard::KEY_LSHIFT) || Keyboard::isKeyDown(Keyboard::KEY_RSHIFT))
     {
         buttons |= _360_JOY_BUTTON_RTHUMB;
     }
-    if (down(SDL_SCANCODE_E))
+    if (Keyboard::isKeyDown(Keyboard::KEY_E))
     {
         buttons |= _360_JOY_BUTTON_Y;
     }
-    if (down(SDL_SCANCODE_Q))
+    if (Keyboard::isKeyDown(Keyboard::KEY_Q))
     {
         buttons |= _360_JOY_BUTTON_B;
     }
-    if (down(SDL_SCANCODE_C))
+    if (Keyboard::isKeyDown(Keyboard::KEY_C))
     {
         buttons |= _360_JOY_BUTTON_X;
     }
-    if (down(SDL_SCANCODE_F5))
+    if (Keyboard::isKeyDown(Keyboard::KEY_F5))
     {
         buttons |= _360_JOY_BUTTON_LTHUMB;
     }
-    if (down(SDL_SCANCODE_TAB))
+    if (Keyboard::isKeyDown(Keyboard::KEY_TAB))
     {
         buttons |= _360_JOY_BUTTON_BACK;
     }
-    if (down(SDL_SCANCODE_ESCAPE))
+    if (Keyboard::isKeyDown(Keyboard::KEY_ESCAPE))
     {
         buttons |= _360_JOY_BUTTON_START | _360_JOY_BUTTON_B;
     }
-    if (down(SDL_SCANCODE_UP))
+    if (Keyboard::isKeyDown(Keyboard::KEY_UP))
     {
         buttons |= _360_JOY_BUTTON_DPAD_UP;
     }
-    if (down(SDL_SCANCODE_DOWN))
+    if (Keyboard::isKeyDown(Keyboard::KEY_DOWN))
     {
         buttons |= _360_JOY_BUTTON_DPAD_DOWN;
     }
-    if (down(SDL_SCANCODE_LEFT))
+    if (Keyboard::isKeyDown(Keyboard::KEY_LEFT))
     {
         buttons |= _360_JOY_BUTTON_DPAD_LEFT;
     }
-    if (down(SDL_SCANCODE_RIGHT))
+    if (Keyboard::isKeyDown(Keyboard::KEY_RIGHT))
     {
         buttons |= _360_JOY_BUTTON_DPAD_RIGHT;
     }
@@ -150,11 +143,22 @@ void C_4JInput::Tick(void)
 
     s_buttonsDown = buttons;
 
-    s_stickLX = (down(SDL_SCANCODE_D) ? 1.0f : 0.0f) - (down(SDL_SCANCODE_A) ? 1.0f : 0.0f);
-    s_stickLY = (down(SDL_SCANCODE_W) ? 1.0f : 0.0f) - (down(SDL_SCANCODE_S) ? 1.0f : 0.0f);
+    s_stickLX = (Keyboard::isKeyDown(Keyboard::KEY_D) ? 1.0f : 0.0f) - (Keyboard::isKeyDown(Keyboard::KEY_A) ? 1.0f : 0.0f);
+    s_stickLY = (Keyboard::isKeyDown(Keyboard::KEY_W) ? 1.0f : 0.0f) - (Keyboard::isKeyDown(Keyboard::KEY_S) ? 1.0f : 0.0f);
 
     float mouseDX = 0.0f, mouseDY = 0.0f;
-    SDL_GetRelativeMouseState(&mouseDX, &mouseDY);
+    if (SDL3Input::GetApp())
+    {
+        double dx = 0.0, dy = 0.0;
+        winit_app_get_mouse_delta(SDL3Input::GetApp(), &dx, &dy);
+        mouseDX = (float)dx;
+        mouseDY = (float)dy;
+    }
+    else
+    {
+        mouseDX = 0.0f;
+        mouseDY = 0.0f;
+    }
     if (Mouse::isGrabbed())
     {
         s_stickRX = Clamp(mouseDX * kMouseLookScale, -1.0f, 1.0f);

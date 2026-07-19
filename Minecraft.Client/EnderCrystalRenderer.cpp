@@ -1,7 +1,7 @@
 #include "EnderCrystalRenderer.h"
 #include "../Minecraft.World/net.minecraft.world.entity.boss.enderdragon.h"
 #include "EnderCrystalModel.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 EnderCrystalRenderer::EnderCrystalRenderer()

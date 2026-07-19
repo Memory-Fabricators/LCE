@@ -71,7 +71,7 @@
 #include "WolfRenderer.h"
 #include "ZombieRenderer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 double EntityRenderDispatcher::xOff = 0.0;
 double EntityRenderDispatcher::yOff = 0.0;

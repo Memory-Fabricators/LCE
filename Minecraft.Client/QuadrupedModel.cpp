@@ -1,7 +1,7 @@
 #include "QuadrupedModel.h"
 #include "../Minecraft.World/Mth.h"
 #include "ModelPart.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 QuadrupedModel::QuadrupedModel(int legSize, float g) : Model()
 {

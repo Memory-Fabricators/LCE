@@ -3,7 +3,7 @@
 #include "../Minecraft.World/net.minecraft.world.entity.animal.h"
 #include "ModelPart.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 const float OzelotModel::xo = 0;
 const float OzelotModel::yo = 16;

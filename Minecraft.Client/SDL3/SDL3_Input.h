@@ -15,10 +15,12 @@
 // SDL3 keyboard/mouse state directly to synthesize a virtual gamepad for
 // gameplay (see that file for why).
 
-#include <SDL3/SDL.h>
+#include "angle_wgpu.h"
 #include <deque>
 #include <string>
 
+struct SDL_Window;
+union SDL_Event;
 class Keyboard
 {
   public:
@@ -29,6 +31,10 @@ class Keyboard
     {
     }
 
+    static void setApp(WinitApp *app)
+    {
+        s_app = app;
+    }
     static void setWindow(SDL_Window *window)
     {
         s_window = window;
@@ -36,29 +42,32 @@ class Keyboard
 
     static bool isKeyDown(int key)
     {
-        SDL_Scancode sc = ToScancode(key);
-        if (sc == SDL_SCANCODE_UNKNOWN)
+        if (s_app)
         {
-            return false;
+            return winit_app_is_key_down(s_app, (uint32_t)key);
         }
-        int numKeys = 0;
-        const bool *state = SDL_GetKeyboardState(&numKeys);
-        return state != nullptr && sc < numKeys && state[sc];
+        return false;
     }
 
     static std::wstring getKeyName(int key)
     {
-        const char *name = SDL_GetScancodeName(ToScancode(key));
-        if (!name || !name[0])
+        if (key >= KEY_A && key <= KEY_Z)
         {
-            return L"???";
+            return std::wstring(1, (wchar_t)(L'A' + (key - KEY_A)));
         }
-        std::wstring out;
-        for (const char *p = name; *p; ++p)
+        switch (key)
         {
-            out += (wchar_t)(unsigned char)*p;
+        case KEY_SPACE: return L"Space";
+        case KEY_LSHIFT: return L"Left Shift";
+        case KEY_ESCAPE: return L"Escape";
+        case KEY_BACK: return L"Backspace";
+        case KEY_RETURN: return L"Enter";
+        case KEY_RSHIFT: return L"Right Shift";
+        case KEY_UP: return L"Up";
+        case KEY_DOWN: return L"Down";
+        case KEY_TAB: return L"Tab";
+        default: return L"Key";
         }
-        return out;
     }
 
     // Toggles OS text-composition input (SDL_StartTextInput/StopTextInput),
@@ -91,8 +100,8 @@ class Keyboard
     static void pushKeyEvent(int key, bool down);
     static void pushCharEvent(wchar_t ch);
 
-    static SDL_Scancode ToScancode(int key);
-    static int FromScancode(SDL_Scancode sc);
+    static int ToScancode(int key);
+    static int FromScancode(int sc);
 
     static const int KEY_A = 0;
     static const int KEY_B = 1;
@@ -129,6 +138,9 @@ class Keyboard
     static const int KEY_UP = 32;
     static const int KEY_DOWN = 33;
     static const int KEY_TAB = 34;
+    static const int KEY_LEFT = 35;
+    static const int KEY_RIGHT = 36;
+    static const int KEY_F5 = 37;
 
     // Sentinel for physical keys with no Keyboard::KEY_* equivalent above -
     // still queued (as character-only or dispatch-and-ignore entries) so
@@ -143,6 +155,7 @@ class Keyboard
         wchar_t ch;
     };
     static inline std::deque<Event> s_queue;
+    static inline WinitApp *s_app = nullptr;
     static inline SDL_Window *s_window = nullptr;
     static inline bool s_repeatEventsEnabled = false;
     static inline int s_curKey = KEY_NONE;
@@ -160,6 +173,10 @@ class Mouse
     {
     }
 
+    static void setApp(WinitApp *app)
+    {
+        s_app = app;
+    }
     static void setWindow(SDL_Window *window)
     {
         s_window = window;
@@ -169,8 +186,11 @@ class Mouse
     static int getY();
     static bool isButtonDown(int button)
     {
-        SDL_MouseButtonFlags buttons = SDL_GetMouseState(nullptr, nullptr);
-        return (buttons & SDL_BUTTON_MASK(button + 1)) != 0;
+        if (s_app)
+        {
+            return winit_app_is_button_down(s_app, (uint32_t)(button + 1));
+        }
+        return false;
     }
 
     // LWJGL-style event queue for Screen::mouseEvent().
@@ -220,6 +240,7 @@ class Mouse
         bool buttonState;
     };
     static inline std::deque<Event> s_queue;
+    static inline WinitApp *s_app = nullptr;
     static inline SDL_Window *s_window = nullptr;
     static inline bool s_grabbed = false;
     static inline int s_curX = 0, s_curY = 0, s_curDX = 0, s_curDY = 0;
@@ -229,12 +250,14 @@ class Mouse
 
 namespace SDL3Input
 {
-// Called once from main() right after the window is created.
+void Init(WinitApp *app);
 void Init(SDL_Window *window);
+WinitApp *GetApp();
 
 // Called for every SDL_Event pulled from SDL_PollEvent() - feeds the
 // Keyboard/Mouse event queues above and the mouse-wheel step counter.
 void PumpEvent(const SDL_Event &event);
+void PumpEvents(WinitApp *app);
 
 // Consumes (and resets) the mouse-wheel steps accumulated since the last
 // call. Used by C_4JInput::Tick() to drive hotbar scrolling.

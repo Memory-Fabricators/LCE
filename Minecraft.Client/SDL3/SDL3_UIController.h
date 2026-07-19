@@ -3,7 +3,6 @@
 #include "../../Minecraft.World/SoundTypes.h"
 #include "../Common/UI/UIEnums.h"
 #include "4JLibs/inc/4J_Storage.h"
-#include "SDL3/SDL.h"
 
 class IggyCustomDrawCallbackRegion;
 class UIScene;

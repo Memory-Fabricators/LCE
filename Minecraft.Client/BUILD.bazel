@@ -1,0 +1,112 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+CLIENT_GL_ARGS = [
+    "-std=c++26",
+    "-D_SDL3",
+    "-DGL_GLES_PROTOTYPES",
+    "-DGL_GLEXT_PROTOTYPES",
+    "-DLCE_USE_MESA_GL",
+]
+
+cc_library(
+    name = "WindowsTypes",
+    srcs = ["SDL3/WindowsTypes.cpp"],
+    hdrs = ["SDL3/WindowsTypes.h"],
+    copts = ["-std=c++26", "-D_SDL3", "-DLCE_SKIP_STDAFX"],
+    includes = ["SDL3"],
+    deps = ["@mimalloc"],
+)
+cc_library(
+    name = "Minecraft.Client.headers",
+    hdrs = glob([
+        "**/*.h",
+        "**/*.hpp",
+    ]),
+    includes = [
+        ".",
+        "Common",
+        "SDL3",
+        "SDL3/stubs",
+        "SDL3Media",
+        "ruffle_bridge",
+    ],
+    deps = [
+        ":WindowsTypes",
+        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
+        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+    ],
+)
+
+
+cc_library(
+    name = "Minecraft.Client.4JRender",
+    srcs = ["SDL3/4JLibs/src/4J_Render.cpp"],
+    hdrs = glob([
+        "**/*.h",
+        "**/*.hpp",
+    ]),
+    copts = CLIENT_GL_ARGS + ["-DLCE_SKIP_STDAFX"],
+    includes = [
+        ".",
+        "Common",
+        "SDL3",
+        "SDL3/stubs",
+        "SDL3Media",
+        "ruffle_bridge",
+    ],
+    deps = [
+        ":WindowsTypes",
+        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
+        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+        "@mimalloc",
+    ],
+)
+
+cc_binary(
+    name = "Minecraft.Client",
+    srcs = glob(
+        [
+            "*.cpp",
+            "Common/**/*.cpp",
+            "SDL3/**/*.cpp",
+            "Xbox/Network/NetworkPlayerXbox.cpp",
+            "Common/UI/UIFontData.cpp",
+        ],
+        exclude = [
+            "CreativeMode.cpp",
+            "Common/UI/**",
+            "Common/Consoles_App.cpp",
+            "Common/Audio/SoundEngine.cpp",
+            "Common/Network/Sony/**",
+            "Common/XUI/**",
+            "Common/Tutorial/XuiCraftingTask.cpp",
+            "SDL3/4JLibs/src/4J_Render.cpp",
+        ],
+    ) + [
+        "Common/UI/UIFontData.cpp",
+    ],
+    copts = CLIENT_GL_ARGS + [
+        '-DLCE_ASSETS_DIR_DEFAULT="Minecraft.Client"',
+        "-include",
+        "Minecraft.Client/stdafx.h",
+    ],
+    includes = [
+        ".",
+        "Common",
+        "SDL3",
+        "SDL3/stubs",
+        "SDL3Media",
+        "ruffle_bridge",
+    ],
+    deps = [
+        ":Minecraft.Client.4JRender",
+        ":WindowsTypes",
+        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
+        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+        "//Minecraft.World:Minecraft.World",
+        "@mimalloc",
+        "@zlib-ng//:zlib",
+    ],
+)

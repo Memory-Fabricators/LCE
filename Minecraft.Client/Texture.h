@@ -1,7 +1,7 @@
 #pragma once
 
-#include <GL/gl.h>    // GL_BGRA_EXT
-#include <GL/glext.h> // GL_BGRA_EXT
+#include "angle_wgpu.h"    // GL_BGRA_EXT
+#include "angle_wgpu.h" // GL_BGRA_EXT
 
 class Rect2i;
 class ByteBuffer;

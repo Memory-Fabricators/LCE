@@ -7,7 +7,7 @@
 #include "EntityRenderDispatcher.h"
 #include "MultiPlayerLocalPlayer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 MobRenderer::MobRenderer(Model *model, float shadow) : EntityRenderer()

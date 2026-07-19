@@ -9,7 +9,7 @@
 #include "ModelPart.h"
 #include "SkullTileRenderer.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 void HumanoidMobRenderer::_init(HumanoidModel *humanoidModel, float scale)
 {

@@ -6,7 +6,7 @@
 #include "ModelPart.h"
 #include "SignModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 SignRenderer::SignRenderer()
 {

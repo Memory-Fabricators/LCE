@@ -31,6 +31,12 @@
               rustc
               rust-analyzer
               rustfmt
+              cbindgen
+              # ruffle_core's build.rs compiles its AVM1/AVM2 "playerglobal"
+              # ActionScript bytecode via a bundled asc.jar - it shells out to
+              # a plain `java` on PATH, so a JDK has to be present at build
+              # time (not needed at runtime).
+              jdk25_headless
               llvmPackages.clang-tools
             ];
 

@@ -2,7 +2,7 @@
 #include "../Minecraft.World/Mth.h"
 #include "../Minecraft.World/net.minecraft.world.entity.monster.h"
 #include "CreeperModel.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 CreeperRenderer::CreeperRenderer() : MobRenderer(new CreeperModel(), 0.5f)
 {

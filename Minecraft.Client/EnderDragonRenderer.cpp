@@ -3,7 +3,7 @@
 #include "DragonModel.h"
 #include "Lighting.h"
 #include "Tesselator.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 #include <cmath>
 
 shared_ptr<EnderDragon> EnderDragonRenderer::bossInstance;

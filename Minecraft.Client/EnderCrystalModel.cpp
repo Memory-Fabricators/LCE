@@ -1,6 +1,6 @@
 #include "EnderCrystalModel.h"
 #include "stdafx.h"
-#include <GL/gl.h>
+#include "angle_wgpu.h"
 
 EnderCrystalModel::EnderCrystalModel(float g)
 {
