@@ -35,13 +35,6 @@ float s_stickLY = 0.0f;
 float s_stickRX = 0.0f;
 float s_stickRY = 0.0f;
 
-// Input.cpp applies the user sensitivity and a 50-degree full-stick turn.
-constexpr float kMouseLookScale = 1.0f / 12.5f;
-
-float Clamp(float v, float lo, float hi)
-{
-    return v < lo ? lo : (v > hi ? hi : v);
-}
 } // namespace
 
 C_4JInput InputManager;
@@ -146,30 +139,8 @@ void C_4JInput::Tick(void)
     s_stickLX = (Keyboard::isKeyDown(Keyboard::KEY_D) ? 1.0f : 0.0f) - (Keyboard::isKeyDown(Keyboard::KEY_A) ? 1.0f : 0.0f);
     s_stickLY = (Keyboard::isKeyDown(Keyboard::KEY_W) ? 1.0f : 0.0f) - (Keyboard::isKeyDown(Keyboard::KEY_S) ? 1.0f : 0.0f);
 
-    float mouseDX = 0.0f, mouseDY = 0.0f;
-    if (SDL3Input::GetApp())
-    {
-        double dx = 0.0, dy = 0.0;
-        winit_app_get_mouse_delta(SDL3Input::GetApp(), &dx, &dy);
-        mouseDX = (float)dx;
-        mouseDY = (float)dy;
-    }
-    else
-    {
-        mouseDX = 0.0f;
-        mouseDY = 0.0f;
-    }
-    if (Mouse::isGrabbed())
-    {
-        s_stickRX = Clamp(mouseDX * kMouseLookScale, -1.0f, 1.0f);
-        s_stickRY = Clamp(-mouseDY * kMouseLookScale, -1.0f, 1.0f);
-    }
-    else
-    {
-        // Drain relative motion while a screen owns the pointer, but do not
-        // rotate the player underneath menus.
-        s_stickRX = s_stickRY = 0.0f;
-    }
+    s_stickRX = 0.0f;
+    s_stickRY = 0.0f;
 }
 
 void C_4JInput::SetDeadzoneAndMovementRange(unsigned int, unsigned int)

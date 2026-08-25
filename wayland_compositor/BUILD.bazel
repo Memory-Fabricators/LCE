@@ -1,0 +1,44 @@
+load("@rules_rs//rs:rust_binary.bzl", "rust_binary")
+load("@rules_rs//rs:rust_library.bzl", "rust_library")
+load("@rules_rs//rs:rust_test.bzl", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_library(
+    name = "wayland_compositor",
+    srcs = [
+        "src/compositor.rs",
+        "src/ffi.rs",
+        "src/lib.rs",
+        "src/pipewire.rs",
+        "src/protocol.rs",
+        "src/shm.rs",
+    ],
+    edition = "2024",
+    deps = [
+        "@crates//:bytemuck",
+        "@crates//:libc-0.2.189",
+        "@crates//:libloading-0.8.9",
+        "@crates//:parking_lot",
+    ],
+)
+
+rust_binary(
+    name = "wayland_compositor_bin",
+    srcs = ["src/main.rs"],
+    edition = "2024",
+    deps = [
+        ":wayland_compositor",
+        "@crates//:libc-0.2.189",
+        "@crates//:libloading-0.8.9",
+    ],
+)
+
+rust_test(
+    name = "wayland_compositor_test",
+    srcs = ["tests/compositor_test.rs"],
+    edition = "2024",
+    deps = [
+        ":wayland_compositor",
+    ],
+)

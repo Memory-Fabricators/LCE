@@ -1,7 +1,8 @@
-diff -uNr a/rs/extensions.bzl b/rs/extensions.bzl
---- a/rs/extensions.bzl	2026-08-17 23:34:47.636603822 -0700
-+++ b/rs/extensions.bzl	2026-08-17 23:34:47.710645746 -0700
-@@ -404,7 +404,7 @@
+diff --git a/rs/extensions.bzl b/rs/extensions.bzl
+index d32321b..9b46003 100644
+--- a/rs/extensions.bzl
++++ b/rs/extensions.bzl
+@@ -426,7 +426,7 @@ crate.annotation(
                  continue
  
              git_crate_metadata_repository(
@@ -10,7 +11,7 @@ diff -uNr a/rs/extensions.bzl b/rs/extensions.bzl
                  package_name = crate_name,
                  package_version = version,
                  purl = _git_crate_purl(crate_name, version, remote, commit),
-@@ -417,16 +417,21 @@
+@@ -439,10 +439,11 @@ crate.annotation(
  
      mctx.report_progress("Initializing hub")
  
@@ -26,6 +27,8 @@ diff -uNr a/rs/extensions.bzl b/rs/extensions.bzl
      repo_root = _normalize_path(cargo_metadata["workspace_root"])
      workspace_package = _label_directory(cargo_lock_path)
  
+@@ -477,7 +478,11 @@ crate.annotation(
+ 
      hub_contents = []
      for name, versions in versions_by_name.items():
 -        for version in versions:
@@ -37,10 +40,11 @@ diff -uNr a/rs/extensions.bzl b/rs/extensions.bzl
              annotation = annotation_for(annotations, name, version, hub_name)
              package = package_by_fq[_fq_crate(name, version)]
              target_repo_name = package["target_repo_name"]
-diff -uNr a/rs/private/cargo_workspace_graph.bzl b/rs/private/cargo_workspace_graph.bzl
---- a/rs/private/cargo_workspace_graph.bzl	2026-08-17 23:34:47.673534763 -0700
-+++ b/rs/private/cargo_workspace_graph.bzl	2026-08-17 23:34:47.710562120 -0700
-@@ -229,6 +229,9 @@
+diff --git a/rs/private/cargo_workspace_graph.bzl b/rs/private/cargo_workspace_graph.bzl
+index 5c3f2c1..b291f27 100644
+--- a/rs/private/cargo_workspace_graph.bzl
++++ b/rs/private/cargo_workspace_graph.bzl
+@@ -229,6 +229,9 @@ def compute_package_fq_deps(package, versions_by_name, strict = True):
          else:
              dep = maybe_fq_dep[:idx]
              resolved_version = maybe_fq_dep[idx + 1:]
@@ -50,7 +54,7 @@ diff -uNr a/rs/private/cargo_workspace_graph.bzl b/rs/private/cargo_workspace_gr
  
          add_to_dict(possible_dep_fq_crates_by_name, dep, fq_crate(dep, resolved_version))
  
-@@ -432,6 +435,9 @@
+@@ -432,6 +435,9 @@ def _resolve_possible_deps(
              if idx != -1:
                  dep = maybe_fq_dep[:idx]
                  resolved_version = maybe_fq_dep[idx + 1:]
@@ -60,10 +64,11 @@ diff -uNr a/rs/private/cargo_workspace_graph.bzl b/rs/private/cargo_workspace_gr
                  add_to_dict(deps_by_name, dep, resolved_version)
  
          for dep in package["feature_resolutions"].possible_deps:
-diff -uNr a/rs/private/git_cargo_workspace_repository.bzl b/rs/private/git_cargo_workspace_repository.bzl
---- a/rs/private/git_cargo_workspace_repository.bzl	2026-08-17 23:34:47.710490328 -0700
-+++ b/rs/private/git_cargo_workspace_repository.bzl	2026-08-17 23:34:47.710584912 -0700
-@@ -46,7 +46,7 @@
+diff --git a/rs/private/git_cargo_workspace_repository.bzl b/rs/private/git_cargo_workspace_repository.bzl
+index 4d7eb06..9bc1a47 100644
+--- a/rs/private/git_cargo_workspace_repository.bzl
++++ b/rs/private/git_cargo_workspace_repository.bzl
+@@ -46,7 +46,7 @@ crate(
      ],
  )
  {additive_build_file_content}{package_metadata_bazel_additive_build_file_content}""".format(
@@ -72,7 +77,7 @@ diff -uNr a/rs/private/git_cargo_workspace_repository.bzl b/rs/private/git_cargo
          crate_name = cargo.values["crate_name"],
          crate_root = cargo.values["crate_root"],
          edition = cargo.values["edition"],
-@@ -66,6 +66,10 @@
+@@ -66,6 +66,10 @@ def _git_cargo_workspace_repository_impl(rctx):
      patch(rctx)
      rctx.delete(rctx.path(".git"))
  

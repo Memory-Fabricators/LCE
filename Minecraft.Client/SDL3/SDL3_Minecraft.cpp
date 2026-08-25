@@ -258,6 +258,7 @@ int main(int argc, char *argv[])
     // Set default sound levels
     pMinecraft->options->set(Options::Option::MUSIC, 1.0f);
     pMinecraft->options->set(Options::Option::SOUND, 1.0f);
+    pMinecraft->options->framerateLimit = 0; // Performance: Max (unlimited/vsync-driven)
 
     // Kick off a game (flat world, creative) - texture packs are loaded by
     // this point, so nothing is blocking this anymore.
@@ -290,8 +291,15 @@ int main(int argc, char *argv[])
         // (see e.g. Minecraft::tick()'s screen == NULL gating).
         Mouse::setGrabbed(pMinecraft->screen == NULL && app.GetGameStarted());
 
-        RenderManager.StartFrame();
+        uint32_t currentWidth = 0, currentHeight = 0;
+        winit_app_get_size(winitApp, &currentWidth, &currentHeight);
+        if (currentWidth > 0 && currentHeight > 0 &&
+            ((int)currentWidth != pMinecraft->width || (int)currentHeight != pMinecraft->height))
+        {
+            pMinecraft->resize((int)currentWidth, (int)currentHeight);
+        }
 
+        RenderManager.StartFrame();
         app.UpdateTime();
         InputManager.Tick();
         RenderManager.Tick();

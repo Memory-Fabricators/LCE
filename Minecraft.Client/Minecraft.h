@@ -266,9 +266,8 @@ class Minecraft
 
     void pauseGame();
     //    void toggleFullScreen();	// 4J - removed
-  private:
+  public:
     void resize(int width, int height);
-
   public:
     // 4J - Moved to per player
     // bool isRaining ;

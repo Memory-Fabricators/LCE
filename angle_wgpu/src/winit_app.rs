@@ -254,12 +254,23 @@ impl ApplicationHandler for AppHandler {
                 };
                 if btn_state == ElementState::Pressed {
                     state.mouse_buttons_down.insert(btn_id);
-                    // Clicking back into the window re-arms grabbing
-                    // (cursor-hide only now); the game re-requests it on
-                    // its next tick via `winit_app_set_mouse_grab`.
+                    // Clicking back into the window re-arms grabbing immediately
+                    // if the application is currently in grabbed state.
                     if state.escape_ungrab {
                         state.escape_ungrab = false;
-                        state.grab_applied = None;
+                        if state.grabbed {
+                            if let Some(win) = state.window.clone() {
+                                let _ = win.set_cursor_grab(CursorGrabMode::Locked);
+                                let _ = win.set_cursor_grab(CursorGrabMode::Confined);
+                                win.set_cursor_visible(false);
+                                let (cx, cy) = ((state.width / 2) as f64, (state.height / 2) as f64);
+                                let _ = win.set_cursor_position(winit::dpi::PhysicalPosition::new(cx, cy).into());
+                                state.last_pointer_pos = Some((cx, cy));
+                            }
+                            state.grab_applied = Some(true);
+                        } else {
+                            state.grab_applied = None;
+                        }
                     }
                 } else {
                     state.mouse_buttons_down.remove(&btn_id);

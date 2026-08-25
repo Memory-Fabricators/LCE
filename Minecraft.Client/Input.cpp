@@ -92,6 +92,7 @@ void Input::tick(LocalPlayer *player)
 
     float tx = 0.0f;
     float ty = 0.0f;
+#ifndef _SDL3
     if (pMinecraft->localgameModes[iPad]->isInputAllowed(MINECRAFT_ACTION_LOOK_LEFT) || pMinecraft->localgameModes[iPad]->isInputAllowed(MINECRAFT_ACTION_LOOK_RIGHT))
     {
         tx = InputManager.GetJoypadStick_RX(iPad) * (((float)app.GetGameSettings(iPad, eGameSetting_Sensitivity_InGame)) / 100.0f); // apply sensitivity to look
@@ -100,7 +101,7 @@ void Input::tick(LocalPlayer *player)
     {
         ty = InputManager.GetJoypadStick_RY(iPad) * (((float)app.GetGameSettings(iPad, eGameSetting_Sensitivity_InGame)) / 100.0f); // apply sensitivity to look
     }
-
+#endif
 #ifndef _CONTENT_PACKAGE
     if (app.GetFreezePlayers())
     {

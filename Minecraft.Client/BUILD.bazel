@@ -34,8 +34,8 @@ cc_library(
     ],
     deps = [
         ":WindowsTypes",
-        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
-        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+        "//angle_wgpu:angle_wgpu_cc",
+        "//ruffle_bridge:ruffle_bridge_cc",
     ],
 )
 
@@ -58,8 +58,8 @@ cc_library(
     ],
     deps = [
         ":WindowsTypes",
-        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
-        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+        "//angle_wgpu:angle_wgpu_cc",
+        "//ruffle_bridge:ruffle_bridge_cc",
         "@mimalloc",
     ],
 )
@@ -103,8 +103,8 @@ cc_binary(
     deps = [
         ":Minecraft.Client.4JRender",
         ":WindowsTypes",
-        "//Minecraft.Client/angle_wgpu:angle_wgpu_cc",
-        "//Minecraft.Client/ruffle_bridge:ruffle_bridge_cc",
+        "//angle_wgpu:angle_wgpu_cc",
+        "//ruffle_bridge:ruffle_bridge_cc",
         "//Minecraft.World:Minecraft.World",
         "@mimalloc",
         "@zlib-ng//:zlib",

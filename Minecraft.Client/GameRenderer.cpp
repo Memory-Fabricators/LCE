@@ -1143,42 +1143,25 @@ void GameRenderer::render(float a, bool bFirst)
         mc->pauseGame();
     }
 
-#if 0 // 4J - TODO
-	if (mc->mouseGrabbed) {
-		mc->mouseHandler.poll();
-
-		float ss = mc->options->sensitivity * 0.6f + 0.2f;
-		float sens = (ss * ss * ss) * 8;
-		float xo = mc->mouseHandler.xd * sens;
-		float yo = mc->mouseHandler.yd * sens;
-
-		int yAxis = 1;
-		if (mc->options->invertYMouse) yAxis = -1;
-
-		if (Minecraft.DEADMAU5_CAMERA_CHEATS) {
-			if (!mc->options->fixedCamera) {
-				if (Keyboard.isKeyDown(Keyboard.KEY_J)) {
-					xo = -12f * mc->options->sensitivity;
-				} else if (Keyboard.isKeyDown(Keyboard.KEY_L)) {
-					xo = 12f * mc->options->sensitivity;
-				}
-				if (Keyboard.isKeyDown(Keyboard.KEY_I)) {
-					yo = 12f * mc->options->sensitivity;
-				} else if (Keyboard.isKeyDown(Keyboard.KEY_K)) {
-					yo = -12f * mc->options->sensitivity;
-				}
-			}
-		}
-
-		if (mc->options->smoothCamera) {
-
-			xo = smoothTurnX.getNewDeltaValue(xo, .05f * sens);
-			yo = smoothTurnY.getNewDeltaValue(yo, .05f * sens);
-
-		}
-
-		mc->player.turn(xo, yo * yAxis);
-	}
+#ifdef _SDL3
+    if (mc->level != NULL && mc->player != NULL && Mouse::isGrabbed() && mc->screen == NULL)
+    {
+        double dx = 0.0, dy = 0.0;
+        if (SDL3Input::GetApp())
+        {
+            winit_app_get_mouse_delta(SDL3Input::GetApp(), &dx, &dy);
+        }
+        float ss = mc->options->sensitivity * 0.6f + 0.2f;
+        float sens = (ss * ss * ss) * 8.0f;
+        float xo = (float)dx * sens;
+        float yo = -(float)dy * sens;
+        int yAxis = mc->options->invertYMouse ? -1 : 1;
+        if (app.GetGameSettings(mc->player->GetXboxPad(), eGameSetting_ControlInvertLook))
+        {
+            yAxis = -yAxis;
+        }
+        mc->player->turn(xo, yo * yAxis);
+    }
 #endif
 
     if (mc->noRender)

@@ -6,7 +6,7 @@ module(
 bazel_dep(name = "rules_rs", version = "0.0.106")
 git_override(
     module_name = "rules_rs",
-    commit = "618daeaa8107ca86e1c4352409f2b395dabf7574",
+    commit = "c86afd0a53f91f91130146087ab78899e656a165",
     patch_strip = 1,
     patches = [
         "//third_party:rules_rs_cargolock_v4.patch",
@@ -55,6 +55,31 @@ http_archive(
     ],
 )
 
+osx = use_extension("@llvm//extensions:osx.bzl", "osx")
+osx.frameworks(names = [
+    "AppKit",
+    "ApplicationServices",
+    "CFNetwork",
+    "Carbon",
+    "ColorSync",
+    "CoreFoundation",
+    "CoreGraphics",
+    "CoreImage",
+    "CoreServices",
+    "CoreText",
+    "CoreVideo",
+    "Foundation",
+    "ImageIO",
+    "IOKit",
+    "Kernel",
+    "Metal",
+    "OSLog",
+    "QuartzCore",
+    "Security",
+    "SystemConfiguration",
+])
+use_repo(osx, "macos_sdk")
+
 toolchains = use_extension("@rules_rs//rs/toolchains:module_extension.bzl", "toolchains")
 toolchains.toolchain(
     edition = "2024",
@@ -84,6 +109,7 @@ crate.from_cargo(
         "x86_64-unknown-linux-gnu",
     ],
 )
+
 crate.annotation(
     crate = "cbindgen",
     gen_binaries = ["cbindgen"],

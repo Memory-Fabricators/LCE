@@ -81,15 +81,22 @@ pub struct WgpuRenderer {
     pub uniform_capacity: u64,
     /// Next free slot index within the current (unsubmitted) frame.
     pub uniform_used: u64,
+    /// CPU staging buffer for batched uniform uploads before flush.
+    pub uniform_staging: Vec<u8>,
 
     /// Reused scratch vertex buffer: each `draw_mesh` call appends at
     /// `vertex_scratch_offset` instead of allocating a fresh GPU buffer.
     pub vertex_scratch: wgpu::Buffer,
     pub vertex_scratch_capacity: u64,
     pub vertex_scratch_offset: u64,
+    /// CPU staging buffer for batched vertex uploads before flush.
+    pub vertex_staging: Vec<u8>,
+
     pub index_scratch: wgpu::Buffer,
     pub index_scratch_capacity: u64,
     pub index_scratch_offset: u64,
+    /// CPU staging buffer for batched index uploads before flush.
+    pub index_staging: Vec<u8>,
 
     // Current frame state
     pub current_surface_texture: Option<wgpu::SurfaceTexture>,
@@ -99,7 +106,6 @@ pub struct WgpuRenderer {
     pub clear_color: [f64; 4],
     pub clear_depth: f32,
 }
-
 impl WgpuRenderer {
     pub async fn new_headless(width: u32, height: u32) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
@@ -278,14 +284,13 @@ impl WgpuRenderer {
         let uniform_align = device.limits().min_uniform_buffer_offset_alignment as u64;
         let uniform_struct_size = std::mem::size_of::<FixedFunctionUniforms>() as u64;
         let uniform_stride = uniform_struct_size.div_ceil(uniform_align) * uniform_align;
-        let uniform_capacity: u64 = 4096;
+        let uniform_capacity: u64 = 16384;
         let uniform_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("angle_wgpu Uniform Buffer Pool"),
             size: uniform_stride * uniform_capacity,
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-
         let uniform_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("angle_wgpu Uniform BindGroup"),
             layout: &uniform_bind_group_layout,
@@ -303,14 +308,14 @@ impl WgpuRenderer {
         // frame instead of allocating a fresh GPU buffer per draw (was the
         // dominant per-frame cost - every chunk face layer allocated two
         // buffers). Grown (doubled) on demand; reset once submitted.
-        let vertex_scratch_capacity: u64 = 4 * 1024 * 1024;
+        let vertex_scratch_capacity: u64 = 16 * 1024 * 1024;
         let vertex_scratch = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("angle_wgpu Vertex Scratch Pool"),
             size: vertex_scratch_capacity,
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         });
-        let index_scratch_capacity: u64 = 1024 * 1024;
+        let index_scratch_capacity: u64 = 4 * 1024 * 1024;
         let index_scratch = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("angle_wgpu Index Scratch Pool"),
             size: index_scratch_capacity,
@@ -344,12 +349,15 @@ impl WgpuRenderer {
             uniform_stride,
             uniform_capacity,
             uniform_used: 0,
+            uniform_staging: Vec::with_capacity((16384 * uniform_stride) as usize),
             vertex_scratch,
             vertex_scratch_capacity,
             vertex_scratch_offset: 0,
+            vertex_staging: Vec::with_capacity(16 * 1024 * 1024),
             index_scratch,
             index_scratch_capacity,
             index_scratch_offset: 0,
+            index_staging: Vec::with_capacity(4 * 1024 * 1024),
             current_surface_texture: None,
             frame_ops: Vec::new(),
             clear_color: [0.4, 0.6, 0.9, 1.0],
@@ -376,7 +384,7 @@ impl WgpuRenderer {
                 format: self.surface_format,
                 width: w,
                 height: h,
-                present_mode: wgpu::PresentMode::Fifo,
+                present_mode: wgpu::PresentMode::AutoVsync,
                 desired_maximum_frame_latency: 2,
                 alpha_mode: self.alpha_mode,
                 view_formats: vec![],
@@ -661,9 +669,7 @@ impl WgpuRenderer {
             }],
         });
         self.uniform_capacity = new_cap;
-        self.uniform_used = 0;
     }
-
     fn grow_vertex_scratch(&mut self, needed_bytes: u64) {
         let mut new_cap = self.vertex_scratch_capacity.max(1);
         while new_cap < needed_bytes {
@@ -676,9 +682,7 @@ impl WgpuRenderer {
             mapped_at_creation: false,
         });
         self.vertex_scratch_capacity = new_cap;
-        self.vertex_scratch_offset = 0;
     }
-
     fn grow_index_scratch(&mut self, needed_bytes: u64) {
         let mut new_cap = self.index_scratch_capacity.max(1);
         while new_cap < needed_bytes {
@@ -691,9 +695,7 @@ impl WgpuRenderer {
             mapped_at_creation: false,
         });
         self.index_scratch_capacity = new_cap;
-        self.index_scratch_offset = 0;
     }
-
     pub fn draw_mesh(
         &mut self,
         key: &PipelineKey,
@@ -715,13 +717,13 @@ impl WgpuRenderer {
             self.grow_uniform_pool(self.uniform_used + 1);
         }
         let uniform_offset = self.uniform_used * self.uniform_stride;
-        self.queue.write_buffer(
-            &self.uniform_buffer,
-            uniform_offset,
-            bytemuck::bytes_of(uniforms),
-        );
+        let uniform_bytes = bytemuck::bytes_of(uniforms);
+        let target_len = (uniform_offset + uniform_bytes.len() as u64) as usize;
+        if self.uniform_staging.len() < target_len {
+            self.uniform_staging.resize(target_len, 0);
+        }
+        self.uniform_staging[uniform_offset as usize..target_len].copy_from_slice(uniform_bytes);
         self.uniform_used += 1;
-
         // Sync texture bind group
         texture.sync_gpu(&self.device, &self.queue, &self.texture_bind_group_layout);
         let Some(tex_bind_group) = &texture.gpu_bind_group else {
@@ -736,11 +738,8 @@ impl WgpuRenderer {
             self.grow_vertex_scratch(self.vertex_scratch_offset + vertex_bytes);
         }
         let vertex_offset = self.vertex_scratch_offset;
-        self.queue.write_buffer(
-            &self.vertex_scratch,
-            vertex_offset,
-            bytemuck::cast_slice(vertices),
-        );
+        let vert_slice: &[u8] = bytemuck::cast_slice(vertices);
+        self.vertex_staging.extend_from_slice(vert_slice);
         self.vertex_scratch_offset += vertex_bytes;
 
         let index_range = indices.map(|idx| {
@@ -749,8 +748,8 @@ impl WgpuRenderer {
                 self.grow_index_scratch(self.index_scratch_offset + index_bytes);
             }
             let offset = self.index_scratch_offset;
-            self.queue
-                .write_buffer(&self.index_scratch, offset, bytemuck::cast_slice(idx));
+            let idx_slice: &[u8] = bytemuck::cast_slice(idx);
+            self.index_staging.extend_from_slice(idx_slice);
             self.index_scratch_offset += index_bytes;
             (offset, offset + index_bytes, idx.len() as u32)
         });
@@ -788,23 +787,54 @@ impl WgpuRenderer {
     /// dominant per-frame cost once chunk counts get into the thousands.
     pub fn flush(&mut self) {
         if self.frame_ops.is_empty() {
+            self.vertex_staging.clear();
+            self.index_staging.clear();
+            self.uniform_staging.clear();
+            self.vertex_scratch_offset = 0;
+            self.index_scratch_offset = 0;
+            self.uniform_used = 0;
             return;
         }
         let Ok(color_view) = self.ensure_frame_target() else {
             self.frame_ops.clear();
+            self.vertex_staging.clear();
+            self.index_staging.clear();
+            self.uniform_staging.clear();
+            self.vertex_scratch_offset = 0;
+            self.index_scratch_offset = 0;
+            self.uniform_used = 0;
             return;
         };
         let Some(depth_view) = self.depth_view.clone() else {
             self.frame_ops.clear();
+            self.vertex_staging.clear();
+            self.index_staging.clear();
+            self.uniform_staging.clear();
+            self.vertex_scratch_offset = 0;
+            self.index_scratch_offset = 0;
+            self.uniform_used = 0;
             return;
         };
+
+        // Upload staged uniform, vertex, and index data in single writes
+        if !self.uniform_staging.is_empty() {
+            self.queue
+                .write_buffer(&self.uniform_buffer, 0, &self.uniform_staging);
+        }
+        if !self.vertex_staging.is_empty() {
+            self.queue
+                .write_buffer(&self.vertex_scratch, 0, &self.vertex_staging);
+        }
+        if !self.index_staging.is_empty() {
+            self.queue
+                .write_buffer(&self.index_scratch, 0, &self.index_staging);
+        }
 
         let mut encoder = self
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("Frame Encoder"),
             });
-
         let ops = std::mem::take(&mut self.frame_ops);
         let mut iter = ops.into_iter().peekable();
         while iter.peek().is_some() {
@@ -910,8 +940,10 @@ impl WgpuRenderer {
         self.vertex_scratch_offset = 0;
         self.index_scratch_offset = 0;
         self.uniform_used = 0;
+        self.vertex_staging.clear();
+        self.index_staging.clear();
+        self.uniform_staging.clear();
     }
-
     pub fn swap_buffers(&mut self) -> Result<(), String> {
         if self.current_surface_texture.is_none() && self.surface.is_some() {
             self.clear(true, true, false);
