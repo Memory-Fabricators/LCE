@@ -50,7 +50,6 @@ pub(crate) const GL_EQUAL: GLenum = 0x0202;
 pub(crate) const GL_KEEP: GLenum = 0x1E00;
 pub(crate) const GL_REPLACE: GLenum = 0x1E01;
 
-#[link(name = "GL")]
 unsafe extern "C" {
     pub(crate) fn glGetError() -> GLenum;
     pub(crate) fn glGetIntegerv(pname: GLenum, data: *mut GLint);

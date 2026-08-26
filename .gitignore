@@ -7,3 +7,4 @@ rust-project.json
 .rules_rust_analyzer/
 compile_commands.json
 /external
+/buck-out

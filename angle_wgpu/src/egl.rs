@@ -481,6 +481,12 @@ pub unsafe fn egl_swap_buffers(_dpy: EGLDisplay, surface: EGLSurface) -> EGLBool
     let renderer = surf_arc.lock().renderer.clone();
     std::mem::forget(surf_arc);
 
+    // Flush any pending batched draw before presenting so it isn't lost /
+    // reordered relative to the swap.
+    if let Some(ctx_arc) = get_current_gl_context() {
+        ctx_arc.lock().flush_pending_batch();
+    }
+
     if let Some(r) = renderer {
         let mut rend = r.lock();
         if let Err(e) = rend.swap_buffers() {

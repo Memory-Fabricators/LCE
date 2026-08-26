@@ -1,58 +1,30 @@
-cxx_precompiled_header(
-    name = "world_pch",
-    src = "stdafx.h",
-    compile_pch_file = True,
-    pch_clanguage = ".cpp",
-    compiler_flags = [
-        "-std=c++26",
-        "-pedantic-errors",
-        "-Wno-gnu-anonymous-struct",
-        "-Wno-nested-anon-types",
-        "-Wno-non-c-typedef-for-linkage",
-        "-Wno-invalid-utf8",
-    ],
-    preprocessor_flags = [
-        "-D_SDL3",
-        "-D_DEBUG_MENUS_ENABLED",
-        "-D_LARGE_WORLDS",
-        "-DSPLIT_SAVES",
-    ],
-    public_include_directories = [
-        ".",
-        "x64headers",
-        "../Minecraft.Client/SDL3",
-        "../Minecraft.Client/SDL3/stubs",
-    ],
-    deps = [
-        "//third_party:sdl3",
-        "//third_party:sdl3_image",
-    ],
-)
-
 cxx_library(
     name = "Minecraft.World",
-    srcs = glob(["*.cpp"], exclude = ["ZonedChunkStorage.cpp"]),
-    prefix_header = "stdafx.h",
+    srcs = glob(
+        ["*.cpp"],
+        exclude = ["ZonedChunkStorage.cpp"],
+    ),
+    exported_headers = glob([
+        "*.h",
+        "x64headers/**/*.h",
+        "pch/**/*.h",
+    ]),
     compiler_flags = [
         "-std=c++26",
-        "-pedantic-errors",
-        "-Wno-gnu-anonymous-struct",
-        "-Wno-nested-anon-types",
-        "-Wno-non-c-typedef-for-linkage",
-        "-Wno-invalid-utf8",
-    ],
-    preprocessor_flags = [
         "-D_SDL3",
-        "-D_DEBUG_MENUS_ENABLED",
-        "-D_LARGE_WORLDS",
-        "-DSPLIT_SAVES",
+        "-DGL_GLES_PROTOTYPES",
+        "-DGL_GLEXT_PROTOTYPES",
+        "-include",
+        "Minecraft.World/stdafx.h",
     ],
     public_include_directories = [
         ".",
         "x64headers",
-        "../Minecraft.Client/SDL3",
-        "../Minecraft.Client/SDL3/stubs",
     ],
-    exported_deps = ["//third_party:sdl3", "//third_party:sdl3_image"],
+    exported_deps = [
+        "//Minecraft.Client:Minecraft.Client.headers",
+        "third_party//mimalloc:mimalloc",
+        "third_party//zlib-ng:zlib",
+    ],
     visibility = ["PUBLIC"],
 )

@@ -56,6 +56,7 @@ pub struct WgpuRenderer {
     pub surface_config: Option<wgpu::SurfaceConfiguration>,
     pub surface_format: wgpu::TextureFormat,
     pub alpha_mode: wgpu::CompositeAlphaMode,
+    pub present_mode: wgpu::PresentMode,
     pub window: Option<Arc<dyn Window>>,
     pub width: u32,
     pub height: u32,
@@ -149,6 +150,7 @@ impl WgpuRenderer {
             None,
             surface_format,
             wgpu::CompositeAlphaMode::Opaque,
+            wgpu::PresentMode::AutoNoVsync,
             width,
             height,
         )
@@ -190,8 +192,24 @@ impl WgpuRenderer {
         eprintln!(
             "[angle_wgpu] adapter={:?} format={surface_format:?} alpha={alpha_mode:?} modes={:?}",
             adapter.get_info(),
-            caps.alpha_modes
+            caps.present_modes
         );
+
+        // The app already paces itself (see `maxFps`), so we don't need
+        // the driver/compositor to also throttle us via vsync - that
+        // second cap is often coarser (e.g. a nested/headless compositor
+        // reporting a low refresh rate) and was the dominant cause of
+        // frame-rate being far below the configured limit. Prefer an
+        // uncapped present mode when the platform supports one, falling
+        // back to vsync only if nothing else is available.
+        let present_mode = [
+            wgpu::PresentMode::Mailbox,
+            wgpu::PresentMode::Immediate,
+            wgpu::PresentMode::AutoNoVsync,
+        ]
+        .into_iter()
+        .find(|m| caps.present_modes.contains(m))
+        .unwrap_or(wgpu::PresentMode::AutoVsync);
 
         Self::init_with_device(
             instance,
@@ -202,6 +220,7 @@ impl WgpuRenderer {
             Some(window),
             surface_format,
             alpha_mode,
+            present_mode,
             width,
             height,
         )
@@ -216,6 +235,7 @@ impl WgpuRenderer {
         window: Option<Arc<dyn Window>>,
         surface_format: wgpu::TextureFormat,
         alpha_mode: wgpu::CompositeAlphaMode,
+        present_mode: wgpu::PresentMode,
         width: u32,
         height: u32,
     ) -> Result<Self, String> {
@@ -332,6 +352,7 @@ impl WgpuRenderer {
             surface_config: None,
             surface_format,
             alpha_mode,
+            present_mode,
             window,
             width: w,
             height: h,
@@ -384,7 +405,7 @@ impl WgpuRenderer {
                 format: self.surface_format,
                 width: w,
                 height: h,
-                present_mode: wgpu::PresentMode::AutoVsync,
+                present_mode: self.present_mode,
                 desired_maximum_frame_latency: 2,
                 alpha_mode: self.alpha_mode,
                 view_formats: vec![],

@@ -1,9 +1,0 @@
-package(default_visibility = ["//visibility:public"])
-
-exports_files([
-    "Cargo.lock",
-    "Cargo.toml",
-    "rules_rs_cargolock_v4.patch",
-    "mimalloc/mimalloc.BUILD.bazel",
-    "zlib-ng/zlib-ng.BUILD.bazel",
-])

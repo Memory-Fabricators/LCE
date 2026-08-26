@@ -1,0 +1,51 @@
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
+load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
+load("@prelude//tests:test_toolchain.bzl", "noop_test_toolchain")
+load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
+load("@prelude//toolchains:remote_test_execution.bzl", "remote_test_execution_toolchain")
+
+# Previously this package just called `system_demo_toolchains()`, which is
+# meant for quick prototyping and builds everything unoptimized (rustc
+# defaults to opt-level=0, and no -O flags are passed to the C/C++
+# compiler either). That was fine to get the buck2 migration working, but
+# it means every build - including ones people expect to actually run/play
+# with - was effectively a debug build. Define our own cxx/rust toolchains
+# instead with release-level optimization flags. We don't use buck2's
+# android/java/kotlin/go/haskell/ocaml/python toolchains in this project,
+# so those pieces of system_demo_toolchains() are dropped rather than
+# reimplemented.
+
+system_cxx_toolchain(
+    name = "cxx",
+    c_flags = ["-O3", "-DNDEBUG"],
+    cxx_flags = ["-O3", "-DNDEBUG"],
+    visibility = ["PUBLIC"],
+)
+
+system_rust_toolchain(
+    name = "rust",
+    default_edition = "2021",
+    rustc_flags = ["-C", "opt-level=3", "-C", "debug-assertions=off"],
+    visibility = ["PUBLIC"],
+)
+
+system_genrule_toolchain(
+    name = "genrule",
+    visibility = ["PUBLIC"],
+)
+
+noop_test_toolchain(
+    name = "test",
+    visibility = ["PUBLIC"],
+)
+
+system_python_bootstrap_toolchain(
+    name = "python_bootstrap",
+    visibility = ["PUBLIC"],
+)
+
+remote_test_execution_toolchain(
+    name = "remote_test_execution",
+    visibility = ["PUBLIC"],
+)

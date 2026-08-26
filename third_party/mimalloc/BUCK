@@ -1,0 +1,38 @@
+load("@prelude//:rules.bzl", "cxx_library", "http_archive")
+
+
+http_archive(
+    name = "mimalloc-src",
+    urls = ["https://github.com/microsoft/mimalloc/archive/refs/tags/v3.4.5.tar.gz"],
+    sha256 = "19a43af0645c57d348e729d5b31e23e912582911bb1047f795790834d3416221",
+    strip_prefix = "mimalloc-3.4.5",
+    sub_targets = ["src/static.c"],
+    type = "tar.gz",
+)
+
+cxx_library(
+    name = "mimalloc",
+    srcs = [":mimalloc-src[src/static.c]"],
+    raw_headers = [":mimalloc-src"],
+    compiler_flags = [
+        "-std=c11",
+        "-DMI_MALLOC_OVERRIDE",
+        "-I$(location :mimalloc-src)/include",
+        "-I$(location :mimalloc-src)/src",
+        "-I$(location :mimalloc-src)/src/prim",
+    ] + select({
+        "DEFAULT": ["-pthread"],
+        "prelude//os:windows": [],
+    }),
+    exported_linker_flags = select({
+        "DEFAULT": ["-pthread", "-lrt"],
+        "prelude//os:macos": ["-pthread"],
+        "prelude//os:windows": [
+            "-DEFAULTLIB:advapi32.lib",
+            "-DEFAULTLIB:bcrypt.lib",
+            "-DEFAULTLIB:user32.lib",
+        ],
+    }),
+    preferred_linkage = "static",
+    visibility = ["PUBLIC"],
+)

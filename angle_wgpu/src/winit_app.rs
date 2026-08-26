@@ -380,11 +380,9 @@ pub unsafe extern "C" fn winit_app_create(
         let mut builder = EventLoop::builder();
         #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
         {
-            use winit::platform::wayland::EventLoopBuilderExtWayland;
             use winit::platform::x11::EventLoopBuilderExtX11;
             EventLoopBuilderExtX11::with_x11(&mut builder);
             EventLoopBuilderExtX11::with_any_thread(&mut builder, true);
-            EventLoopBuilderExtWayland::with_any_thread(&mut builder, true);
         }
         let Ok(event_loop) = builder.build() else {
             return;

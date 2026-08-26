@@ -234,7 +234,7 @@ impl CommandHandler for Handler {
         bitmap: BitmapHandle,
         transform: ruffle_render::transform::Transform,
         smoothing: bool,
-        _: ruffle_render::bitmap::PixelSnapping,
+        pixel_snapping: ruffle_render::bitmap::PixelSnapping,
     ) {
         let Some(texture) =
             (bitmap.0.as_ref() as &dyn std::any::Any).downcast_ref::<OpenGlBitmap>()
@@ -242,6 +242,10 @@ impl CommandHandler for Handler {
             eprintln!("Ruffle OpenGL: foreign bitmap handle");
             return;
         };
+        let mut matrix = transform.matrix;
+        pixel_snapping.apply(&mut matrix);
+        matrix *= Matrix::scale(texture.width as f32, texture.height as f32);
+
         let mult = transform.color_transform.mult_rgba_normalized();
         let filter = if smoothing {
             gl::GL_LINEAR
@@ -256,13 +260,13 @@ impl CommandHandler for Handler {
             gl::glColor4f(mult[0], mult[1], mult[2], mult[3]);
             gl::glBegin(gl::GL_TRIANGLE_FAN);
             gl::glTexCoord2f(0.0, 0.0);
-            Handler::vertex(transform.matrix, 0.0, 0.0);
+            Handler::vertex(matrix, 0.0, 0.0);
             gl::glTexCoord2f(1.0, 0.0);
-            Handler::vertex(transform.matrix, 1.0, 0.0);
+            Handler::vertex(matrix, 1.0, 0.0);
             gl::glTexCoord2f(1.0, 1.0);
-            Handler::vertex(transform.matrix, 1.0, 1.0);
+            Handler::vertex(matrix, 1.0, 1.0);
             gl::glTexCoord2f(0.0, 1.0);
-            Handler::vertex(transform.matrix, 0.0, 1.0);
+            Handler::vertex(matrix, 0.0, 1.0);
             gl::glEnd();
             gl::glDisable(gl::GL_TEXTURE_2D);
         }
@@ -491,15 +495,19 @@ impl RenderBackend for OpenGlRenderer {
             gl::glDisable(gl::GL_TEXTURE_2D);
             gl::glDisable(gl::GL_STENCIL_TEST);
             gl::glColorMask(1, 1, 1, 1);
-            gl::glClearColor(
-                clear.r as f32 / 255.0,
-                clear.g as f32 / 255.0,
-                clear.b as f32 / 255.0,
-                clear.a as f32 / 255.0,
-            );
-            gl::glClear(
-                gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT,
-            );
+            if clear.a > 0 {
+                gl::glClearColor(
+                    clear.r as f32 / 255.0,
+                    clear.g as f32 / 255.0,
+                    clear.b as f32 / 255.0,
+                    clear.a as f32 / 255.0,
+                );
+                gl::glClear(
+                    gl::GL_COLOR_BUFFER_BIT | gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT,
+                );
+            } else {
+                gl::glClear(gl::GL_DEPTH_BUFFER_BIT | gl::GL_STENCIL_BUFFER_BIT);
+            }
             gl::glEnable(gl::GL_BLEND);
             gl::glBlendFunc(gl::GL_SRC_ALPHA, gl::GL_ONE_MINUS_SRC_ALPHA);
         }

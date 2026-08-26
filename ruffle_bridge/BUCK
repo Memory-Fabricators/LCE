@@ -1,0 +1,46 @@
+rust_library(
+    name = "ruffle_bridge",
+    srcs = glob(["src/**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2024",
+    visibility = ["PUBLIC"],
+    deps = [
+        "third_party//:async-channel",
+        "third_party//:indexmap",
+        "third_party//:ruffle_core",
+        "third_party//:ruffle_render",
+        "third_party//:swf",
+        "third_party//:url",
+    ],
+)
+
+genrule(
+    name = "ruffle_bridge_header",
+    srcs = glob(["src/**/*.rs"]) + ["cbindgen.toml"],
+    out = "ruffle_bridge.h",
+    cmd = "$(exe third_party//:cbindgen-cbindgen) --config cbindgen.toml --output $OUT src/lib.rs",
+)
+
+rust_test(
+    name = "pause_menu_test",
+    srcs = glob(["src/**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2024",
+    deps = [
+        "//angle_wgpu:angle_wgpu",
+        "third_party//:async-channel",
+        "third_party//:indexmap",
+        "third_party//:ruffle_core",
+        "third_party//:ruffle_render",
+        "third_party//:swf",
+        "third_party//:url",
+    ],
+)
+
+cxx_library(
+    name = "ruffle_bridge_cc",
+    exported_headers = {"ruffle_bridge.h": ":ruffle_bridge_header"},
+    header_namespace = "",
+    exported_deps = [":ruffle_bridge"],
+    visibility = ["PUBLIC"],
+)

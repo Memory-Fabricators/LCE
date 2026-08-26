@@ -243,6 +243,11 @@ int main(int argc, char *argv[])
     app.loadMediaArchive();
     app.loadStringTable();
 
+    // Initialise UI controller
+    uint32_t winWidth = 1280, winHeight = 720;
+    winit_app_get_size(winitApp, &winWidth, &winHeight);
+    ui.init(winitApp, static_cast<int>(winWidth), static_cast<int>(winHeight));
+
     // Bootstrap Minecraft singleton (this initialises Tile, etc.)
     Minecraft::main();
     Minecraft *pMinecraft = Minecraft::GetInstance();
@@ -318,14 +323,10 @@ int main(int argc, char *argv[])
 
         pMinecraft->soundEngine->playMusicTick();
 
-        // Mirrors Windows64_Minecraft.cpp: tick/render the UI controller before
-        // presenting. Both are no-ops on this platform for now (Common/UI/Iggy
-        // isn't ported yet) but keeping the call here matches the real frame
-        // sequence so it starts doing something the moment that lands.
+        // Tick and render UI controller
         ui.tick();
         ui.render();
         ruffleBridge.Tick();
-
         RenderManager.Present();
 
         ui.CheckMenuDisplayed();

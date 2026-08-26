@@ -2,9 +2,11 @@ package(default_visibility = ["//visibility:public"])
 
 exports_files([
     "asc-no-manifest-dir.patch",
+    "core-place-by-class.patch",
     "lib-rs-embedder-ui.patch",
     "loader-run-first-frame-scripts.patch",
     "movie_clip-run-first-frame-scripts.patch",
     "playerglobal-paths.patch",
     "swf-as-writer.patch",
+    "swf-place-by-class.patch",
 ])

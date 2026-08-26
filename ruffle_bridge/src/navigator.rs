@@ -45,25 +45,35 @@ impl SearchPathNavigatorBackend {
     /// it always requests the literal name baked into the SWF - so that one
     /// logical name is aliased to its real Windows64 HD filename here.
     fn resolve_local_path(&self, url: &str) -> Option<PathBuf> {
-        let real_name = if url == "platformskin.swf" {
+        let clean_name = url
+            .trim_start_matches("file:///")
+            .trim_start_matches("file://")
+            .trim_start_matches('/');
+        let real_name = if clean_name == "platformskin.swf" {
             "skinHDWin.swf"
         } else {
-            url
+            clean_name
         };
         self.search_dirs
             .iter()
-            .map(|dir| dir.join(real_name))
+            .map(|dir| {
+                if let Ok(canon) = dir.canonicalize() {
+                    canon.join(real_name)
+                } else {
+                    dir.join(real_name)
+                }
+            })
             .find(|candidate| candidate.is_file())
     }
 
-    fn first_search_dir(&self) -> &Path {
+    fn first_search_dir(&self) -> PathBuf {
         self.search_dirs
             .first()
-            .map(PathBuf::as_path)
-            .unwrap_or_else(|| Path::new("."))
+            .and_then(|d| d.canonicalize().ok())
+            .or_else(|| self.search_dirs.first().cloned())
+            .unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")))
     }
 }
-
 impl NavigatorBackend for SearchPathNavigatorBackend {
     fn navigate_to_url(
         &self,

@@ -1,0 +1,81 @@
+rust_library(
+    name = "angle_wgpu",
+    srcs = glob(["src/**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    visibility = ["PUBLIC"],
+    deps = [
+        "third_party//:bytemuck",
+        "third_party//:glam",
+        "third_party//:log",
+        "third_party//:parking_lot",
+        "third_party//:raw-window-handle",
+        "third_party//:x11-dl",
+        "third_party//:wgpu",
+        "third_party//:winit",
+        "third_party//:zune-core",
+        "third_party//:zune-png",
+    ],
+)
+
+genrule(
+    name = "angle_wgpu_header",
+    srcs = glob(["src/**/*.rs"]) + ["cbindgen.toml"],
+    out = "angle_wgpu.h",
+    cmd = "$(exe third_party//:cbindgen-cbindgen) --config cbindgen.toml --output $OUT src/lib.rs",
+)
+
+cxx_library(
+    name = "angle_wgpu_cc",
+    exported_headers = {"angle_wgpu.h": ":angle_wgpu_header"},
+    header_namespace = "",
+    exported_linker_flags = select({
+        "prelude//os:macos": [
+            "-Wl,-framework,Metal",
+            "-Wl,-framework,CoreGraphics",
+            "-Wl,-framework,QuartzCore",
+            "-Wl,-framework,AppKit",
+            "-Wl,-framework,Foundation",
+            "-Wl,-framework,IOKit",
+            "-Wl,-framework,CoreVideo",
+            "-Wl,-framework,Carbon",
+        ],
+        "DEFAULT": [],
+    }),
+    exported_deps = [":angle_wgpu"],
+    visibility = ["PUBLIC"],
+)
+
+# MangoHud (and similar overlay tools) don't use dlsym(RTLD_NEXT, ...) to
+# find EGL; they explicitly dlopen() a library file named "libEGL.so.1"
+# (or libEGL_mesa.so.*/libEGL_nvidia.so.*). Since our EGL implementation
+# lives in libangle_wgpu_angle_wgpu.so, provide a same-named symlink so
+# that lookup succeeds. Consumers that need this at runtime should add
+# the directory containing this symlink to LD_LIBRARY_PATH (dlopen()
+# calls from a preloaded library don't inherit the main executable's
+# rpath/runpath).
+genrule(
+    name = "libEGL.so.1",
+    srcs = [":angle_wgpu[shared]"],
+    out = "libEGL.so.1",
+    cmd = "ln -s $(location :angle_wgpu[shared]) $OUT",
+    visibility = ["PUBLIC"],
+)
+
+# A small directory containing just the libEGL.so.1 shim, so it can be
+# added wholesale to a consumer's rpath (see Minecraft.Client/BUCK).
+genrule(
+    name = "egl_shim_dir",
+    srcs = [":angle_wgpu[shared]"],
+    out = "egl_shim",
+    cmd = "mkdir -p $OUT && ln -s $(location :angle_wgpu[shared]) $OUT/libEGL.so.1",
+    visibility = ["PUBLIC"],
+)
+
+cxx_test(
+    name = "angle_wgpu_test",
+    srcs = ["test_main.cpp"],
+    deps = [
+        ":angle_wgpu_cc",
+    ],
+)

@@ -1369,6 +1369,7 @@ pub unsafe extern "C" fn glClear(mask: GLbitfield) {
         let clear_depth = (mask & GL_DEPTH_BUFFER_BIT) != 0;
         let clear_stencil = (mask & GL_STENCIL_BUFFER_BIT) != 0;
 
+        ctx.flush_pending_batch();
         if let Some(r) = &ctx.renderer {
             r.lock().clear(clear_color, clear_depth, clear_stencil);
         }
@@ -1399,6 +1400,7 @@ pub unsafe extern "C" fn glReadPixels(
 #[no_mangle]
 pub unsafe extern "C" fn glFlush() {
     with_context(|ctx| {
+        ctx.flush_pending_batch();
         if let Some(r) = &ctx.renderer {
             r.lock().flush();
         }

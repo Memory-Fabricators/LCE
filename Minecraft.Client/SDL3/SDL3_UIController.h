@@ -11,8 +11,34 @@ class Tutorial;
 struct _TutorialPopupInfo;
 typedef _TutorialPopupInfo TutorialPopupInfo;
 
+struct RuffleBridgePlayer;
+
 class ConsoleUIController
 {
+  public:
+    struct SceneEntry
+    {
+        EUIScene scene = eUIScene_COUNT;
+        int pad = 0;
+        EUILayer layer = eUILayer_Scene;
+        EUIGroup group = eUIGroup_PAD;
+        void *initData = nullptr;
+        RuffleBridgePlayer *player = nullptr;
+        std::string movieName;
+    };
+
+  private:
+    std::vector<SceneEntry> m_sceneStack;
+    std::vector<std::string> m_searchDirs;
+    int m_width = 1280;
+    int m_height = 720;
+    double m_lastTickSeconds = 0.0;
+    bool m_initialised = false;
+
+    std::string GetMoviePathForScene(EUIScene scene, int width, int height);
+    bool LoadScenePlayer(SceneEntry &entry);
+    void DestroyScenePlayer(SceneEntry &entry);
+
   public:
     void init(void *window, int w, int h);
     void render();
@@ -29,6 +55,7 @@ class ConsoleUIController
 
     bool NavigateToScene(int iPad, EUIScene scene, void *initData = NULL, EUILayer layer = eUILayer_Scene, EUIGroup group = eUIGroup_PAD);
     bool NavigateBack(int iPad, bool forceUsePad = false, EUIScene eScene = eUIScene_COUNT, EUILayer eLayer = eUILayer_COUNT);
+    void NavigateToHomeMenu();
     void CloseUIScenes(int iPad, bool forceIPad = false);
     void CloseAllPlayersScenes();
     bool IsIgnoreAutosaveMenuDisplayed(int iPad);

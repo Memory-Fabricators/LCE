@@ -38,6 +38,7 @@ impl BridgePlayer {
             .with_movie(movie)
             .with_autoplay(true)
             .build();
+        player.lock().unwrap().set_window_mode("transparent");
         let bridge_player = Self {
             player,
             executor: Mutex::new(executor),

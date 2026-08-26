@@ -1,0 +1,2 @@
+[buildscript.run]
+env = { OPT_LEVEL = "3", CARGO_CFG_TARGET_ARCH = "x86_64", CARGO_CFG_TARGET_ENV = "gnu", CARGO_CFG_TARGET_OS = "linux", CARGO_CFG_TARGET_VENDOR = "unknown", CARGO_CFG_TARGET_FAMILY = "unix" }

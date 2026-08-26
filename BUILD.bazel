@@ -1,4 +1,0 @@
-# Root BUILD.bazel
-package(default_visibility = ["//visibility:public"])
-
-exports_files(["rules_rs_cargolock_v4.patch"])

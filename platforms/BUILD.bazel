@@ -1,9 +1,0 @@
-package(default_visibility = ["//visibility:public"])
-
-platform(
-    name = "local_windows_msvc",
-    parents = ["@platforms//host"],
-    constraint_values = [
-        "@llvm//constraints/windows/abi:msvc",
-    ],
-)

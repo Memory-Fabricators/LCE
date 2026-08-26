@@ -164,6 +164,25 @@ pub struct GlContext {
     pub display_list_mode: GLenum,
 
     pub error: GLenum,
+
+    // Draw batching: consecutive draw_vertex_data calls sharing the same
+    // pipeline state, uniforms, bound texture, viewport and scissor are
+    // coalesced into one accumulated draw instead of hitting the renderer
+    // (and its GPU pipeline/bind-group setup) once per call - GLES1-style
+    // immediate-mode code from the C++ side issues many small consecutive
+    // draws with unchanged state (e.g. one draw per chunk face), so this
+    // significantly cuts per-frame overhead.
+    pending_batch: Option<PendingBatch>,
+}
+
+struct PendingBatch {
+    key: PipelineKey,
+    uniforms: FixedFunctionUniforms,
+    tex_id: GLuint,
+    viewport: (u32, u32, u32, u32),
+    scissor: Option<(u32, u32, u32, u32)>,
+    vertices: Vec<VertexData>,
+    indices: Vec<u32>,
 }
 
 unsafe impl Send for GlContext {}
@@ -271,7 +290,52 @@ impl GlContext {
             active_display_list: None,
             display_list_mode: GL_COMPILE,
             error: GL_NO_ERROR,
+            pending_batch: None,
         }
+    }
+
+    /// Submits any accumulated batched draw to the renderer. Must be called
+    /// before anything that depends on draw ordering relative to other GL
+    /// operations (clears, glFlush/glFinish, swap buffers) or before a
+    /// non-mergeable draw begins.
+    pub fn flush_pending_batch(&mut self) {
+        let Some(batch) = self.pending_batch.take() else {
+            return;
+        };
+        let Some(renderer) = &self.renderer else {
+            return;
+        };
+        let mut tex_mgr = self.texture_manager.lock();
+        let mut default_white_slot: Option<TextureObject> = None;
+        let tex = if batch.tex_id != 0 {
+            tex_mgr.textures.get_mut(&batch.tex_id)
+        } else {
+            None
+        };
+        let tex = match tex {
+            Some(t) => t,
+            None => match tex_mgr.default_white.as_mut() {
+                Some(t) => t,
+                None => {
+                    let mut default_white = TextureObject::new(0, GL_TEXTURE_2D);
+                    default_white.width = 1;
+                    default_white.height = 1;
+                    default_white.level_data.insert(0, vec![255, 255, 255, 255]);
+                    default_white_slot.insert(default_white)
+                }
+            },
+        };
+
+        let mut rend = renderer.lock();
+        rend.draw_mesh(
+            &batch.key,
+            &batch.uniforms,
+            tex,
+            &batch.vertices,
+            Some(&batch.indices),
+            batch.viewport,
+            batch.scissor,
+        );
     }
 
     #[inline]
@@ -441,8 +505,14 @@ impl GlContext {
             return;
         };
 
-        let (mut final_vertices, final_indices) = if mode == GL_QUADS {
-            // Expand quads to triangle indexed list
+        // Avoid cloning `vertices`/`indices` here: draw_mesh only ever
+        // needs to read them (they get copied once into the shared
+        // vertex/index staging buffers), so cloning here was pure wasted
+        // work duplicated on every single draw call - for chunk-heavy
+        // scenes with many small per-face draws this was a dominant CPU
+        // cost. Only the GL_QUADS index expansion actually needs a fresh
+        // owned buffer.
+        let quad_indices = if mode == GL_QUADS {
             let quad_count = vertices.len() / 4;
             let mut inds = Vec::with_capacity(quad_count * 6);
             for q in 0..quad_count as u32 {
@@ -454,25 +524,19 @@ impl GlContext {
                 inds.push(base + 2);
                 inds.push(base + 3);
             }
-            (vertices.to_vec(), Some(inds))
-        } else if let Some(inds) = indices {
-            (vertices.to_vec(), Some(inds.to_vec()))
+            Some(inds)
         } else {
-            (vertices.to_vec(), None)
+            None
+        };
+        let final_vertices = vertices;
+        let final_indices: Option<&[u32]> = if mode == GL_QUADS {
+            quad_indices.as_deref()
+        } else {
+            indices
         };
 
         let key = self.build_pipeline_key(mode);
         let uniforms = self.build_uniforms();
-
-        let mut tex_mgr = self.texture_manager.lock();
-        let mut default_white = TextureObject::new(0, GL_TEXTURE_2D);
-        default_white.width = 1;
-        default_white.height = 1;
-        default_white.level_data.insert(0, vec![255, 255, 255, 255]);
-
-        let tex = tex_mgr
-            .get_current_texture_mut()
-            .unwrap_or(&mut default_white);
 
         let vp = (
             self.viewport.0.max(0) as u32,
@@ -492,16 +556,87 @@ impl GlContext {
             None
         };
 
+        // Only triangle-list topology (GL_TRIANGLES/GL_QUADS/GL_POLYGON,
+        // all normalized to indexed triangle lists above) can be safely
+        // merged with a preceding draw: strips/fans/lines/points each
+        // encode connectivity that can't be concatenated without
+        // corrupting the primitive, so those go straight to the renderer
+        // as before (after flushing anything pending first, to preserve
+        // draw order).
+        if key.topology != 0 {
+            self.flush_pending_batch();
+            self.dispatch_draw(&key, &uniforms, final_vertices, final_indices, vp, scissor);
+            return;
+        }
+
+        let tex_id = {
+            let tex_mgr = self.texture_manager.lock();
+            if tex_mgr.active_unit < 8 {
+                tex_mgr.bound_textures[tex_mgr.active_unit]
+            } else {
+                0
+            }
+        };
+
+        let mergeable = self.pending_batch.as_ref().is_some_and(|b| {
+            b.key == key
+                && b.tex_id == tex_id
+                && b.viewport == vp
+                && b.scissor == scissor
+                && bytemuck::bytes_of(&b.uniforms) == bytemuck::bytes_of(&uniforms)
+        });
+
+        if !mergeable {
+            self.flush_pending_batch();
+            self.pending_batch = Some(PendingBatch {
+                key,
+                uniforms,
+                tex_id,
+                viewport: vp,
+                scissor,
+                vertices: Vec::new(),
+                indices: Vec::new(),
+            });
+        }
+
+        let batch = self.pending_batch.as_mut().unwrap();
+        let base = batch.vertices.len() as u32;
+        batch.vertices.extend_from_slice(final_vertices);
+        match final_indices {
+            Some(idx) => batch.indices.extend(idx.iter().map(|i| i + base)),
+            None => batch
+                .indices
+                .extend((0..final_vertices.len() as u32).map(|i| i + base)),
+        }
+    }
+
+    /// Issues a single draw directly to the renderer, bypassing batching.
+    fn dispatch_draw(
+        &mut self,
+        key: &PipelineKey,
+        uniforms: &FixedFunctionUniforms,
+        vertices: &[VertexData],
+        indices: Option<&[u32]>,
+        vp: (u32, u32, u32, u32),
+        scissor: Option<(u32, u32, u32, u32)>,
+    ) {
+        let Some(renderer) = &self.renderer else {
+            return;
+        };
+        let mut tex_mgr = self.texture_manager.lock();
+        let mut default_white_slot: Option<TextureObject> = None;
+        let tex = if tex_mgr.get_current_texture_mut().is_some() {
+            tex_mgr.get_current_texture_mut().unwrap()
+        } else {
+            let mut default_white = TextureObject::new(0, GL_TEXTURE_2D);
+            default_white.width = 1;
+            default_white.height = 1;
+            default_white.level_data.insert(0, vec![255, 255, 255, 255]);
+            default_white_slot.insert(default_white)
+        };
+
         let mut rend = renderer.lock();
-        rend.draw_mesh(
-            &key,
-            &uniforms,
-            tex,
-            &final_vertices,
-            final_indices.as_deref(),
-            vp,
-            scissor,
-        );
+        rend.draw_mesh(key, uniforms, tex, vertices, indices, vp, scissor);
     }
 
     pub fn call_display_list(&mut self, list_id: GLuint) {

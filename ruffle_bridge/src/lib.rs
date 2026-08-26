@@ -1,11 +1,14 @@
 //! C ABI boundary for the SDL3/OpenGL Ruffle integration.
 
+pub mod iggy;
 mod embedder_ui;
 mod gl;
 mod menu_button;
 mod navigator;
 mod opengl_renderer;
 mod player;
+
+pub use iggy::*;
 
 use menu_button::MenuButtonHandle;
 use opengl_renderer::OpenGlRenderer;
@@ -453,5 +456,153 @@ pub unsafe extern "C" fn ruffle_bridge_button_destroy(button: *mut RuffleBridgeB
             let button = Box::from_raw(button);
             drop(Box::from_raw(button.handle.cast::<MenuButtonHandle>()));
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ruffle_core::backend::navigator::NullExecutor;
+    use ruffle_render::backend::null::NullRenderer;
+    use ruffle_core::display_object::{TDisplayObject, TDisplayObjectContainer, BoundsMode};
+    use ruffle_core::tag_utils::SwfMovie;
+    use ruffle_core::{FloatDuration, PlayerBuilder, ViewportDimensions};
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_pause_menu_buttons() {
+        let swf_path = "Minecraft.Client/Common/Media/PauseMenu720.swf";
+        let swf_bytes = std::fs::read(swf_path).expect("failed to read PauseMenu720.swf");
+        let movie = SwfMovie::from_data(&swf_bytes, "file:///PauseMenu720.swf".to_string(), None, None).expect("failed to parse swf");
+
+        let mut executor = NullExecutor::new();
+        let search_dirs = vec![
+            PathBuf::from("Minecraft.Client/Common/Media"),
+            PathBuf::from("Minecraft.Client/Windows64Media/Media"),
+            PathBuf::from("Common/Media"),
+            PathBuf::from("Windows64Media/Media"),
+            PathBuf::from("."),
+        ];
+        let navigator = crate::navigator::SearchPathNavigatorBackend::new(search_dirs, &executor);
+
+        let renderer = NullRenderer::new(ViewportDimensions {
+            width: 1280,
+            height: 720,
+            scale_factor: 1.0,
+        });
+
+        let player = PlayerBuilder::new()
+            .with_renderer(renderer)
+            .with_navigator(navigator)
+            .with_viewport_dimensions(1280, 720, 1.0)
+            .with_movie(movie)
+            .with_autoplay(true)
+            .build();
+
+        for _ in 0..60 {
+            executor.run();
+            player.lock().unwrap().tick(FloatDuration::from_secs(1.0 / 30.0));
+        }
+        executor.run();
+
+        // Inspect stage and children
+        player.lock().unwrap().mutate_with_update_context(|context| {
+            let root = context.stage.root_clip().expect("no root clip");
+            eprintln!("Root clip: name={:?}, x={}, y={}", root.name(), root.x(), root.y());
+
+            // Let's check movie libraries
+            eprintln!("Checking libraries...");
+            let known: Vec<_> = context.library.known_movies().collect();
+            for movie in known {
+                eprintln!("  Known movie: url={}", movie.url());
+                let lib = context.library.library_for_movie(movie.clone()).expect("lib");
+                if let Some(dom) = lib.try_avm2_domain() {
+                    let mut act = ruffle_core::avm2::Activation::from_domain(context, dom);
+                    let name = ruffle_core::string::AvmString::new_utf8(act.gc(), "FJ_MainMenuButton_Norm");
+                    let val = dom.get_defined_value_handling_vector(&mut act, name);
+                    eprintln!("    FJ_MainMenuButton_Norm in domain: {:?}", val);
+                }
+            }
+
+            eprintln!("Lookup FJ_MainMenuButton_Norm by name in avm2_class_registry:");
+            let sym = context.library.avm2_class_registry().class_symbol_by_name("FJ_MainMenuButton_Norm");
+            eprintln!("  FJ_MainMenuButton_Norm: {:?}", sym);
+
+            // Test constructing FJ_MainMenuButton_Norm directly
+            let stage_dom = context.avm2.stage_domain();
+            let mut act = ruffle_core::avm2::Activation::from_domain(context, stage_dom);
+            let name = ruffle_core::string::AvmString::new_utf8(act.gc(), "FJ_MainMenuButton_Norm");
+            let cls_val = stage_dom.get_defined_value_handling_vector(&mut act, name);
+            eprintln!("Constructing FJ_MainMenuButton_Norm from stage domain: {:?}", cls_val);
+            if let Ok(val) = cls_val {
+                if let Some(cls) = val.as_object().and_then(|o| o.as_class_object()) {
+                    let instance = cls.construct(&mut act, &[]);
+                    eprintln!("  Instance result: {:?}", instance);
+                    if let Ok(inst_val) = instance {
+                        if let Some(dobj) = inst_val.as_object().and_then(|o| o.as_display_object()) {
+                            eprintln!("  Dobj: name={:?}, x={}, y={}, w={}, h={}, bounds={:?}",
+                                dobj.name(), dobj.x(), dobj.y(), dobj.width(), dobj.height(), dobj.world_bounds(BoundsMode::Engine));
+                            if let Some(c) = dobj.as_container() {
+                                for (i, sub) in c.iter_render_list().enumerate() {
+                                    eprintln!("    Sub {}: name={:?}, depth={}, x={}, y={}, w={}, h={}",
+                                        i, sub.name(), sub.depth(), sub.x(), sub.y(), sub.width(), sub.height());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if let Some(container) = root.as_container() {
+                for (idx, child) in container.iter_render_list().enumerate() {
+                    eprintln!(
+                        "Child {}: name='{:?}', depth={}, x={}, y={}, width={}, height={}, visible={}, bounds={:?}",
+                        idx,
+                        child.name(),
+                        child.depth(),
+                        child.x(),
+                        child.y(),
+                        child.width(),
+                        child.height(),
+                        child.visible(),
+                        child.world_bounds(BoundsMode::Engine)
+                    );
+                    if let Some(mc) = child.as_movie_clip() {
+                        eprintln!("  MovieClip: current_frame={}, playing={}",
+                            mc.current_frame(),
+                            mc.playing(),
+                        );
+                        if let Some(c) = mc.as_container() {
+                            for (cidx, subchild) in c.iter_render_list().enumerate() {
+                                eprintln!("    Subchild {}: name={:?}, depth={}, x={}, y={}, w={}, h={}, visible={}, bounds={:?}",
+                                    cidx, subchild.name(), subchild.depth(), subchild.x(), subchild.y(), subchild.width(), subchild.height(), subchild.visible(), subchild.world_bounds(BoundsMode::Engine));
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Test button initialization with MenuButtonHandle
+        player.lock().unwrap().mutate_with_update_context(|context| {
+            let res = embedder_ui::call_named_child_method(
+                context,
+                "Button1",
+                "Init",
+                &[
+                    ruffle_core::external::Value::String("Resume Game".to_string()),
+                    ruffle_core::external::Value::Number(0.0),
+                ],
+            );
+            eprintln!("Button1 Init result: {:?}", res);
+
+            let res_label = embedder_ui::call_named_child_method(
+                context,
+                "Button1",
+                "GetLabel",
+                &[],
+            );
+            eprintln!("Button1 GetLabel result: {:?}", res_label);
+        });
     }
 }

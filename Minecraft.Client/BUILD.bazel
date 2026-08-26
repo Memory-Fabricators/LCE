@@ -110,3 +110,7 @@ cc_binary(
         "@zlib-ng//:zlib",
     ],
 )
+filegroup(
+    name = "media",
+    srcs = glob(["Common/Media/**", "Windows64Media/Media/**"]),
+)

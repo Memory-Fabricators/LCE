@@ -1,0 +1,7 @@
+overlay = "overlay"
+
+[env]
+CARGO_MANIFEST_DIR = "$(location :ruffle-b209d9eb980f943a.git)/core"
+
+[buildscript.run]
+env = { RUFFLE_REPO_ROOT = "$(location :ruffle-b209d9eb980f943a.git)", ASC_MANIFEST_DIR = "$(location :ruffle-b209d9eb980f943a.git)/tools/asc" }
