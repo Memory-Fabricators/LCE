@@ -4,6 +4,7 @@
 
 third_party_dir = "third_party"
 vendor = false
+precise_srcs = true
 cargo_env = [
     "CARGO_PKG_NAME",
     "CARGO_PKG_VERSION",

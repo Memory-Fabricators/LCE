@@ -1,0 +1,41 @@
+rust_library(
+    name = "client_platform",
+    srcs = glob(["src/**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2021",
+    visibility = ["PUBLIC"],
+    deps = [
+        "third_party//:log",
+        "third_party//:parking_lot",
+        "third_party//:raw-window-handle",
+        "third_party//:winit",
+        "third_party//:zune-core",
+        "third_party//:zune-png",
+    ],
+)
+
+genrule(
+    name = "client_platform_header",
+    srcs = glob(["src/**/*.rs"]) + ["cbindgen.toml"],
+    out = "client_platform.h",
+    cmd = "$(exe third_party//:cbindgen-cbindgen) --config cbindgen.toml --output $OUT src/lib.rs",
+)
+
+cxx_library(
+    name = "client_platform_cc",
+    exported_headers = {"client_platform.h": ":client_platform_header"},
+    header_namespace = "",
+    exported_deps = [
+        ":client_platform",
+        "//angle_wgpu:angle_wgpu_cc",
+    ],
+    visibility = ["PUBLIC"],
+)
+
+cxx_test(
+    name = "client_platform_test",
+    srcs = ["test_main.cpp"],
+    deps = [
+        ":client_platform_cc",
+    ],
+)

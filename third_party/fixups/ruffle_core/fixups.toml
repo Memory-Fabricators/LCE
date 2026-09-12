@@ -1,7 +1,45 @@
-overlay = "overlay"
+extra_srcs = [
+    "assets/texts/ar-SA/context_menu.ftl",
+    "assets/texts/bs-BA/context_menu.ftl",
+    "assets/texts/ca-ES/context_menu.ftl",
+    "assets/texts/cs-CZ/context_menu.ftl",
+    "assets/texts/de-DE/context_menu.ftl",
+    "assets/texts/en-US/context_menu.ftl",
+    "assets/texts/eo-UY/context_menu.ftl",
+    "assets/texts/es-ES/context_menu.ftl",
+    "assets/texts/fi-FI/context_menu.ftl",
+    "assets/texts/fr-FR/context_menu.ftl",
+    "assets/texts/gl-ES/context_menu.ftl",
+    "assets/texts/he-IL/context_menu.ftl",
+    "assets/texts/hr-HR/context_menu.ftl",
+    "assets/texts/hu-HU/context_menu.ftl",
+    "assets/texts/id-ID/context_menu.ftl",
+    "assets/texts/it-IT/context_menu.ftl",
+    "assets/texts/ja-JP/context_menu.ftl",
+    "assets/texts/ko-KR/context_menu.ftl",
+    "assets/texts/nb-NO/context_menu.ftl",
+    "assets/texts/nl-NL/context_menu.ftl",
+    "assets/texts/pl-PL/context_menu.ftl",
+    "assets/texts/pt-BR/context_menu.ftl",
+    "assets/texts/pt-PT/context_menu.ftl",
+    "assets/texts/ro-RO/context_menu.ftl",
+    "assets/texts/ru-RU/context_menu.ftl",
+    "assets/texts/sk-SK/context_menu.ftl",
+    "assets/texts/sl-SI/context_menu.ftl",
+    "assets/texts/sr-CS/context_menu.ftl",
+    "assets/texts/sr-SP/context_menu.ftl",
+    "assets/texts/sv-SE/context_menu.ftl",
+    "assets/texts/th-TH/context_menu.ftl",
+    "assets/texts/tr-TR/context_menu.ftl",
+    "assets/texts/tt-RU/context_menu.ftl",
+    "assets/texts/uk-UA/context_menu.ftl",
+    "assets/texts/vi-VN/context_menu.ftl",
+    "assets/texts/zh-CN/context_menu.ftl",
+    "assets/texts/zh-TW/context_menu.ftl",
+]
 
 [env]
-CARGO_MANIFEST_DIR = "$(location :ruffle-b209d9eb980f943a.git)/core"
+CARGO_MANIFEST_DIR = "ruffle/src/core"
 
 [buildscript.run]
-env = { RUFFLE_REPO_ROOT = "$(location :ruffle-b209d9eb980f943a.git)", ASC_MANIFEST_DIR = "$(location :ruffle-b209d9eb980f943a.git)/tools/asc" }
+env = { RUFFLE_REPO_ROOT = "third_party/ruffle/src", ASC_MANIFEST_DIR = "third_party/ruffle/src/tools/asc" }

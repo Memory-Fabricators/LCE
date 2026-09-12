@@ -43,7 +43,7 @@ fn _inject_library_abcs(player: &Arc<Mutex<Player>>) -> bool {
         return false;
     }
     let use_full = FULL_INJECT_BUDGET
-        .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |b| {
+        .try_update(Ordering::Relaxed, Ordering::Relaxed, |b| {
             if b > 0 {
                 Some(b - 1)
             } else {

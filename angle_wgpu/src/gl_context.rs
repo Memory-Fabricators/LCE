@@ -643,99 +643,66 @@ impl GlContext {
         let Some(list) = self.display_lists.get_list(list_id) else {
             return;
         };
-        for op in list.ops {
+
+        // `list` is an Arc snapshot. Iterating by reference keeps the compiled
+        // chunk geometry in place; cloning the old `DisplayList` here copied every
+        // vertex and index of every visible chunk before it was uploaded.
+        for op in &list.ops {
             match op {
-                DisplayListOp::Draw {
-                    mode,
-                    vertices,
-                    indices,
-                } => {
-                    let idx_slice = if indices.is_empty() {
-                        None
-                    } else {
-                        Some(indices.as_slice())
-                    };
-                    self.draw_vertex_data(mode, &vertices, idx_slice);
+                DisplayListOp::Draw { mode, vertices, indices } => {
+                    let indices = (!indices.is_empty()).then_some(indices.as_slice());
+                    self.draw_vertex_data(*mode, vertices, indices);
                 }
                 DisplayListOp::MatrixPush(mode) => {
                     let prev = self.matrix_mode;
-                    self.matrix_mode = mode;
+                    self.matrix_mode = *mode;
                     let _ = self.current_matrix_stack().push();
                     self.matrix_mode = prev;
                 }
                 DisplayListOp::MatrixPop(mode) => {
                     let prev = self.matrix_mode;
-                    self.matrix_mode = mode;
+                    self.matrix_mode = *mode;
                     let _ = self.current_matrix_stack().pop();
                     self.matrix_mode = prev;
                 }
                 DisplayListOp::MatrixLoad(mode, m) => {
                     let prev = self.matrix_mode;
-                    self.matrix_mode = mode;
-                    self.current_matrix_stack().load_matrix(&m);
+                    self.matrix_mode = *mode;
+                    self.current_matrix_stack().load_matrix(m);
                     self.matrix_mode = prev;
                 }
                 DisplayListOp::MatrixMult(mode, m) => {
                     let prev = self.matrix_mode;
-                    self.matrix_mode = mode;
-                    self.current_matrix_stack().mult_matrix(&m);
+                    self.matrix_mode = *mode;
+                    self.current_matrix_stack().mult_matrix(m);
                     self.matrix_mode = prev;
                 }
-                DisplayListOp::MatrixTranslate(x, y, z) => {
-                    self.current_matrix_stack().translate(x, y, z);
-                }
-                DisplayListOp::MatrixRotate(a, x, y, z) => {
-                    self.current_matrix_stack().rotate(a, x, y, z);
-                }
-                DisplayListOp::MatrixScale(x, y, z) => {
-                    self.current_matrix_stack().scale(x, y, z);
-                }
-                DisplayListOp::BindTexture(id) => {
-                    let mut tm = self.texture_manager.lock();
-                    tm.bind_texture(GL_TEXTURE_2D, id);
-                }
-                DisplayListOp::Enable(cap) => {
-                    self.set_enable(cap, true);
-                }
-                DisplayListOp::Disable(cap) => {
-                    self.set_enable(cap, false);
-                }
-                DisplayListOp::Color4f(r, g, b, a) => {
-                    self.current_color = [r, g, b, a];
-                }
-                DisplayListOp::Normal3f(x, y, z) => {
-                    self.current_normal = [x, y, z];
-                }
-                DisplayListOp::TexCoord2f(u, v) => {
-                    self.current_texcoord = [u, v];
-                }
+                DisplayListOp::MatrixTranslate(x, y, z) => self.current_matrix_stack().translate(*x, *y, *z),
+                DisplayListOp::MatrixRotate(a, x, y, z) => self.current_matrix_stack().rotate(*a, *x, *y, *z),
+                DisplayListOp::MatrixScale(x, y, z) => self.current_matrix_stack().scale(*x, *y, *z),
+                DisplayListOp::BindTexture(id) => self.texture_manager.lock().bind_texture(GL_TEXTURE_2D, *id),
+                DisplayListOp::Enable(cap) => self.set_enable(*cap, true),
+                DisplayListOp::Disable(cap) => self.set_enable(*cap, false),
+                DisplayListOp::Color4f(r, g, b, a) => self.current_color = [*r, *g, *b, *a],
+                DisplayListOp::Normal3f(x, y, z) => self.current_normal = [*x, *y, *z],
+                DisplayListOp::TexCoord2f(u, v) => self.current_texcoord = [*u, *v],
                 DisplayListOp::BlendFunc(src, dst) => {
-                    self.src_factor = src;
-                    self.dst_factor = dst;
+                    self.src_factor = *src;
+                    self.dst_factor = *dst;
                 }
-                DisplayListOp::DepthFunc(func) => {
-                    self.depth_func = func;
-                }
-                DisplayListOp::DepthMask(mask) => {
-                    self.depth_mask = mask;
-                }
+                DisplayListOp::DepthFunc(func) => self.depth_func = *func,
+                DisplayListOp::DepthMask(mask) => self.depth_mask = *mask,
                 DisplayListOp::AlphaFunc(func, r) => {
-                    self.alpha_func = func;
-                    self.alpha_ref = r;
+                    self.alpha_func = *func;
+                    self.alpha_ref = *r;
                 }
-                DisplayListOp::CullFace(mode) => {
-                    self.cull_face_mode = mode;
-                }
+                DisplayListOp::CullFace(mode) => self.cull_face_mode = *mode,
                 DisplayListOp::PolygonOffset(factor, units) => {
-                    self.polygon_offset_factor = factor;
-                    self.polygon_offset_units = units;
+                    self.polygon_offset_factor = *factor;
+                    self.polygon_offset_units = *units;
                 }
-                DisplayListOp::ShadeModel(model) => {
-                    self.shade_model = model;
-                }
-                DisplayListOp::CallList(child_id) => {
-                    self.call_display_list(child_id);
-                }
+                DisplayListOp::ShadeModel(model) => self.shade_model = *model,
+                DisplayListOp::CallList(child_id) => self.call_display_list(*child_id),
             }
         }
     }

@@ -21,6 +21,7 @@
 #include "SDL3_RuffleBridge.h"
 #include "SDL3_UIController.h"
 #include "angle_wgpu.h"
+#include "client_platform.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

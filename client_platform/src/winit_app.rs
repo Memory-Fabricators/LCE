@@ -1,14 +1,11 @@
 //! Winit windowing and event handling integration for EGL.
 #![allow(unused_imports, dead_code)]
-use crate::egl::{EglDisplayState, EglSurfaceState, block_on};
-use crate::renderer::WgpuRenderer;
-use crate::types::*;
 use parking_lot::Mutex;
-use raw_window_handle::{HasDisplayHandle, HasWindowHandle as _};
+use raw_window_handle::{HasDisplayHandle, HasWindowHandle as _, RawDisplayHandle, RawWindowHandle};
 use std::collections::HashSet;
-use std::ffi::{CStr, c_char, c_void};
-use std::sync::Arc;
+use std::ffi::{c_char, c_void, CStr};
 use std::sync::atomic::Ordering;
+use std::sync::Arc;
 use std::time::Duration;
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
@@ -47,7 +44,6 @@ pub struct WinitAppState {
     pub grab_applied: Option<bool>,
     pub title: String,
     pub resizable: bool,
-    pub egl_surface: Option<Arc<Mutex<EglSurfaceState>>>,
     pub initialized: bool,
     pub should_exit: bool,
 }
@@ -55,6 +51,11 @@ pub struct WinitAppState {
 pub struct WinitApp {
     pub state: Arc<Mutex<WinitAppState>>,
     pub thread_handle: Option<std::thread::JoinHandle<()>>,
+    /// macOS requires the event loop and its AppKit window to stay on the process main thread.
+    #[cfg(target_os = "macos")]
+    mac_event_loop: Option<EventLoop<()>>,
+    #[cfg(target_os = "macos")]
+    mac_handler: Option<AppHandler>,
 }
 
 struct AppHandler {
@@ -104,25 +105,6 @@ fn keycode_to_game_key(code: KeyCode) -> Option<u32> {
     }
 }
 
-#[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
-fn pick_opaque_x11_visual(event_loop: &dyn ActiveEventLoop) -> Option<u32> {
-    use raw_window_handle::RawDisplayHandle;
-
-    let handle = event_loop.display_handle().ok()?;
-    let RawDisplayHandle::Xlib(xlib) = handle.as_raw() else {
-        return None;
-    };
-    let dpy = xlib.display?.as_ptr().cast();
-
-    // Loads libX11 via dlopen (same mechanism winit-x11 itself uses via the
-    // x11-dl crate), instead of linking against it directly.
-    let xlib_fns = x11_dl::xlib::Xlib::open().ok()?;
-    const TRUE_COLOR: i32 = 4;
-    let mut info: x11_dl::xlib::XVisualInfo = unsafe { std::mem::zeroed() };
-    let ok = unsafe { (xlib_fns.XMatchVisualInfo)(dpy, xlib.screen, 24, TRUE_COLOR, &mut info) };
-    (ok != 0).then_some(info.visualid as u32)
-}
-
 impl ApplicationHandler for AppHandler {
     fn can_create_surfaces(&mut self, event_loop: &dyn ActiveEventLoop) {
         self.resumed(event_loop);
@@ -136,21 +118,6 @@ impl ApplicationHandler for AppHandler {
                 .with_surface_size(PhysicalSize::new(state.width, state.height))
                 .with_resizable(state.resizable)
                 .with_transparent(false);
-
-            #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
-            {
-                use winit::platform::x11::{ActiveEventLoopExtX11, WindowAttributesX11};
-                if event_loop.is_x11() {
-                    if let Some(visual) = pick_opaque_x11_visual(event_loop) {
-                        eprintln!("[angle_wgpu] X11 24-bit TrueColor visual {visual:#x}");
-                        attrs = attrs.with_platform_attributes(Box::new(
-                            WindowAttributesX11::default().with_x11_visual(visual),
-                        ));
-                    } else {
-                        eprintln!("[angle_wgpu] no 24-bit X11 visual; window may stay ARGB");
-                    }
-                }
-            }
 
             match event_loop.create_window(attrs) {
                 Ok(win) => {
@@ -180,15 +147,6 @@ impl ApplicationHandler for AppHandler {
             WindowEvent::SurfaceResized(size) => {
                 state.width = size.width.max(1);
                 state.height = size.height.max(1);
-                if let Some(surf) = &state.egl_surface {
-                    let mut s = surf.lock();
-                    s.width = state.width;
-                    s.height = state.height;
-                    if let Some(r) = &s.renderer {
-                        let mut rend = r.lock();
-                        rend.resize(state.width, state.height);
-                    }
-                }
             }
             WindowEvent::Focused(f) => {
                 state.focused = f;
@@ -254,12 +212,26 @@ impl ApplicationHandler for AppHandler {
                 };
                 if btn_state == ElementState::Pressed {
                     state.mouse_buttons_down.insert(btn_id);
-                    // Clicking back into the window re-arms grabbing
-                    // (cursor-hide only now); the game re-requests it on
-                    // its next tick via `winit_app_set_mouse_grab`.
+                    // Clicking back into the window re-arms grabbing immediately
+                    // if the application is currently in grabbed state.
                     if state.escape_ungrab {
                         state.escape_ungrab = false;
-                        state.grab_applied = None;
+                        if state.grabbed {
+                            if let Some(win) = state.window.clone() {
+                                let _ = win.set_cursor_grab(CursorGrabMode::Locked);
+                                let _ = win.set_cursor_grab(CursorGrabMode::Confined);
+                                win.set_cursor_visible(false);
+                                let (cx, cy) =
+                                    ((state.width / 2) as f64, (state.height / 2) as f64);
+                                let _ = win.set_cursor_position(
+                                    winit::dpi::PhysicalPosition::new(cx, cy).into(),
+                                );
+                                state.last_pointer_pos = Some((cx, cy));
+                            }
+                            state.grab_applied = Some(true);
+                        } else {
+                            state.grab_applied = None;
+                        }
                     }
                 } else {
                     state.mouse_buttons_down.remove(&btn_id);
@@ -272,6 +244,7 @@ impl ApplicationHandler for AppHandler {
                 MouseScrollDelta::PixelDelta(pos) => {
                     state.scroll_delta += (pos.y / 20.0) as f32;
                 }
+                _ => {}
             },
             WindowEvent::KeyboardInput { event, .. } => {
                 if let PhysicalKey::Code(code) = event.physical_key {
@@ -335,7 +308,6 @@ pub unsafe extern "C" fn winit_app_create(
     height: u32,
     resizable: bool,
 ) -> *mut WinitApp {
-    crate::init_logging();
     let title_str = if !title.is_null() {
         CStr::from_ptr(title).to_string_lossy().into_owned()
     } else {
@@ -359,29 +331,36 @@ pub unsafe extern "C" fn winit_app_create(
         grab_applied: None,
         title: title_str,
         resizable,
-        egl_surface: None,
         initialized: false,
         should_exit: false,
     }));
 
-    let state_clone = state.clone();
-    let thread_handle = std::thread::spawn(move || {
-        let mut builder = EventLoop::builder();
-        #[cfg(all(unix, not(target_os = "macos"), not(target_os = "android")))]
-        {
-            use winit::platform::wayland::EventLoopBuilderExtWayland;
-            use winit::platform::x11::EventLoopBuilderExtX11;
-            EventLoopBuilderExtX11::with_x11(&mut builder);
-            EventLoopBuilderExtX11::with_any_thread(&mut builder, true);
-            EventLoopBuilderExtWayland::with_any_thread(&mut builder, true);
-        }
-        let Ok(event_loop) = builder.build() else {
-            return;
-        };
-        let handler = AppHandler { state: state_clone };
+    #[cfg(target_os = "macos")]
+    let (thread_handle, mac_event_loop, mac_handler) = {
+        use winit::platform::pump_events::EventLoopExtPumpEvents;
+        let mut event_loop = EventLoop::builder().build().expect("create macOS event loop");
         event_loop.set_control_flow(ControlFlow::Poll);
-        let _ = event_loop.run_app(handler);
-    });
+        let mut handler = AppHandler { state: state.clone() };
+        event_loop.pump_app_events(Some(Duration::ZERO), &mut handler);
+        (None, Some(event_loop), Some(handler))
+    };
+    #[cfg(not(target_os = "macos"))]
+    let thread_handle = {
+        let state_clone = state.clone();
+        Some(std::thread::spawn(move || {
+            let mut builder = EventLoop::builder();
+            #[cfg(all(unix, not(target_os = "android")))]
+            {
+                use winit::platform::x11::EventLoopBuilderExtX11;
+                EventLoopBuilderExtX11::with_x11(&mut builder);
+                EventLoopBuilderExtX11::with_any_thread(&mut builder, true);
+            }
+            let Ok(event_loop) = builder.build() else { return; };
+            let handler = AppHandler { state: state_clone };
+            event_loop.set_control_flow(ControlFlow::Poll);
+            let _ = event_loop.run_app(handler);
+        }))
+    };
 
     // Wait briefly for window initialization (up to 500ms)
     for _ in 0..50 {
@@ -393,7 +372,14 @@ pub unsafe extern "C" fn winit_app_create(
 
     let app = Box::new(WinitApp {
         state,
-        thread_handle: Some(thread_handle),
+        #[cfg(target_os = "macos")]
+        thread_handle,
+        #[cfg(not(target_os = "macos"))]
+        thread_handle,
+        #[cfg(target_os = "macos")]
+        mac_event_loop,
+        #[cfg(target_os = "macos")]
+        mac_handler,
     });
 
     Box::into_raw(app)
@@ -417,6 +403,14 @@ pub unsafe extern "C" fn winit_app_destroy(app: *mut WinitApp) {
 pub unsafe extern "C" fn winit_app_pump_events(app: *mut WinitApp) -> bool {
     if app.is_null() {
         return false;
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use winit::platform::pump_events::EventLoopExtPumpEvents;
+        let app_mut = &mut *app;
+        if let (Some(event_loop), Some(handler)) = (&mut app_mut.mac_event_loop, &mut app_mut.mac_handler) {
+            event_loop.pump_app_events(Some(Duration::ZERO), handler);
+        }
     }
     let app_ref = &*app;
     let s = app_ref.state.lock();
@@ -556,122 +550,31 @@ pub unsafe extern "C" fn winit_app_consume_wheel_delta(app: *mut WinitApp) -> f3
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn winit_app_create_egl_surface(
-    app: *mut WinitApp,
-    dpy: EGLDisplay,
-    _config: EGLConfig,
-) -> EGLSurface {
-    if app.is_null() {
-        return EGL_NO_SURFACE;
+pub unsafe extern "C" fn winit_app_get_native_display(app: *mut WinitApp) -> *mut c_void {
+    if app.is_null() { return std::ptr::null_mut(); }
+    let window = match (*app).state.lock().window.clone() { Some(window) => window, None => return std::ptr::null_mut() };
+    let Ok(display) = window.display_handle() else { return std::ptr::null_mut(); };
+    match display.as_raw() {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawDisplayHandle::Xlib(handle) => handle.display.map_or(std::ptr::null_mut(), |display| display.as_ptr()),
+        // EGL_DEFAULT_DISPLAY is the correct display argument on Win32 and AppKit.
+        _ => std::ptr::null_mut(),
     }
-    let app_ref = &*app;
-    let (window_arc, width, height) = {
-        let s = app_ref.state.lock();
-        let Some(win) = s.window.clone() else {
-            return EGL_NO_SURFACE;
-        };
-        (win, s.width, s.height)
-    };
-
-    // `Arc<dyn Window>` doesn't itself impl `HasDisplayHandle` (no blanket
-    // impl through `Arc` in raw-window-handle); this thin wrapper forwards to
-    // the window's own `dyn Window: HasDisplayHandle` impl so wgpu can use
-    // the real platform display instead of probing blind.
-    #[derive(Debug)]
-    struct WindowDisplayHandle(Arc<dyn Window>);
-    impl raw_window_handle::HasDisplayHandle for WindowDisplayHandle {
-        fn display_handle(
-            &self,
-        ) -> Result<raw_window_handle::DisplayHandle<'_>, raw_window_handle::HandleError> {
-            self.0.display_handle()
-        }
-    }
-
-    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_with_display_handle(
-        Box::new(WindowDisplayHandle(window_arc.clone())),
-    ));
-
-    let surface = match instance.create_surface(window_arc.clone()) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("[angle_wgpu] create_surface failed: {e:#?}");
-            return EGL_NO_SURFACE;
-        }
-    };
-
-    let adapter = match block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
-        power_preference: wgpu::PowerPreference::HighPerformance,
-        compatible_surface: Some(&surface),
-        force_fallback_adapter: false,
-        apply_limit_buckets: false,
-    })) {
-        Ok(a) => a,
-        Err(e) => {
-            eprintln!("[angle_wgpu] request_adapter failed: {e:?}");
-            return EGL_NO_SURFACE;
-        }
-    };
-
-    let (device, queue) = match block_on(adapter.request_device(&wgpu::DeviceDescriptor {
-        label: Some("angle_wgpu Winit Surface Device"),
-        ..Default::default()
-    })) {
-        Ok(dq) => dq,
-        Err(e) => {
-            eprintln!("[angle_wgpu] request_device failed: {e:?}");
-            return EGL_NO_SURFACE;
-        }
-    };
-
-    let renderer = match WgpuRenderer::new_with_surface(
-        instance,
-        adapter,
-        device,
-        queue,
-        surface,
-        window_arc.clone(),
-        width,
-        height,
-    ) {
-        Ok(r) => Arc::new(Mutex::new(r)),
-        Err(e) => {
-            eprintln!("[angle_wgpu] new_with_surface failed: {e}");
-            return EGL_NO_SURFACE;
-        }
-    };
-
-    let dpy_arc = if !dpy.is_null() {
-        Arc::from_raw(dpy as *const Mutex<EglDisplayState>)
-    } else {
-        crate::egl::get_or_create_display()
-    };
-
-    let id = {
-        let d = dpy_arc.lock();
-        d.allocate_surface_id()
-    };
-
-    let surface_state = Arc::new(Mutex::new(EglSurfaceState {
-        id,
-        width,
-        height,
-        native_window: Arc::as_ptr(&window_arc) as *mut c_void,
-        renderer: Some(renderer),
-    }));
-
-    {
-        let mut d = dpy_arc.lock();
-        d.surfaces.insert(id, surface_state.clone());
-    }
-
-    if !dpy.is_null() {
-        std::mem::forget(dpy_arc);
-    }
-
-    {
-        let mut s = app_ref.state.lock();
-        s.egl_surface = Some(surface_state.clone());
-    }
-
-    Arc::into_raw(surface_state) as EGLSurface
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn winit_app_get_native_window(app: *mut WinitApp) -> *mut c_void {
+    if app.is_null() { return std::ptr::null_mut(); }
+    let window = match (*app).state.lock().window.clone() { Some(window) => window, None => return std::ptr::null_mut() };
+    let Ok(handle) = window.window_handle() else { return std::ptr::null_mut(); };
+    match handle.as_raw() {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawWindowHandle::Xlib(handle) => handle.window as usize as *mut c_void,
+        #[cfg(target_os = "windows")]
+        RawWindowHandle::Win32(handle) => handle.hwnd.get() as *mut c_void,
+        #[cfg(target_os = "macos")]
+        RawWindowHandle::AppKit(handle) => handle.ns_view.as_ptr(),
+        _ => std::ptr::null_mut(),
+    }
+}
+

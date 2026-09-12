@@ -6,6 +6,7 @@
 // gameplay code that doesn't need to know about the render backend.
 
 #include "angle_wgpu.h"
+#include "client_platform.h"
 
 #include <unordered_map>
 #include <vector>

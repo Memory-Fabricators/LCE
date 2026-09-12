@@ -31,6 +31,7 @@ cxx_library(
         ":WindowsTypes",
         "//angle_wgpu:angle_wgpu_cc",
         "//ruffle_bridge:ruffle_bridge_cc",
+        "//client_platform:client_platform_cc",
     ],
     visibility = ["PUBLIC"],
 )
@@ -52,6 +53,7 @@ cxx_library(
         ":WindowsTypes",
         "//angle_wgpu:angle_wgpu_cc",
         "//ruffle_bridge:ruffle_bridge_cc",
+        "//client_platform:client_platform_cc",
         "third_party//mimalloc:mimalloc",
     ],
     visibility = ["PUBLIC"],
@@ -128,6 +130,7 @@ cxx_binary(
         ":WindowsTypes",
         "//angle_wgpu:angle_wgpu_cc",
         "//ruffle_bridge:ruffle_bridge_cc",
+        "//client_platform:client_platform_cc",
         "//Minecraft.World:Minecraft.World",
         "third_party//mimalloc:mimalloc",
         "third_party//zlib-ng:zlib",

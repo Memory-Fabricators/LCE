@@ -267,7 +267,7 @@ static GLenum ToGLDepthFunc(int func)
 void C4JRender::Initialise(WinitApp *app)
 {
     g_render.app = app;
-    g_render.eglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+    g_render.eglDisplay = eglGetDisplay(app ? winit_app_get_native_display(app) : EGL_DEFAULT_DISPLAY);
     EGLint major = 0, minor = 0;
     eglInitialize(g_render.eglDisplay, &major, &minor);
 
@@ -288,7 +288,8 @@ void C4JRender::Initialise(WinitApp *app)
 
     if (app)
     {
-        g_render.eglSurface = winit_app_create_egl_surface(app, g_render.eglDisplay, config);
+        g_render.eglSurface = eglCreateWindowSurface(
+            g_render.eglDisplay, config, winit_app_get_native_window(app), nullptr);
     }
     else
     {

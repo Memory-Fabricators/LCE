@@ -9,12 +9,8 @@ rust_library(
         "third_party//:glam",
         "third_party//:log",
         "third_party//:parking_lot",
-        "third_party//:raw-window-handle",
-        "third_party//:x11-dl",
         "third_party//:wgpu",
-        "third_party//:winit",
-        "third_party//:zune-core",
-        "third_party//:zune-png",
+        "third_party//:raw-window-handle",
     ],
 )
 

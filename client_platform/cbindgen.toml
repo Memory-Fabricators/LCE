@@ -1,5 +1,5 @@
 language = "C"
-include_guard = "ANGLE_WGPU_H"
+include_guard = "CLIENT_PLATFORM_H"
 pragma_once = true
 usize_is_size_t = true
 no_includes = false

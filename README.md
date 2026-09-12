@@ -4,19 +4,19 @@ Yes.
 
 ## Building
 
-You will need Bazel >=9.2.0 installed and a modern OpenJDK distribution >=26.
+**You will need to install Buck2, Reindeer, Rustup, Clang and a modern OpenJDK distribution >=26 (for Ruffle).**
 
-`bazel build //...`
-
-## Development
-
-To generate the rust-project.json for rust-analyzer:
+First, apply the patches to Ruffle:
 
 ```sh
-bazel run @rules_rust//tools/rust_analyzer:setup print
-bazel run @rules_rust//tools/rust_analyzer:gen_rust_project
+git clone https://github.com/theoparis/ruffle -b push-xntyqqztpkxt third_party/ruffle/src
+cd third_party/ruffle/src
+git apply ../../ruffle.patch
+cd -
 ```
 
-To generate the compile_commands.json for clangd:
+Then you can build the client.
 
-`bazel run @hedron_compile_commands//:refresh_all`
+```sh
+buck2 run //Minecraft.Client:Minecraft.Client`
+```

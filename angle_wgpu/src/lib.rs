@@ -1,16 +1,15 @@
-//! ANGLE alternative forwarding mixed OpenGL ES 1.1 / 2.0 and EGL calls to wgpu and winit.
+//! ANGLE alternative forwarding mixed OpenGL ES 1.1 / 2.0 and EGL calls to wgpu.
 #![allow(non_snake_case, unused_imports, dead_code)]
 
 pub mod display_list;
 pub mod egl;
 pub mod gl_context;
-pub mod image;
+pub mod native_surface;
 pub mod matrix;
 pub mod renderer;
 pub mod shader;
 pub mod texture;
 pub mod types;
-pub mod winit_app;
 
 use crate::display_list::VertexData;
 use crate::egl::*;

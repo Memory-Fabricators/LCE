@@ -32,8 +32,8 @@
 #include "Timer.h"
 #include "TitleScreen.h"
 #include "User.h"
-#include "stdafx.h"
 #include "angle_wgpu.h"
+#include "stdafx.h"
 #include <SDL3/SDL3_Input.h>
 
 #include "../Minecraft.World/ByteBuffer.h"
@@ -1936,15 +1936,6 @@ void Minecraft::run_middle()
                 player->SetThirdPersonView(0);
             }
 
-            {
-                static int s_renderProbeCount = 0;
-                if (s_renderProbeCount < 5)
-                {
-                    s_renderProbeCount++;
-                    fprintf(stderr, "[RENDERPROBE] noRender=%d level=%p localplayers[0]=%p localgameModes[0]=%p\n",
-                            (int)noRender, (void *)level, (void *)localplayers[0].get(), (void *)localgameModes[0]);
-                }
-            }
             if (!noRender)
             {
                 bool bFirst = true;

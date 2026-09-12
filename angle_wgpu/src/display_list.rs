@@ -3,6 +3,7 @@
 use crate::matrix::{Mat4, MatrixMode};
 use crate::types::*;
 use parking_lot::RwLock;
+use std::sync::Arc;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -79,7 +80,11 @@ impl DisplayList {
 /// Global/Context-shared display list registry (thread-safe for chunk worker threads).
 #[derive(Debug)]
 pub struct DisplayListRegistry {
-    lists: RwLock<HashMap<GLuint, DisplayList>>,
+    // Lists are immutable after `glEndList`. Store them behind `Arc` so a
+    // render-thread lookup does not clone all of a chunk's vertex data every
+    // frame. Chunk rebuild workers replace the entry atomically under this
+    // lock, while active playback keeps the previous list alive.
+    lists: RwLock<HashMap<GLuint, Arc<DisplayList>>>,
     next_id: AtomicU32,
 }
 
@@ -102,7 +107,7 @@ impl DisplayListRegistry {
         let mut lists = self.lists.write();
         for i in 0..range {
             let id = start + i as u32;
-            lists.insert(id, DisplayList::new(id));
+            lists.insert(id, Arc::new(DisplayList::new(id)));
         }
         start
     }
@@ -122,10 +127,10 @@ impl DisplayListRegistry {
 
     pub fn store_list(&self, list: DisplayList) {
         let mut lists = self.lists.write();
-        lists.insert(list.id, list);
+        lists.insert(list.id, Arc::new(list));
     }
 
-    pub fn get_list(&self, list: GLuint) -> Option<DisplayList> {
+    pub fn get_list(&self, list: GLuint) -> Option<Arc<DisplayList>> {
         let lists = self.lists.read();
         lists.get(&list).cloned()
     }

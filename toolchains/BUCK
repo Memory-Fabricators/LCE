@@ -18,15 +18,15 @@ load("@prelude//toolchains:remote_test_execution.bzl", "remote_test_execution_to
 
 system_cxx_toolchain(
     name = "cxx",
-    c_flags = ["-O3", "-DNDEBUG"],
-    cxx_flags = ["-O3", "-DNDEBUG"],
+    c_flags = ["-O2", "-DNDEBUG"],
+    cxx_flags = ["-O2", "-DNDEBUG"],
     visibility = ["PUBLIC"],
 )
 
 system_rust_toolchain(
     name = "rust",
     default_edition = "2021",
-    rustc_flags = ["-C", "opt-level=3", "-C", "debug-assertions=off"],
+    rustc_flags = ["-C", "opt-level=2", "-C", "debug-assertions=on"],
     visibility = ["PUBLIC"],
 )
 

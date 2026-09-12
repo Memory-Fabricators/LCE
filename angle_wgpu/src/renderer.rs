@@ -6,7 +6,13 @@ use crate::texture::TextureObject;
 use crate::types::*;
 use std::collections::HashMap;
 use std::sync::Arc;
-use winit::window::Window;
+
+/// Application-owned presentation hooks. Windowing integrations implement this
+/// without making ANGLE depend on their windowing toolkit.
+pub trait PresentWindow: Send + Sync {
+    fn pre_present_notify(&self);
+    fn request_redraw(&self);
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct PipelineKey {
@@ -57,7 +63,7 @@ pub struct WgpuRenderer {
     pub surface_format: wgpu::TextureFormat,
     pub alpha_mode: wgpu::CompositeAlphaMode,
     pub present_mode: wgpu::PresentMode,
-    pub window: Option<Arc<dyn Window>>,
+    pub window: Option<Arc<dyn PresentWindow>>,
     pub width: u32,
     pub height: u32,
 
@@ -162,7 +168,7 @@ impl WgpuRenderer {
         device: wgpu::Device,
         queue: wgpu::Queue,
         surface: wgpu::Surface<'static>,
-        window: Arc<dyn Window>,
+        window: Arc<dyn PresentWindow>,
         width: u32,
         height: u32,
     ) -> Result<Self, String> {
@@ -232,7 +238,7 @@ impl WgpuRenderer {
         device: wgpu::Device,
         queue: wgpu::Queue,
         surface: Option<wgpu::Surface<'static>>,
-        window: Option<Arc<dyn Window>>,
+        window: Option<Arc<dyn PresentWindow>>,
         surface_format: wgpu::TextureFormat,
         alpha_mode: wgpu::CompositeAlphaMode,
         present_mode: wgpu::PresentMode,

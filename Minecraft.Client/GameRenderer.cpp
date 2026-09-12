@@ -28,7 +28,6 @@
 #include "CreativeMode.h"
 #include "Frustum.h"
 #include "FrustumCuller.h"
-#include "angle_wgpu.h"
 #include "GameMode.h"
 #include "GuiParticles.h"
 #include "HumanoidModel.h"
@@ -47,8 +46,9 @@
 #include "TexturePackRepository.h"
 #include "Textures.h"
 #include "WaterDropParticle.h"
-#include "stdafx.h"
 #include "angle_wgpu.h"
+#include "client_platform.h"
+#include "stdafx.h"
 
 bool GameRenderer::anaglyph3d = false;
 int GameRenderer::anaglyphPass = 0;
@@ -1181,15 +1181,6 @@ void GameRenderer::render(float a, bool bFirst)
 
     int maxFps = getFpsCap(mc->options->framerateLimit);
 
-    {
-        static int s_probe = 0;
-        if (s_probe < 10)
-        {
-            s_probe++;
-            fprintf(stderr, "[RENDERPROBE2] level=%p framerateLimit=%d maxFps=%d screen=%p noRender=%d\n", (void *)mc->level, mc->options->framerateLimit, maxFps, (void *)mc->screen, mc->noRender ? 1 : 0);
-        }
-    }
-
     if (mc->level != NULL)
     {
         if (mc->options->framerateLimit == 0)
@@ -1320,7 +1311,11 @@ int GameRenderer::runUpdate(LPVOID lpParam)
         // Now limiting maximum number of updates that can be deferred as have noticed that with redstone clock circuits, it is possible to create
         // things that need constant updating, so if you stand near them, the render data Never gets updated and the game just keeps going until it runs out of render memory...
         int count = 0;
-        static const int MAX_DEFERRED_UPDATES = 10;
+        // A large atomic burst lets the chunk worker monopolize a CPU core for
+        // tens of milliseconds just as the player enters new terrain. Keep the
+        // atomic update small: the next pass continues immediately, but the
+        // renderer/input thread gets a scheduling opportunity between bursts.
+        static const int MAX_DEFERRED_UPDATES = 2;
         bool shouldContinue = false;
         do
         {
@@ -1331,6 +1326,13 @@ int GameRenderer::runUpdate(LPVOID lpParam)
         //		while( minecraft->levelRenderer->updateDirtyChunks() )
         //			;
         RenderManager.CBuffDeferredModeEnd();
+        // Avoid immediately starting another expensive scan/rebuild burst when
+        // work remains. This is intentionally a tiny backoff: it trades a small
+        // amount of chunk streaming throughput for stable frame pacing.
+        if (shouldContinue)
+        {
+            Sleep(1);
+        }
 
         // If any renderable tile entities were flagged in this last block of chunk(s) that were udpated, then change their
         // flags to say that this deferred chunk is over and they are actually safe to be removed now

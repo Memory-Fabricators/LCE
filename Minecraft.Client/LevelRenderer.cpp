@@ -57,8 +57,8 @@
 #include "Tesselator.h"
 #include "Textures.h"
 #include "TileEntityRenderDispatcher.h"
-#include "stdafx.h"
 #include "angle_wgpu.h"
+#include "stdafx.h"
 
 #ifdef __PS3__
 #include "C4JSpursJob.h"
@@ -826,23 +826,7 @@ int LevelRenderer::renderChunks(int from, int to, int layer, double alpha)
     int count = 0;
     ClipChunk *pClipChunk = chunks[playerIndex].data;
     unsigned char emptyFlag = LevelRenderer::CHUNK_FLAG_EMPTY0 << layer;
-    {
-        static int s_probe = 0;
-        if (s_probe < 10)
-        {
-            s_probe++;
-            int visibleCount = 0;
-            ClipChunk *p = chunks[playerIndex].data;
-            for (int i = 0; i < chunks[playerIndex].length; i++, p++)
-            {
-                if (p->visible)
-                {
-                    visibleCount++;
-                }
-            }
-            fprintf(stderr, "[RENDERPROBE3] layer=%d total=%d visible=%d\n", layer, (int)chunks[playerIndex].length, visibleCount);
-        }
-    }
+
     for (int i = 0; i < chunks[playerIndex].length; i++, pClipChunk++)
     {
         if (!pClipChunk->visible)

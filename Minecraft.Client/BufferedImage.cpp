@@ -4,6 +4,7 @@
 #include "Textures.h"
 #include "stdafx.h"
 #include "angle_wgpu.h"
+#include "client_platform.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstring>

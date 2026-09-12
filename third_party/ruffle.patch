@@ -1,0 +1,130 @@
+diff --git a/core/build.rs b/core/build.rs
+index 290f15d19..c5c4add47 100644
+--- a/core/build.rs
++++ b/core/build.rs
+@@ -1,12 +1,12 @@
+ use std::path::{Path, PathBuf};
+ 
+ fn main() {
+-    let repo_root = Path::new("../");
++    let repo_root = if Path::new("src/avm1/globals/globals.as").exists() { Path::new(".") } else { Path::new("..") };
+     let out_dir = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+ 
+-    build_playerglobal::build_avm1_playerglobal(repo_root, &out_dir)
++    build_playerglobal::build_avm1_playerglobal(&repo_root, &out_dir)
+         .expect("Failed to build playerglobal_avm1");
+-    build_playerglobal::build_avm2_playerglobal(repo_root, &out_dir, cfg!(feature = "known_stubs"))
++    build_playerglobal::build_avm2_playerglobal(&repo_root, &out_dir, cfg!(feature = "known_stubs"))
+         .expect("Failed to build playerglobal_avm2");
+ 
+     println!(
+diff --git a/core/build_playerglobal/src/avm1.rs b/core/build_playerglobal/src/avm1.rs
+index f6ac9d416..61aec4b25 100644
+--- a/core/build_playerglobal/src/avm1.rs
++++ b/core/build_playerglobal/src/avm1.rs
+@@ -7,7 +7,7 @@ pub fn build_avm1_playerglobal(
+     repo_root: &Path,
+     out_dir: &Path,
+ ) -> Result<(), Box<dyn std::error::Error>> {
+-    let source_root = repo_root.join("core/src/avm1/globals/");
++    let source_root = if repo_root.join("src/avm1/globals").exists() { repo_root.join("src/avm1/globals") } else { repo_root.join("core/src/avm1/globals") };
+     let provider = FileSystemSourceProvider::with_root(source_root);
+     let compile_options = CompileOptions::default().with_swf_version(8);
+     let mut builder = ProgramBuilder::new(provider).with_compile_options(compile_options);
+diff --git a/core/build_playerglobal/src/avm2.rs b/core/build_playerglobal/src/avm2.rs
+index 955ba1abc..e54d6b100 100644
+--- a/core/build_playerglobal/src/avm2.rs
++++ b/core/build_playerglobal/src/avm2.rs
+@@ -55,7 +55,7 @@ pub fn build_avm2_playerglobal(
+     out_dir: &Path,
+     with_stubs: bool,
+ ) -> Result<(), Box<dyn std::error::Error>> {
+-    let classes_dir = repo_root.join("core/src/avm2/globals/");
++    let classes_dir = if repo_root.join("src/avm2/globals").exists() { repo_root.join("src/avm2/globals") } else { repo_root.join("core/src/avm2/globals") };
+ 
+     let out_path = out_dir.join("playerglobal_avm2.swf");
+ 
+diff --git a/core/src/ecma_conversions.rs b/core/src/ecma_conversions.rs
+index 3eb81f82b..c18aa35ee 100644
+--- a/core/src/ecma_conversions.rs
++++ b/core/src/ecma_conversions.rs
+@@ -40,18 +40,7 @@ pub fn f64_to_wrapping_u32(n: f64) -> u32 {
+ /// Converts an `f64` to an `i32` with ECMAScript `ToInt32` wrapping behavior.
+ /// The value will be wrapped in the range [-2^31, 2^31).
+ pub fn f64_to_wrapping_i32(n: f64) -> i32 {
+-    cfg_select! {
+-        target_arch = "aarch64" => {
+-            if std::arch::is_aarch64_feature_detected!("jsconv") {
+-                // SAFETY: the `jsconv` target feature was just verified to be available above,
+-                // so the `fjcvtzs` instruction used by `__jcvt` is available.
+-                unsafe { std::arch::aarch64::__jcvt(n) }
+-            } else {
+-                f64_to_wrapping_i32_generic(n)
+-            }
+-        }
+-        _ => f64_to_wrapping_i32_generic(n),
+-    }
++    f64_to_wrapping_i32_generic(n)
+ }
+ 
+ fn f64_to_wrapping_i32_generic(n: f64) -> i32 {
+diff --git a/core/src/lib.rs b/core/src/lib.rs
+index d76c1cba7..9b95e1ce5 100644
+--- a/core/src/lib.rs
++++ b/core/src/lib.rs
+@@ -1,3 +1,4 @@
++#![feature(if_let_guard)]
+ // This lint is helpful, but right now we have too many instances of it.
+ // TODO: Remove this once all instances are fixed.
+ #![allow(clippy::needless_pass_by_ref_mut)]
+@@ -6,7 +7,7 @@
+ #![allow(clippy::get_first)]
+ 
+ #[macro_use]
+-mod display_object;
++pub mod display_object;
+ pub use display_object::{StageAlign, StageDisplayState, StageScaleMode};
+ 
+ #[macro_use]
+@@ -14,7 +15,7 @@ extern crate num_derive;
+ 
+ #[macro_use]
+ mod avm1;
+-mod avm2;
++pub mod avm2;
+ mod avm_rng;
+ mod binary_data;
+ pub mod bitmap;
+@@ -76,4 +77,4 @@ pub const NEWEST_PLAYER_VERSION: u8 = 51;
+ pub const DEFAULT_PLAYER_VERSION: u8 = 32;
+ 
+ /// Path to the raw playerglobal ABC, for use as an `asc.jar` import library.
+-pub const PLAYERGLOBAL_ABC_PATH: &str = env!("RUFFLE_PLAYERGLOBAL_ABC_PATH");
++pub const PLAYERGLOBAL_ABC_PATH: &str = "playerglobal_import.abc";
+diff --git a/tools/asc/src/lib.rs b/tools/asc/src/lib.rs
+index 98e6aa5c8..13be28874 100644
+--- a/tools/asc/src/lib.rs
++++ b/tools/asc/src/lib.rs
+@@ -34,7 +34,21 @@ impl AscConfig {
+ }
+ 
+ pub fn run_asc(config: AscConfig) -> anyhow::Result<()> {
+-    let asc_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("asc.jar");
++    let asc_dir = std::env::var("ASC_MANIFEST_DIR")
++        .or_else(|_| std::env::var("CARGO_MANIFEST_DIR"))
++        .unwrap_or_default();
++    let asc_dir_path = PathBuf::from(&asc_dir);
++
++    // If asc_dir_path is relative, also check relative to project root
++    let candidates = [
++        asc_dir_path.join("asc.jar"),
++        PathBuf::from("/home/theo/src/LCE").join(&asc_dir).join("asc.jar"),
++        PathBuf::from("tools/asc/asc.jar"),
++        PathBuf::from("../tools/asc/asc.jar"),
++        PathBuf::from("asc.jar"),
++        PathBuf::from(&asc_dir).join("../tools/asc/asc.jar"),
++    ];
++    let asc_path = candidates.into_iter().find(|p| p.exists()).unwrap_or_else(|| PathBuf::from("asc.jar"));
+ 
+     let mut cli_args: Vec<String> = vec![
+         "-classpath".to_string(),

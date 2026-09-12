@@ -52,6 +52,7 @@ pub struct EglContextState {
 
 pub struct EglDisplayState {
     pub initialized: bool,
+    pub native_display: NativeDisplayType,
     pub surfaces: HashMap<u32, Arc<Mutex<EglSurfaceState>>>,
     pub contexts: HashMap<u32, Arc<Mutex<EglContextState>>>,
     pub shared_textures: Arc<Mutex<TextureManager>>,
@@ -64,6 +65,7 @@ impl Default for EglDisplayState {
     fn default() -> Self {
         Self {
             initialized: false,
+            native_display: std::ptr::null_mut(),
             surfaces: HashMap::new(),
             contexts: HashMap::new(),
             shared_textures: Arc::new(Mutex::new(TextureManager::new())),
@@ -134,9 +136,10 @@ pub fn get_or_create_display() -> Arc<Mutex<EglDisplayState>> {
 // EGL C API
 // ============================================================================
 
-pub unsafe fn egl_get_display(_display_id: NativeDisplayType) -> EGLDisplay {
+pub unsafe fn egl_get_display(display_id: NativeDisplayType) -> EGLDisplay {
     crate::init_logging();
     let dpy = get_or_create_display();
+    dpy.lock().native_display = display_id;
     Arc::into_raw(dpy) as EGLDisplay
 }
 
@@ -267,6 +270,15 @@ pub unsafe fn egl_create_window_surface(
     } else {
         get_or_create_display()
     };
+    if !win.is_null() {
+        let native_display = dpy_arc.lock().native_display;
+        if !dpy.is_null() {
+            std::mem::forget(dpy_arc);
+        }
+        return crate::native_surface::create_native_egl_surface(
+            dpy, native_display, win, width, height,
+        );
+    }
 
     let id = {
         let d = dpy_arc.lock();

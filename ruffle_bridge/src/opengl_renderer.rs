@@ -235,6 +235,7 @@ impl CommandHandler for Handler {
         transform: ruffle_render::transform::Transform,
         smoothing: bool,
         pixel_snapping: ruffle_render::bitmap::PixelSnapping,
+        _region: ruffle_render::bitmap::PixelRegion,
     ) {
         let Some(texture) =
             (bitmap.0.as_ref() as &dyn std::any::Any).downcast_ref::<OpenGlBitmap>()

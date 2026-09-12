@@ -8,3 +8,4 @@ rust-project.json
 compile_commands.json
 /external
 /buck-out
+/third_party/ruffle/src

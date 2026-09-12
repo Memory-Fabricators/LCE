@@ -16,6 +16,7 @@
 // gameplay (see that file for why).
 
 #include "angle_wgpu.h"
+#include "client_platform.h"
 #include <deque>
 #include <string>
 

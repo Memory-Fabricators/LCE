@@ -1,5 +1,6 @@
 #include "SDL3_RuffleBridge.h"
 #include "angle_wgpu.h"
+#include "client_platform.h"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>

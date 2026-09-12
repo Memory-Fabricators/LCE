@@ -9,22 +9,22 @@ path = "/dev/null"
 
 [dependencies]
 cbindgen = { version = "0.29.4", artifact = ["bin"] }
-ruffle_core = { git = "https://github.com/theoparis/ruffle", features = ["default_font"], branch = "push-xntyqqztpkxt" }
-ruffle_render = { git = "https://github.com/theoparis/ruffle", branch = "push-xntyqqztpkxt", default-features = false, features = ["tessellator"] }
-swf = { git = "https://github.com/theoparis/ruffle", branch = "push-xntyqqztpkxt" }
+ruffle_core = { path = "ruffle/src/core", features = ["default_font"] }
+ruffle_render = { path = "ruffle/src/render", default-features = false, features = ["tessellator"] }
+swf = { path = "ruffle/src/swf" }
 wgpu = { git = "https://github.com/gfx-rs/wgpu", default-features = false, features = ["wgsl", "vulkan", "gles", "metal"] }
 raw-window-handle = { version = "0.6.2", default-features = false }
 url = "2"
-glam = "0.33.5"
+glam = "0.33.7"
 async-channel = "2"
 indexmap = "2"
-winit = { version = "0.31.0-beta.2", default-features = false, features = ["x11"] }
+winit = { version = "0.31.0-beta.3", default-features = false, features = ["x11"] }
 bytemuck = { version = "1.25.2", features = ["derive"] }
 parking_lot = "0.12.5"
 log = "0.4.34"
 x11-dl = "2.21.0"
-zune-png = { git = "https://github.com/etemesi254/zune-image", rev = "fac516c47cf05b07a2625954beecfa354ac14017", default-features = false, features = ["sse", "std"] }
-zune-core = { git = "https://github.com/etemesi254/zune-image", rev = "fac516c47cf05b07a2625954beecfa354ac14017", default-features = false, features = [] }
+zune-png = { git = "https://github.com/etemesi254/zune-image", default-features = false, features = ["sse", "std"] }
+zune-core = { git = "https://github.com/etemesi254/zune-image", default-features = false, features = [] }
 
 [patch.crates-io]
-swf = { git = "https://github.com/theoparis/ruffle", branch = "push-xntyqqztpkxt" }
+swf = { path = "ruffle/src/swf" }
