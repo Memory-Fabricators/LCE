@@ -3,9 +3,9 @@
 use crate::matrix::{Mat4, MatrixMode};
 use crate::types::*;
 use parking_lot::RwLock;
-use std::sync::Arc;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::Arc;
 
 #[derive(Debug, Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
 #[repr(C)]

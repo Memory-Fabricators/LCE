@@ -2,7 +2,7 @@
 #![allow(unused_imports, dead_code, unused_mut)]
 use crate::display_list::{DisplayList, DisplayListOp, DisplayListRegistry, VertexData};
 use crate::matrix::{Mat4, MatrixMode, MatrixStack};
-use crate::renderer::{PipelineKey, WgpuRenderer};
+use crate::renderer::{ClearState, PipelineKey, WgpuRenderer};
 use crate::shader::FixedFunctionUniforms;
 use crate::texture::{TextureManager, TextureObject};
 use crate::types::*;
@@ -173,7 +173,14 @@ pub struct GlContext {
     // draws with unchanged state (e.g. one draw per chunk face), so this
     // significantly cuts per-frame overhead.
     pending_batch: Option<PendingBatch>,
+    /// Capacity recycled from the last flushed batch so starting a new batch
+    /// doesn't reallocate (and regrow) its vertex/index vectors every time.
+    spare_vertices: Vec<VertexData>,
+    spare_indices: Vec<u32>,
 }
+
+/// Don't keep unusually large recycled buffers alive.
+const MAX_SPARE_BATCH_ELEMS: usize = 1 << 20;
 
 struct PendingBatch {
     key: PipelineKey,
@@ -291,6 +298,8 @@ impl GlContext {
             display_list_mode: GL_COMPILE,
             error: GL_NO_ERROR,
             pending_batch: None,
+            spare_vertices: Vec::new(),
+            spare_indices: Vec::new(),
         }
     }
 
@@ -336,6 +345,46 @@ impl GlContext {
             batch.viewport,
             batch.scissor,
         );
+        drop(rend);
+        drop(tex_mgr);
+
+        let PendingBatch {
+            mut vertices,
+            mut indices,
+            ..
+        } = batch;
+        if vertices.capacity() <= MAX_SPARE_BATCH_ELEMS {
+            vertices.clear();
+            self.spare_vertices = vertices;
+        }
+        if indices.capacity() <= MAX_SPARE_BATCH_ELEMS {
+            indices.clear();
+            self.spare_indices = indices;
+        }
+    }
+
+    /// Flushes the pending batch if it samples `tex_id`. A batch only stores a
+    /// texture id and reads the texture at flush time, so anything that
+    /// mutates or deletes a texture must call this first or already-batched
+    /// draws would see the new contents (or fall back to white).
+    pub fn flush_batch_if_uses_texture(&mut self, tex_id: GLuint) {
+        if self.pending_batch.as_ref().is_some_and(|b| b.tex_id == tex_id) {
+            self.flush_pending_batch();
+        }
+    }
+
+    /// Same as [`Self::flush_batch_if_uses_texture`] for the currently bound
+    /// texture of the active unit (what `glTex*` calls operate on).
+    pub fn flush_batch_if_uses_bound_texture(&mut self) {
+        let id = {
+            let tm = self.texture_manager.lock();
+            if tm.active_unit < 8 {
+                tm.bound_textures[tm.active_unit]
+            } else {
+                0
+            }
+        };
+        self.flush_batch_if_uses_texture(id);
     }
 
     #[inline]
@@ -435,11 +484,29 @@ impl GlContext {
         }
     }
 
+    /// Snapshot of the state that modifies `glClear` (scissor, masks).
+    pub fn clear_state(&self) -> ClearState {
+        let (r, g, b, a) = self.color_mask;
+        ClearState {
+            scissor: self.scissor_test_enabled.then(|| {
+                (
+                    self.scissor.0.max(0) as u32,
+                    self.scissor.1.max(0) as u32,
+                    self.scissor.2.max(1) as u32,
+                    self.scissor.3.max(1) as u32,
+                )
+            }),
+            color_mask: r as u8 | (g as u8) << 1 | (b as u8) << 2 | (a as u8) << 3,
+            depth_mask: self.depth_mask,
+        }
+    }
+
     pub fn build_pipeline_key(&self, mode: GLenum) -> PipelineKey {
         let topology = match mode {
-            GL_TRIANGLES | GL_QUADS | GL_POLYGON => 0,
-            GL_TRIANGLE_STRIP => 1,
-            GL_TRIANGLE_FAN => 2,
+            // Everything that produces triangles is expanded to a triangle
+            // list in `expand_primitives`.
+            GL_TRIANGLES | GL_QUADS | GL_QUAD_STRIP | GL_POLYGON | GL_TRIANGLE_STRIP
+            | GL_TRIANGLE_FAN => 0,
             GL_LINES => 3,
             GL_LINE_STRIP | GL_LINE_LOOP => 4,
             GL_POINTS => 5,
@@ -477,6 +544,8 @@ impl GlContext {
             blend_enabled: self.blend_enabled,
             src_factor: self.src_factor,
             dst_factor: self.dst_factor,
+            src_factor_alpha: self.src_factor_alpha,
+            dst_factor_alpha: self.dst_factor_alpha,
             depth_test: self.depth_test_enabled,
             depth_write: self.depth_mask,
             depth_func: self.depth_func,
@@ -501,38 +570,19 @@ impl GlContext {
             }
         }
 
-        let Some(renderer) = &self.renderer else {
+        let Some(_renderer) = &self.renderer else {
             return;
         };
 
-        // Avoid cloning `vertices`/`indices` here: draw_mesh only ever
-        // needs to read them (they get copied once into the shared
-        // vertex/index staging buffers), so cloning here was pure wasted
-        // work duplicated on every single draw call - for chunk-heavy
-        // scenes with many small per-face draws this was a dominant CPU
-        // cost. Only the GL_QUADS index expansion actually needs a fresh
-        // owned buffer.
-        let quad_indices = if mode == GL_QUADS {
-            let quad_count = vertices.len() / 4;
-            let mut inds = Vec::with_capacity(quad_count * 6);
-            for q in 0..quad_count as u32 {
-                let base = q * 4;
-                inds.push(base + 0);
-                inds.push(base + 1);
-                inds.push(base + 2);
-                inds.push(base + 0);
-                inds.push(base + 2);
-                inds.push(base + 3);
-            }
-            Some(inds)
-        } else {
-            None
-        };
+        // Primitives wgpu can't express directly (quads, quad strips, fans,
+        // polygons, triangle strips, line loops) are rewritten as an index
+        // list over the unchanged vertices. Triangle-producing modes all end
+        // up as plain triangle lists, which also makes them batchable.
+        let expanded = expand_primitives(mode, vertices.len(), indices);
         let final_vertices = vertices;
-        let final_indices: Option<&[u32]> = if mode == GL_QUADS {
-            quad_indices.as_deref()
-        } else {
-            indices
+        let final_indices: Option<&[u32]> = match &expanded {
+            Some(e) => Some(e.as_slice()),
+            None => indices,
         };
 
         let key = self.build_pipeline_key(mode);
@@ -594,8 +644,8 @@ impl GlContext {
                 tex_id,
                 viewport: vp,
                 scissor,
-                vertices: Vec::new(),
-                indices: Vec::new(),
+                vertices: std::mem::take(&mut self.spare_vertices),
+                indices: std::mem::take(&mut self.spare_indices),
             });
         }
 
@@ -649,7 +699,11 @@ impl GlContext {
         // vertex and index of every visible chunk before it was uploaded.
         for op in &list.ops {
             match op {
-                DisplayListOp::Draw { mode, vertices, indices } => {
+                DisplayListOp::Draw {
+                    mode,
+                    vertices,
+                    indices,
+                } => {
                     let indices = (!indices.is_empty()).then_some(indices.as_slice());
                     self.draw_vertex_data(*mode, vertices, indices);
                 }
@@ -677,10 +731,18 @@ impl GlContext {
                     self.current_matrix_stack().mult_matrix(m);
                     self.matrix_mode = prev;
                 }
-                DisplayListOp::MatrixTranslate(x, y, z) => self.current_matrix_stack().translate(*x, *y, *z),
-                DisplayListOp::MatrixRotate(a, x, y, z) => self.current_matrix_stack().rotate(*a, *x, *y, *z),
-                DisplayListOp::MatrixScale(x, y, z) => self.current_matrix_stack().scale(*x, *y, *z),
-                DisplayListOp::BindTexture(id) => self.texture_manager.lock().bind_texture(GL_TEXTURE_2D, *id),
+                DisplayListOp::MatrixTranslate(x, y, z) => {
+                    self.current_matrix_stack().translate(*x, *y, *z)
+                }
+                DisplayListOp::MatrixRotate(a, x, y, z) => {
+                    self.current_matrix_stack().rotate(*a, *x, *y, *z)
+                }
+                DisplayListOp::MatrixScale(x, y, z) => {
+                    self.current_matrix_stack().scale(*x, *y, *z)
+                }
+                DisplayListOp::BindTexture(id) => {
+                    self.texture_manager.lock().bind_texture(GL_TEXTURE_2D, *id)
+                }
                 DisplayListOp::Enable(cap) => self.set_enable(*cap, true),
                 DisplayListOp::Disable(cap) => self.set_enable(*cap, false),
                 DisplayListOp::Color4f(r, g, b, a) => self.current_color = [*r, *g, *b, *a],
@@ -689,6 +751,8 @@ impl GlContext {
                 DisplayListOp::BlendFunc(src, dst) => {
                     self.src_factor = *src;
                     self.dst_factor = *dst;
+                    self.src_factor_alpha = *src;
+                    self.dst_factor_alpha = *dst;
                 }
                 DisplayListOp::DepthFunc(func) => self.depth_func = *func,
                 DisplayListOp::DepthMask(mask) => self.depth_mask = *mask,
@@ -732,5 +796,123 @@ impl GlContext {
             GL_POLYGON_OFFSET_FILL => self.polygon_offset_fill_enabled = enable,
             _ => {}
         }
+    }
+}
+
+/// Rewrites modes wgpu has no native topology for into an index list that
+/// references the original (unduplicated) vertices. Returns `None` when the
+/// draw can be submitted as-is. `indices`, when present, is the caller's own
+/// index list and is honoured for every expanded mode.
+fn expand_primitives(mode: GLenum, vertex_count: usize, indices: Option<&[u32]>) -> Option<Vec<u32>> {
+    let n = indices.map_or(vertex_count, |i| i.len());
+    let at = |k: usize| -> u32 {
+        match indices {
+            Some(i) => i[k],
+            None => k as u32,
+        }
+    };
+    match mode {
+        GL_QUADS => {
+            let mut out = Vec::with_capacity(n / 4 * 6);
+            for q in 0..n / 4 {
+                let b = q * 4;
+                out.extend_from_slice(&[at(b), at(b + 1), at(b + 2), at(b), at(b + 2), at(b + 3)]);
+            }
+            Some(out)
+        }
+        GL_QUAD_STRIP => {
+            let mut out = Vec::with_capacity(n.saturating_sub(2) / 2 * 6);
+            let mut v = 0;
+            while v + 3 < n {
+                out.extend_from_slice(&[at(v), at(v + 1), at(v + 3), at(v), at(v + 3), at(v + 2)]);
+                v += 2;
+            }
+            Some(out)
+        }
+        GL_TRIANGLE_FAN | GL_POLYGON => {
+            let mut out = Vec::with_capacity(n.saturating_sub(2) * 3);
+            for i in 1..n.saturating_sub(1) {
+                out.extend_from_slice(&[at(0), at(i), at(i + 1)]);
+            }
+            Some(out)
+        }
+        GL_TRIANGLE_STRIP => {
+            let mut out = Vec::with_capacity(n.saturating_sub(2) * 3);
+            for i in 0..n.saturating_sub(2) {
+                // Alternate winding so every triangle keeps the strip's facing.
+                if i % 2 == 0 {
+                    out.extend_from_slice(&[at(i), at(i + 1), at(i + 2)]);
+                } else {
+                    out.extend_from_slice(&[at(i + 1), at(i), at(i + 2)]);
+                }
+            }
+            Some(out)
+        }
+        GL_LINE_LOOP => {
+            if n < 2 {
+                return Some(Vec::new());
+            }
+            let mut out: Vec<u32> = (0..n).map(at).collect();
+            out.push(at(0));
+            Some(out)
+        }
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quads_split_into_two_triangles() {
+        let e = expand_primitives(GL_QUADS, 8, None).unwrap();
+        assert_eq!(e, [0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7]);
+    }
+
+    #[test]
+    fn quads_honour_caller_indices_and_drop_partial() {
+        let idx = [10, 11, 12, 13, 99];
+        let e = expand_primitives(GL_QUADS, 100, Some(&idx)).unwrap();
+        assert_eq!(e, [10, 11, 12, 10, 12, 13]);
+    }
+
+    #[test]
+    fn fan_and_polygon_share_apex() {
+        let want = [0, 1, 2, 0, 2, 3, 0, 3, 4];
+        assert_eq!(expand_primitives(GL_TRIANGLE_FAN, 5, None).unwrap(), want);
+        assert_eq!(expand_primitives(GL_POLYGON, 5, None).unwrap(), want);
+    }
+
+    #[test]
+    fn triangle_strip_alternates_winding() {
+        let e = expand_primitives(GL_TRIANGLE_STRIP, 5, None).unwrap();
+        assert_eq!(e, [0, 1, 2, 2, 1, 3, 2, 3, 4]);
+    }
+
+    #[test]
+    fn quad_strip_matches_quads() {
+        // Strip vertices 0..4 form quad (0,1,3,2).
+        let e = expand_primitives(GL_QUAD_STRIP, 4, None).unwrap();
+        assert_eq!(e, [0, 1, 3, 0, 3, 2]);
+    }
+
+    #[test]
+    fn line_loop_closes() {
+        assert_eq!(expand_primitives(GL_LINE_LOOP, 3, None).unwrap(), [0, 1, 2, 0]);
+    }
+
+    #[test]
+    fn degenerate_inputs_are_empty_not_panics() {
+        for m in [GL_QUADS, GL_QUAD_STRIP, GL_TRIANGLE_FAN, GL_POLYGON, GL_TRIANGLE_STRIP, GL_LINE_LOOP] {
+            assert!(expand_primitives(m, 1, None).unwrap().is_empty());
+            assert!(expand_primitives(m, 0, None).unwrap().is_empty());
+        }
+    }
+
+    #[test]
+    fn passthrough_modes_are_untouched() {
+        assert!(expand_primitives(GL_TRIANGLES, 6, None).is_none());
+        assert!(expand_primitives(GL_LINES, 4, None).is_none());
     }
 }

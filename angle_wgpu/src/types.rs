@@ -43,6 +43,21 @@ pub const EGL_NO_CONTEXT: EGLContext = 0 as EGLContext;
 pub const EGL_NO_SURFACE: EGLSurface = 0 as EGLSurface;
 pub const EGL_DEFAULT_DISPLAY: EGLDisplay = 0 as EGLDisplay;
 
+// EGL_EXT_platform_base / EGL_EXT_platform_wayland / EGL_EXT_platform_x11
+pub const EGL_PLATFORM_X11_EXT: EGLenum = 0x31D5;
+pub const EGL_PLATFORM_WAYLAND_EXT: EGLenum = 0x31D8;
+
+/// Which native window system EGL surfaces are being created against.
+///
+/// The host selects this explicitly with `eglGetPlatformDisplayEXT`, mirroring
+/// how ANGLE is told the platform by the application rather than guessing it.
+#[repr(u32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum NativePlatform {
+    X11,
+    Wayland,
+}
+
 pub const EGL_FALSE: EGLBoolean = 0;
 pub const EGL_TRUE: EGLBoolean = 1;
 

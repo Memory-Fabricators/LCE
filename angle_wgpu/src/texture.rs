@@ -22,7 +22,17 @@ pub struct TextureObject {
     pub max_lod: f32,
     pub max_level: u32,
     pub level_data: HashMap<u32, Vec<u8>>,
+    /// Full GPU texture rebuild needed (size / level layout changed).
     pub dirty: bool,
+    /// Only the sampler state changed; rebuild sampler + bind group, keep texels.
+    pub sampler_dirty: bool,
+    /// Sub-rectangles `(level, x, y, w, h)` modified since the last sync that
+    /// can be uploaded in place without recreating the GPU texture.
+    pub dirty_rects: Vec<(u32, u32, u32, u32, u32)>,
+    /// Renderer flush epoch in which this texture was last bound for a draw.
+    /// In-place uploads are only safe if no queued (unsubmitted) draw in the
+    /// current epoch already references the old texels.
+    pub last_used_epoch: u64,
 
     // GPU resources
     pub gpu_texture: Option<wgpu::Texture>,
@@ -52,6 +62,9 @@ impl TextureObject {
             max_level: 1000,
             level_data: HashMap::new(),
             dirty: true,
+            sampler_dirty: false,
+            dirty_rects: Vec::new(),
+            last_used_epoch: u64::MAX,
             gpu_texture: None,
             gpu_view: None,
             gpu_sampler: None,
@@ -105,13 +118,18 @@ impl TextureObject {
             (self.height >> level).max(1)
         };
 
+        // A brand new level changes the GPU mip chain, so it needs a rebuild.
+        let level_existed = self.level_data.contains_key(&level);
         let entry = self
             .level_data
             .entry(level)
             .or_insert_with(|| vec![0u8; (base_w * base_h * 4) as usize]);
-        if entry.len() < (base_w * base_h * 4) as usize {
+        let grew = entry.len() < (base_w * base_h * 4) as usize;
+        if grew {
             entry.resize((base_w * base_h * 4) as usize, 0);
         }
+        let copy_w_total = width.min(base_w.saturating_sub(xoffset));
+        let rows_total = height.min(base_h.saturating_sub(yoffset));
 
         // Copy scanlines
         for row in 0..height {
@@ -131,7 +149,31 @@ impl TextureObject {
             }
         }
 
-        self.dirty = true;
+        if !level_existed || grew || self.gpu_texture.is_none() {
+            self.dirty = true;
+        } else if copy_w_total > 0 && rows_total > 0 && !self.dirty {
+            // Upload just this rectangle at the next sync instead of
+            // recreating the texture, sampler and bind group.
+            self.dirty_rects
+                .push((level, xoffset, yoffset, copy_w_total, rows_total));
+        }
+    }
+
+    /// Updates a sampler parameter; only flags a sampler rebuild if the
+    /// value actually changed (apps often re-set the same parameters every
+    /// frame, which used to force a full texture re-upload).
+    pub fn set_parameter(&mut self, pname: GLenum, param: GLenum) {
+        let slot = match pname {
+            GL_TEXTURE_MIN_FILTER => &mut self.min_filter,
+            GL_TEXTURE_MAG_FILTER => &mut self.mag_filter,
+            GL_TEXTURE_WRAP_S => &mut self.wrap_s,
+            GL_TEXTURE_WRAP_T => &mut self.wrap_t,
+            _ => return,
+        };
+        if *slot != param {
+            *slot = param;
+            self.sampler_dirty = true;
+        }
     }
 
     pub fn get_wgpu_sampler_descriptor(&self) -> wgpu::SamplerDescriptor<'static> {
@@ -183,8 +225,78 @@ impl TextureObject {
         device: &wgpu::Device,
         queue: &wgpu::Queue,
         bind_group_layout: &wgpu::BindGroupLayout,
+        epoch: u64,
     ) {
+        // Queued draws in this epoch may still reference the current texels;
+        // an in-place write would retroactively change them, so rebuild.
+        if !self.dirty_rects.is_empty() && self.last_used_epoch == epoch {
+            self.dirty = true;
+        }
+        self.last_used_epoch = epoch;
+
         if !self.dirty && self.gpu_bind_group.is_some() {
+            // Incremental paths: no texture/view recreation.
+            if !self.dirty_rects.is_empty() {
+                if let Some(texture) = &self.gpu_texture {
+                    for &(level, x, y, w, h) in &self.dirty_rects {
+                        let Some(data) = self.level_data.get(&level) else {
+                            continue;
+                        };
+                        let level_w = if level == 0 {
+                            self.width.max(1)
+                        } else {
+                            (self.width >> level).max(1)
+                        };
+                        let offset = ((y * level_w + x) * 4) as usize;
+                        let needed = offset + (((h - 1) * level_w + w) * 4) as usize;
+                        if data.len() < needed {
+                            continue;
+                        }
+                        queue.write_texture(
+                            wgpu::TexelCopyTextureInfo {
+                                texture,
+                                mip_level: level,
+                                origin: wgpu::Origin3d { x, y, z: 0 },
+                                aspect: wgpu::TextureAspect::All,
+                            },
+                            &data[offset..],
+                            wgpu::TexelCopyBufferLayout {
+                                offset: 0,
+                                bytes_per_row: Some(level_w * 4),
+                                rows_per_image: Some(h),
+                            },
+                            wgpu::Extent3d {
+                                width: w,
+                                height: h,
+                                depth_or_array_layers: 1,
+                            },
+                        );
+                    }
+                }
+                self.dirty_rects.clear();
+            }
+            if self.sampler_dirty {
+                if let Some(view) = &self.gpu_view {
+                    let sampler = device.create_sampler(&self.get_wgpu_sampler_descriptor());
+                    self.gpu_bind_group =
+                        Some(device.create_bind_group(&wgpu::BindGroupDescriptor {
+                            label: Some("GL Texture BindGroup"),
+                            layout: bind_group_layout,
+                            entries: &[
+                                wgpu::BindGroupEntry {
+                                    binding: 0,
+                                    resource: wgpu::BindingResource::TextureView(view),
+                                },
+                                wgpu::BindGroupEntry {
+                                    binding: 1,
+                                    resource: wgpu::BindingResource::Sampler(&sampler),
+                                },
+                            ],
+                        }));
+                    self.gpu_sampler = Some(sampler);
+                }
+                self.sampler_dirty = false;
+            }
             return;
         }
 
@@ -284,6 +396,8 @@ impl TextureObject {
         self.gpu_sampler = Some(sampler);
         self.gpu_bind_group = Some(bind_group);
         self.dirty = false;
+        self.sampler_dirty = false;
+        self.dirty_rects.clear();
     }
 }
 
@@ -311,9 +425,9 @@ pub fn convert_to_rgba8(
                 let src_idx = i * 4;
                 let dst_idx = i * 4;
                 if src_idx + 3 < data.len() {
-                    out[dst_idx + 0] = data[src_idx + 2]; // R
+                    out[dst_idx] = data[src_idx + 2]; // R
                     out[dst_idx + 1] = data[src_idx + 1]; // G
-                    out[dst_idx + 2] = data[src_idx + 0]; // B
+                    out[dst_idx + 2] = data[src_idx]; // B
                     out[dst_idx + 3] = data[src_idx + 3]; // A
                 }
             }
@@ -323,7 +437,7 @@ pub fn convert_to_rgba8(
                 let src_idx = i * 3;
                 let dst_idx = i * 4;
                 if src_idx + 2 < data.len() {
-                    out[dst_idx + 0] = data[src_idx + 0];
+                    out[dst_idx] = data[src_idx];
                     out[dst_idx + 1] = data[src_idx + 1];
                     out[dst_idx + 2] = data[src_idx + 2];
                     out[dst_idx + 3] = 255;
@@ -334,7 +448,7 @@ pub fn convert_to_rgba8(
             for i in 0..num_pixels {
                 let dst_idx = i * 4;
                 if i < data.len() {
-                    out[dst_idx + 0] = 255;
+                    out[dst_idx] = 255;
                     out[dst_idx + 1] = 255;
                     out[dst_idx + 2] = 255;
                     out[dst_idx + 3] = data[i];
@@ -346,7 +460,7 @@ pub fn convert_to_rgba8(
                 let dst_idx = i * 4;
                 if i < data.len() {
                     let l = data[i];
-                    out[dst_idx + 0] = l;
+                    out[dst_idx] = l;
                     out[dst_idx + 1] = l;
                     out[dst_idx + 2] = l;
                     out[dst_idx + 3] = 255;
@@ -358,9 +472,9 @@ pub fn convert_to_rgba8(
                 let src_idx = i * 2;
                 let dst_idx = i * 4;
                 if src_idx + 1 < data.len() {
-                    let l = data[src_idx + 0];
+                    let l = data[src_idx];
                     let a = data[src_idx + 1];
-                    out[dst_idx + 0] = l;
+                    out[dst_idx] = l;
                     out[dst_idx + 1] = l;
                     out[dst_idx + 2] = l;
                     out[dst_idx + 3] = a;

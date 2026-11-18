@@ -18,5 +18,5 @@ cd -
 Then you can build the client.
 
 ```sh
-buck2 run //Minecraft.Client:Minecraft.Client`
+buck2 run //Minecraft.Client:Minecraft.Client
 ```

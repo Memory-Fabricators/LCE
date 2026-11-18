@@ -14,7 +14,7 @@ use ruffle_core::backend::ui::FontDefinition;
 use ruffle_core::context::UpdateContext;
 use ruffle_core::external::{ExternalInterfaceProvider, Value as ExtValue};
 use ruffle_core::font::FontFileData;
-use ruffle_core::tag_utils::SwfMovie;
+use ruffle_core::tag_utils::SwfMovieData;
 use ruffle_core::{Color, Player, PlayerBuilder, ViewportDimensions};
 
 /// Global font registry. Populated by `iggy_open_install_truetype_utf8`
@@ -29,13 +29,13 @@ static FONT_REGISTRY: Mutex<Vec<FontEntry>> = Mutex::new(Vec::new());
 /// Global library registry. Populated by `iggy_open_library_create_from_memory`
 /// and replayed into each Player's root ApplicationDomain so secondary SWF
 /// symbols and PlaceByClass references resolve properly.
-static LIBRARY_REGISTRY: Mutex<Vec<Arc<SwfMovie>>> = Mutex::new(Vec::new());
+static LIBRARY_REGISTRY: Mutex<Vec<Arc<SwfMovieData>>> = Mutex::new(Vec::new());
 
 /// Concurrent cap on full-inject Players (refunded on player_destroy).
 static FULL_INJECT_BUDGET: AtomicU32 = AtomicU32::new(8);
 
 fn _inject_library_abcs(player: &Arc<Mutex<Player>>) -> bool {
-    let libs: Vec<Arc<SwfMovie>> = match LIBRARY_REGISTRY.lock() {
+    let libs: Vec<Arc<SwfMovieData>> = match LIBRARY_REGISTRY.lock() {
         Ok(g) => g.clone(),
         Err(_) => return false,
     };
@@ -55,9 +55,9 @@ fn _inject_library_abcs(player: &Arc<Mutex<Player>>) -> bool {
     if let Ok(mut p) = player.try_lock() {
         for lib in libs.iter() {
             if use_full {
-                p.inject_secondary_swf_full(lib.clone());
+                p.inject_secondary_swf_full(lib.as_ref().clone());
             } else {
-                p.inject_secondary_swf_abc(lib.clone());
+                p.inject_secondary_swf_abc(lib.as_ref().clone());
             }
         }
     }
@@ -381,7 +381,7 @@ impl ExternalInterfaceProvider for IggyExternalBridge {
 // ======================================================================
 
 pub struct OpaqueLibrary {
-    pub movie: Arc<SwfMovie>,
+    pub movie: Arc<SwfMovieData>,
 }
 
 pub struct OpaquePlayer {
@@ -433,7 +433,7 @@ pub unsafe extern "C" fn iggy_open_library_create_from_memory(
             .into_owned()
     };
     let url = format!("file:///lce/{}", name);
-    match SwfMovie::from_data(&bytes, url, None, None) {
+    match SwfMovieData::from_data(&bytes, url, None, None) {
         Ok(movie) => {
             let movie_arc = Arc::new(movie);
             if let Ok(mut g) = LIBRARY_REGISTRY.lock() {
@@ -470,8 +470,12 @@ pub unsafe extern "C" fn iggy_open_player_create_from_memory(
         return std::ptr::null_mut();
     }
     let bytes: Vec<u8> = unsafe { std::slice::from_raw_parts(data, len) }.to_vec();
-    let movie = match SwfMovie::from_data(&bytes, String::from("file:///lce/inline.swf"), None, None)
-    {
+    let movie = match SwfMovieData::from_data(
+        &bytes,
+        String::from("file:///lce/inline.swf"),
+        None,
+        None,
+    ) {
         Ok(m) => m,
         Err(_) => return std::ptr::null_mut(),
     };

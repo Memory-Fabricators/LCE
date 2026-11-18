@@ -267,7 +267,21 @@ static GLenum ToGLDepthFunc(int func)
 void C4JRender::Initialise(WinitApp *app)
 {
     g_render.app = app;
-    g_render.eglDisplay = eglGetDisplay(app ? winit_app_get_native_display(app) : EGL_DEFAULT_DISPLAY);
+
+    // Ask EGL for the platform the host actually created a window on, the way
+    // ANGLE does. Falling back to eglGetDisplay lets it choose the default
+    // platform when the window system has no EGL platform extension (Windows,
+    // macOS, or a null window for headless use).
+    void *nativeDisplay = app ? winit_app_get_native_display(app) : EGL_DEFAULT_DISPLAY;
+    EGLenum eglPlatform = app ? winit_app_get_egl_platform(app) : 0;
+    if (eglPlatform != 0)
+    {
+        g_render.eglDisplay = eglGetPlatformDisplayEXT(eglPlatform, nativeDisplay, nullptr);
+    }
+    else
+    {
+        g_render.eglDisplay = eglGetDisplay(nativeDisplay);
+    }
     EGLint major = 0, minor = 0;
     eglInitialize(g_render.eglDisplay, &major, &minor);
 

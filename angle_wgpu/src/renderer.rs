@@ -1,7 +1,7 @@
 //! wgpu device, queue, surface, pipeline cache, and rendering backend.
 #![allow(unused_imports, dead_code)]
 use crate::display_list::VertexData;
-use crate::shader::{FIXED_FUNCTION_WGSL, FixedFunctionUniforms};
+use crate::shader::{FixedFunctionUniforms, FIXED_FUNCTION_WGSL};
 use crate::texture::TextureObject;
 use crate::types::*;
 use std::collections::HashMap;
@@ -22,6 +22,8 @@ pub struct PipelineKey {
     pub blend_enabled: bool,
     pub src_factor: u32,
     pub dst_factor: u32,
+    pub src_factor_alpha: u32,
+    pub dst_factor_alpha: u32,
     pub depth_test: bool,
     pub depth_write: bool,
     pub depth_func: u32,
@@ -51,7 +53,70 @@ enum FrameOp {
         depth: Option<f32>,
     },
     Draw(PendingDraw),
+    /// Scissored and/or channel-masked clear, drawn as a fullscreen triangle
+    /// inside the current pass (render-pass load ops can't do either).
+    QuadClear(QuadClear),
 }
+
+struct QuadClear {
+    key: (bool, bool, u8),
+    vertex_offset: u64,
+    /// Already in wgpu (top-left origin) coordinates.
+    scissor: (u32, u32, u32, u32),
+}
+
+/// GL state that modifies `glClear`.
+#[derive(Debug, Clone, Copy)]
+pub struct ClearState {
+    /// GL window-space (bottom-left origin) scissor rect, if the scissor test is on.
+    pub scissor: Option<(u32, u32, u32, u32)>,
+    /// RGBA write mask bits (1=R, 2=G, 4=B, 8=A).
+    pub color_mask: u8,
+    pub depth_mask: bool,
+}
+
+impl Default for ClearState {
+    fn default() -> Self {
+        Self {
+            scissor: None,
+            color_mask: 0xF,
+            depth_mask: true,
+        }
+    }
+}
+
+/// Converts a GL window-space rectangle (origin bottom-left) into wgpu's
+/// top-left origin, clamped to the target. Used for viewport and scissor.
+fn gl_rect_to_target(rect: (u32, u32, u32, u32), tw: u32, th: u32) -> (u32, u32, u32, u32) {
+    let (x, y, w, h) = rect;
+    let x = x.min(tw - 1);
+    let y = y.min(th - 1);
+    let w = w.min(tw - x).max(1);
+    let h = h.min(th - y).max(1);
+    (x, th - y - h, w, h)
+}
+
+const CLEAR_WGSL: &str = r#"
+struct In {
+    @location(0) position: vec3<f32>,
+    @location(2) color: vec4<f32>,
+};
+struct Out {
+    @builtin(position) pos: vec4<f32>,
+    @location(0) color: vec4<f32>,
+};
+@vertex
+fn vs_main(in: In) -> Out {
+    var o: Out;
+    o.pos = vec4<f32>(in.position, 1.0);
+    o.color = in.color;
+    return o;
+}
+@fragment
+fn fs_main(in: Out) -> @location(0) vec4<f32> {
+    return in.color;
+}
+"#;
 
 pub struct WgpuRenderer {
     pub instance: wgpu::Instance,
@@ -60,7 +125,12 @@ pub struct WgpuRenderer {
     pub queue: wgpu::Queue,
     pub surface: Option<wgpu::Surface<'static>>,
     pub surface_config: Option<wgpu::SurfaceConfiguration>,
+    /// Format that render pipelines and views use (always non-sRGB, like
+    /// ANGLE's default framebuffer: GL output is written as-is).
     pub surface_format: wgpu::TextureFormat,
+    /// Format of the swapchain textures themselves; differs from
+    /// `surface_format` only when the platform offers sRGB formats alone.
+    pub surface_texture_format: wgpu::TextureFormat,
     pub alpha_mode: wgpu::CompositeAlphaMode,
     pub present_mode: wgpu::PresentMode,
     pub window: Option<Arc<dyn PresentWindow>>,
@@ -79,6 +149,9 @@ pub struct WgpuRenderer {
     pub texture_bind_group_layout: wgpu::BindGroupLayout,
     pub pipeline_layout: wgpu::PipelineLayout,
     pub pipelines: HashMap<PipelineKey, wgpu::RenderPipeline>,
+    clear_shader: wgpu::ShaderModule,
+    clear_pipeline_layout: wgpu::PipelineLayout,
+    clear_pipelines: HashMap<(bool, bool, u8), wgpu::RenderPipeline>,
 
     pub uniform_buffer: wgpu::Buffer,
     pub uniform_bind_group: wgpu::BindGroup,
@@ -110,6 +183,9 @@ pub struct WgpuRenderer {
     /// Ops (clears + draws) accumulated since the last `flush`, recorded
     /// into GPU commands in one pass over this list.
     frame_ops: Vec<FrameOp>,
+    /// Incremented every `flush`; lets textures know whether a queued draw in
+    /// the current (unsubmitted) batch may still reference their texels.
+    flush_epoch: u64,
     pub clear_color: [f64; 4],
     pub clear_depth: f32,
 }
@@ -155,6 +231,7 @@ impl WgpuRenderer {
             None,
             None,
             surface_format,
+            surface_format,
             wgpu::CompositeAlphaMode::Opaque,
             wgpu::PresentMode::AutoNoVsync,
             width,
@@ -173,20 +250,30 @@ impl WgpuRenderer {
         height: u32,
     ) -> Result<Self, String> {
         let caps = surface.get_capabilities(&adapter);
-        let surface_format = caps
-            .formats
-            .iter()
-            .copied()
-            .find(|f| {
-                matches!(
-                    f,
-                    wgpu::TextureFormat::Bgra8Unorm
-                        | wgpu::TextureFormat::Rgba8Unorm
-                        | wgpu::TextureFormat::Bgra8UnormSrgb
-                        | wgpu::TextureFormat::Rgba8UnormSrgb
-                )
-            })
-            .unwrap_or(caps.formats[0]);
+        // ANGLE exposes the default framebuffer as linear (non-sRGB) unless
+        // EGL_GL_COLORSPACE_SRGB is requested, and GL output is never
+        // gamma-encoded implicitly. So prefer a plain UNORM swapchain format
+        // deterministically (not "whatever the driver lists first"). If only
+        // sRGB variants exist, keep that texture format but render through a
+        // non-sRGB view of it.
+        let (surface_texture_format, surface_format) = [
+            wgpu::TextureFormat::Bgra8Unorm,
+            wgpu::TextureFormat::Rgba8Unorm,
+        ]
+        .into_iter()
+        .find(|f| caps.formats.contains(f))
+        .map(|f| (f, f))
+        .or_else(|| {
+            [
+                wgpu::TextureFormat::Bgra8UnormSrgb,
+                wgpu::TextureFormat::Rgba8UnormSrgb,
+            ]
+            .into_iter()
+            .find(|f| caps.formats.contains(f))
+            .map(|f| (f, f.remove_srgb_suffix()))
+        })
+        .or_else(|| caps.formats.first().map(|&f| (f, f.remove_srgb_suffix())))
+        .ok_or_else(|| "surface reports no supported texture formats".to_string())?;
         let alpha_mode = if caps.alpha_modes.contains(&wgpu::CompositeAlphaMode::Opaque) {
             wgpu::CompositeAlphaMode::Opaque
         } else {
@@ -196,7 +283,7 @@ impl WgpuRenderer {
                 .unwrap_or(wgpu::CompositeAlphaMode::Opaque)
         };
         eprintln!(
-            "[angle_wgpu] adapter={:?} format={surface_format:?} alpha={alpha_mode:?} modes={:?}",
+            "[angle_wgpu] adapter={:?} format={surface_texture_format:?} (render as {surface_format:?}) alpha={alpha_mode:?} modes={:?}",
             adapter.get_info(),
             caps.present_modes
         );
@@ -225,6 +312,7 @@ impl WgpuRenderer {
             Some(surface),
             Some(window),
             surface_format,
+            surface_texture_format,
             alpha_mode,
             present_mode,
             width,
@@ -240,6 +328,7 @@ impl WgpuRenderer {
         surface: Option<wgpu::Surface<'static>>,
         window: Option<Arc<dyn PresentWindow>>,
         surface_format: wgpu::TextureFormat,
+        surface_texture_format: wgpu::TextureFormat,
         alpha_mode: wgpu::CompositeAlphaMode,
         present_mode: wgpu::PresentMode,
         width: u32,
@@ -303,6 +392,17 @@ impl WgpuRenderer {
             immediate_size: 0,
         });
 
+        let clear_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("angle_wgpu Clear WGSL"),
+            source: wgpu::ShaderSource::Wgsl(CLEAR_WGSL.into()),
+        });
+        let clear_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("angle_wgpu Clear Pipeline Layout"),
+                bind_group_layouts: &[],
+                immediate_size: 0,
+            });
+
         // Dynamic-offset uniform pool: one big buffer sliced per draw call
         // instead of a single slot rewritten (and mis-synchronized, since
         // draws within a frame share one un-submitted command encoder)
@@ -357,6 +457,7 @@ impl WgpuRenderer {
             surface,
             surface_config: None,
             surface_format,
+            surface_texture_format,
             alpha_mode,
             present_mode,
             window,
@@ -371,6 +472,9 @@ impl WgpuRenderer {
             texture_bind_group_layout,
             pipeline_layout,
             pipelines: HashMap::new(),
+            clear_shader,
+            clear_pipeline_layout,
+            clear_pipelines: HashMap::new(),
             uniform_buffer,
             uniform_bind_group,
             uniform_stride,
@@ -387,6 +491,7 @@ impl WgpuRenderer {
             index_staging: Vec::with_capacity(4 * 1024 * 1024),
             current_surface_texture: None,
             frame_ops: Vec::new(),
+            flush_epoch: 0,
             clear_color: [0.4, 0.6, 0.9, 1.0],
             clear_depth: 1.0,
         };
@@ -408,13 +513,17 @@ impl WgpuRenderer {
         if let Some(surface) = &self.surface {
             let config = wgpu::SurfaceConfiguration {
                 usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-                format: self.surface_format,
+                format: self.surface_texture_format,
                 width: w,
                 height: h,
                 present_mode: self.present_mode,
                 desired_maximum_frame_latency: 2,
                 alpha_mode: self.alpha_mode,
-                view_formats: vec![],
+                view_formats: if self.surface_texture_format == self.surface_format {
+                    vec![]
+                } else {
+                    vec![self.surface_format]
+                },
                 color_space: wgpu::SurfaceColorSpace::Auto,
             };
             surface.configure(&self.device, &config);
@@ -501,6 +610,8 @@ impl WgpuRenderer {
 
                 let src = to_wgpu_factor(key.src_factor);
                 let dst = to_wgpu_factor(key.dst_factor);
+                let src_a = to_wgpu_factor(key.src_factor_alpha);
+                let dst_a = to_wgpu_factor(key.dst_factor_alpha);
 
                 Some(wgpu::BlendState {
                     color: wgpu::BlendComponent {
@@ -509,8 +620,8 @@ impl WgpuRenderer {
                         operation: wgpu::BlendOperation::Add,
                     },
                     alpha: wgpu::BlendComponent {
-                        src_factor: src,
-                        dst_factor: dst,
+                        src_factor: src_a,
+                        dst_factor: dst_a,
                         operation: wgpu::BlendOperation::Add,
                     },
                 })
@@ -532,7 +643,8 @@ impl WgpuRenderer {
 
             let depth_stencil = Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth24PlusStencil8,
-                depth_write_enabled: Some(key.depth_write),
+                // GL never touches the depth buffer while GL_DEPTH_TEST is off.
+                depth_write_enabled: Some(key.depth_test && key.depth_write),
                 depth_compare: if key.depth_test {
                     Some(to_wgpu_compare(key.depth_func))
                 } else {
@@ -552,7 +664,9 @@ impl WgpuRenderer {
             if key.color_mask & 4 != 0 {
                 write_mask |= wgpu::ColorWrites::BLUE;
             }
-            write_mask |= wgpu::ColorWrites::ALPHA;
+            if key.color_mask & 8 != 0 {
+                write_mask |= wgpu::ColorWrites::ALPHA;
+            }
 
             let pipeline = self
                 .device
@@ -602,7 +716,12 @@ impl WgpuRenderer {
                     }),
                     primitive: wgpu::PrimitiveState {
                         topology,
-                        strip_index_format: None,
+                        strip_index_format: matches!(
+                            topology,
+                            wgpu::PrimitiveTopology::TriangleStrip
+                                | wgpu::PrimitiveTopology::LineStrip
+                        )
+                        .then_some(wgpu::IndexFormat::Uint32),
                         front_face,
                         cull_mode,
                         unclipped_depth: false,
@@ -619,6 +738,21 @@ impl WgpuRenderer {
         }
 
         self.pipelines.get(key).unwrap()
+    }
+
+    /// Makes sure a render target exists (acquiring the swapchain texture if
+    /// needed) without allocating a `TextureView`; used on per-draw paths.
+    fn ensure_target_available(&mut self) -> Result<(), String> {
+        if self.surface.is_some() {
+            if self.current_surface_texture.is_some() {
+                return Ok(());
+            }
+            self.ensure_frame_target().map(|_| ())
+        } else if self.offscreen_color_view.is_some() {
+            Ok(())
+        } else {
+            Err("No render target available".to_string())
+        }
     }
 
     pub fn ensure_frame_target(&mut self) -> Result<wgpu::TextureView, String> {
@@ -647,9 +781,10 @@ impl WgpuRenderer {
                 }
             }
             let tex = self.current_surface_texture.as_ref().unwrap();
-            Ok(tex
-                .texture
-                .create_view(&wgpu::TextureViewDescriptor::default()))
+            Ok(tex.texture.create_view(&wgpu::TextureViewDescriptor {
+                format: Some(self.surface_format),
+                ..Default::default()
+            }))
         } else if let Some(view) = &self.offscreen_color_view {
             Ok(view.clone())
         } else {
@@ -657,17 +792,148 @@ impl WgpuRenderer {
         }
     }
 
-    pub fn clear(&mut self, clear_color: bool, clear_depth: bool, _clear_stencil: bool) {
-        if !clear_color && !clear_depth {
+    pub fn clear(
+        &mut self,
+        clear_color: bool,
+        clear_depth: bool,
+        _clear_stencil: bool,
+        state: ClearState,
+    ) {
+        // glDepthMask also gates depth clears.
+        let clear_depth = clear_depth && state.depth_mask;
+        let color_mask = state.color_mask & 0xF;
+        if (!clear_color || color_mask == 0) && !clear_depth {
             return;
         }
-        if self.ensure_frame_target().is_err() {
+        if self.ensure_target_available().is_err() {
             return;
         }
-        self.frame_ops.push(FrameOp::Clear {
-            color: clear_color.then_some(self.clear_color),
-            depth: clear_depth.then_some(self.clear_depth),
-        });
+        let (tw, th) = (self.width.max(1), self.height.max(1));
+        let rect = state
+            .scissor
+            .map(|r| gl_rect_to_target(r, tw, th))
+            .filter(|r| *r != (0, 0, tw, th));
+
+        if rect.is_none() && (!clear_color || color_mask == 0xF) {
+            // Whole-target clear: use the cheap render-pass load op.
+            self.frame_ops.push(FrameOp::Clear {
+                color: clear_color.then_some(self.clear_color),
+                depth: clear_depth.then_some(self.clear_depth),
+            });
+            return;
+        }
+
+        let c = self.clear_color;
+        let color = [c[0] as f32, c[1] as f32, c[2] as f32, 1.0];
+        let z = self.clear_depth.clamp(0.0, 1.0);
+        let v = |x: f32, y: f32| VertexData {
+            position: [x, y, z],
+            tex_coord: [0.0, 0.0],
+            color,
+            normal: [0.0, 0.0, 1.0],
+        };
+        let offset = self.stage_vertices(&[v(-1.0, -1.0), v(3.0, -1.0), v(-1.0, 3.0)]);
+        let key = (clear_color && color_mask != 0, clear_depth, color_mask);
+        self.get_or_create_clear_pipeline(key);
+        self.frame_ops.push(FrameOp::QuadClear(QuadClear {
+            key,
+            vertex_offset: offset,
+            scissor: rect.unwrap_or((0, 0, tw, th)),
+        }));
+    }
+
+    /// Appends vertices to the frame's vertex staging area, returning their
+    /// byte offset in the scratch buffer.
+    fn stage_vertices(&mut self, vertices: &[VertexData]) -> u64 {
+        let bytes = std::mem::size_of_val(vertices) as u64;
+        if self.vertex_scratch_offset + bytes > self.vertex_scratch_capacity {
+            self.grow_vertex_scratch(self.vertex_scratch_offset + bytes);
+        }
+        let offset = self.vertex_scratch_offset;
+        self.vertex_staging
+            .extend_from_slice(bytemuck::cast_slice(vertices));
+        self.vertex_scratch_offset += bytes;
+        offset
+    }
+
+    fn get_or_create_clear_pipeline(&mut self, key: (bool, bool, u8)) {
+        if self.clear_pipelines.contains_key(&key) {
+            return;
+        }
+        let (color, depth, mask) = key;
+        let mut write_mask = wgpu::ColorWrites::empty();
+        if color {
+            for (bit, w) in [
+                (1, wgpu::ColorWrites::RED),
+                (2, wgpu::ColorWrites::GREEN),
+                (4, wgpu::ColorWrites::BLUE),
+                (8, wgpu::ColorWrites::ALPHA),
+            ] {
+                if mask & bit != 0 {
+                    write_mask |= w;
+                }
+            }
+        }
+        let attributes = [
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 1,
+                format: wgpu::VertexFormat::Float32x2,
+            },
+            wgpu::VertexAttribute {
+                offset: 20,
+                shader_location: 2,
+                format: wgpu::VertexFormat::Float32x4,
+            },
+            wgpu::VertexAttribute {
+                offset: 36,
+                shader_location: 3,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+        ];
+        let pipeline = self
+            .device
+            .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: Some("angle_wgpu Clear Pipeline"),
+                layout: Some(&self.clear_pipeline_layout),
+                vertex: wgpu::VertexState {
+                    module: &self.clear_shader,
+                    entry_point: Some("vs_main"),
+                    compilation_options: Default::default(),
+                    buffers: &[Some(wgpu::VertexBufferLayout {
+                        array_stride: std::mem::size_of::<VertexData>() as u64,
+                        step_mode: wgpu::VertexStepMode::Vertex,
+                        attributes: &attributes,
+                    })],
+                },
+                fragment: Some(wgpu::FragmentState {
+                    module: &self.clear_shader,
+                    entry_point: Some("fs_main"),
+                    compilation_options: Default::default(),
+                    targets: &[Some(wgpu::ColorTargetState {
+                        format: self.surface_format,
+                        blend: None,
+                        write_mask,
+                    })],
+                }),
+                primitive: wgpu::PrimitiveState::default(),
+                depth_stencil: Some(wgpu::DepthStencilState {
+                    format: wgpu::TextureFormat::Depth24PlusStencil8,
+                    depth_write_enabled: Some(depth),
+                    depth_compare: Some(wgpu::CompareFunction::Always),
+                    stencil: wgpu::StencilState::default(),
+                    bias: wgpu::DepthBiasState::default(),
+                }),
+                multisample: wgpu::MultisampleState::default(),
+                multiview_mask: None,
+                cache: None,
+            });
+        self.clear_pipelines.insert(key, pipeline);
     }
 
     fn grow_uniform_pool(&mut self, needed_slots: u64) {
@@ -752,7 +1018,12 @@ impl WgpuRenderer {
         self.uniform_staging[uniform_offset as usize..target_len].copy_from_slice(uniform_bytes);
         self.uniform_used += 1;
         // Sync texture bind group
-        texture.sync_gpu(&self.device, &self.queue, &self.texture_bind_group_layout);
+        texture.sync_gpu(
+            &self.device,
+            &self.queue,
+            &self.texture_bind_group_layout,
+            self.flush_epoch,
+        );
         let Some(tex_bind_group) = &texture.gpu_bind_group else {
             return;
         };
@@ -760,7 +1031,7 @@ impl WgpuRenderer {
         // Append into the reused vertex/index scratch pools instead of
         // allocating a fresh GPU buffer per draw call (was the dominant
         // per-frame cost: every chunk face layer allocated two buffers).
-        let vertex_bytes = (vertices.len() * std::mem::size_of::<VertexData>()) as u64;
+        let vertex_bytes = std::mem::size_of_val(vertices) as u64;
         if self.vertex_scratch_offset + vertex_bytes > self.vertex_scratch_capacity {
             self.grow_vertex_scratch(self.vertex_scratch_offset + vertex_bytes);
         }
@@ -770,7 +1041,7 @@ impl WgpuRenderer {
         self.vertex_scratch_offset += vertex_bytes;
 
         let index_range = indices.map(|idx| {
-            let index_bytes = (idx.len() * std::mem::size_of::<u32>()) as u64;
+            let index_bytes = std::mem::size_of_val(idx) as u64;
             if self.index_scratch_offset + index_bytes > self.index_scratch_capacity {
                 self.grow_index_scratch(self.index_scratch_offset + index_bytes);
             }
@@ -781,20 +1052,15 @@ impl WgpuRenderer {
             (offset, offset + index_bytes, idx.len() as u32)
         });
 
-        if self.ensure_frame_target().is_err() {
+        if self.ensure_target_available().is_err() {
             return;
         }
         self.get_or_create_pipeline(key);
 
-        let (vx, vy, vw, vh) = viewport;
+        // GL rects are bottom-left origin; wgpu's are top-left.
         let (target_w, target_h) = (self.width.max(1), self.height.max(1));
-        let safe_vw = vw.min(target_w.saturating_sub(vx)).max(1);
-        let safe_vh = vh.min(target_h.saturating_sub(vy)).max(1);
-        let resolved_scissor = scissor.map(|(sx, sy, sw, sh)| {
-            let safe_sw = sw.min(target_w.saturating_sub(sx)).max(1);
-            let safe_sh = sh.min(target_h.saturating_sub(sy)).max(1);
-            (sx, sy, safe_sw, safe_sh)
-        });
+        let (vx, vy, safe_vw, safe_vh) = gl_rect_to_target(viewport, target_w, target_h);
+        let resolved_scissor = scissor.map(|r| gl_rect_to_target(r, target_w, target_h));
 
         self.frame_ops.push(FrameOp::Draw(PendingDraw {
             key: *key,
@@ -873,11 +1139,12 @@ impl WgpuRenderer {
                 _ => (None, None),
             };
 
-            let mut draws: Vec<PendingDraw> = Vec::new();
-            while let Some(FrameOp::Draw(_)) = iter.peek() {
-                if let Some(FrameOp::Draw(d)) = iter.next() {
-                    draws.push(d);
-                }
+            let mut items: Vec<FrameOp> = Vec::new();
+            while matches!(
+                iter.peek(),
+                Some(FrameOp::Draw(_)) | Some(FrameOp::QuadClear(_))
+            ) {
+                items.extend(iter.next());
             }
 
             let color_ops = match clear_color {
@@ -924,7 +1191,29 @@ impl WgpuRenderer {
                 multiview_mask: None,
             });
 
-            for d in &draws {
+            let (target_w, target_h) = (self.width.max(1), self.height.max(1));
+            for item in &items {
+                let d = match item {
+                    FrameOp::Draw(d) => d,
+                    FrameOp::QuadClear(q) => {
+                        let Some(pipeline) = self.clear_pipelines.get(&q.key) else {
+                            continue;
+                        };
+                        pass.set_pipeline(pipeline);
+                        pass.set_viewport(0.0, 0.0, target_w as f32, target_h as f32, 0.0, 1.0);
+                        let (sx, sy, sw, sh) = q.scissor;
+                        pass.set_scissor_rect(sx, sy, sw, sh);
+                        let bytes = 3 * std::mem::size_of::<VertexData>() as u64;
+                        pass.set_vertex_buffer(
+                            0,
+                            self.vertex_scratch
+                                .slice(q.vertex_offset..q.vertex_offset + bytes),
+                        );
+                        pass.draw(0..3, 0..1);
+                        continue;
+                    }
+                    FrameOp::Clear { .. } => continue,
+                };
                 let Some(pipeline) = self.pipelines.get(&d.key) else {
                     continue;
                 };
@@ -934,9 +1223,10 @@ impl WgpuRenderer {
 
                 let (vx, vy, vw, vh) = d.viewport;
                 pass.set_viewport(vx, vy, vw, vh, 0.0, 1.0);
-                if let Some((sx, sy, sw, sh)) = d.scissor {
-                    pass.set_scissor_rect(sx, sy, sw, sh);
-                }
+                // Always set: the scissor persists across draws in a pass,
+                // so an unscissored draw must reset a previous draw's rect.
+                let (sx, sy, sw, sh) = d.scissor.unwrap_or((0, 0, target_w, target_h));
+                pass.set_scissor_rect(sx, sy, sw, sh);
 
                 pass.set_vertex_buffer(
                     0,
@@ -959,6 +1249,7 @@ impl WgpuRenderer {
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
+        self.flush_epoch = self.flush_epoch.wrapping_add(1);
         // Safe to reuse immediately: wgpu queue operations (writes and
         // submits) execute in issue order on the same queue, so the next
         // frame's `write_buffer` calls at these same offsets are
@@ -973,7 +1264,7 @@ impl WgpuRenderer {
     }
     pub fn swap_buffers(&mut self) -> Result<(), String> {
         if self.current_surface_texture.is_none() && self.surface.is_some() {
-            self.clear(true, true, false);
+            self.clear(true, true, false, ClearState::default());
         }
         self.flush();
         if let Some(window) = &self.window {
@@ -1002,5 +1293,120 @@ impl WgpuRenderer {
             window.request_redraw();
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::future::Future;
+    use std::task::{Context, Poll, RawWaker, RawWakerVTable, Waker};
+
+    fn block_on<F: Future>(fut: F) -> F::Output {
+        fn noop_raw() -> RawWaker {
+            fn clone(_: *const ()) -> RawWaker {
+                noop_raw()
+            }
+            fn noop(_: *const ()) {}
+            static VT: RawWakerVTable = RawWakerVTable::new(clone, noop, noop, noop);
+            RawWaker::new(std::ptr::null(), &VT)
+        }
+        let waker = unsafe { Waker::from_raw(noop_raw()) };
+        let mut cx = Context::from_waker(&waker);
+        let mut fut = std::pin::pin!(fut);
+        loop {
+            if let Poll::Ready(v) = fut.as_mut().poll(&mut cx) {
+                return v;
+            }
+            std::thread::yield_now();
+        }
+    }
+
+    /// Reads the offscreen target back as `[b, g, r, a]` per pixel (Bgra8).
+    fn read_back(r: &WgpuRenderer) -> Vec<u8> {
+        let (w, h) = (r.width, r.height);
+        assert_eq!((w * 4) % 256, 0, "test sizes must keep rows 256B aligned");
+        let buf = r.device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size: (w * h * 4) as u64,
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+        let mut enc = r.device.create_command_encoder(&Default::default());
+        enc.copy_texture_to_buffer(
+            r.offscreen_color.as_ref().unwrap().as_image_copy(),
+            wgpu::TexelCopyBufferInfo {
+                buffer: &buf,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(w * 4),
+                    rows_per_image: Some(h),
+                },
+            },
+            wgpu::Extent3d {
+                width: w,
+                height: h,
+                depth_or_array_layers: 1,
+            },
+        );
+        r.queue.submit([enc.finish()]);
+        buf.slice(..).map_async(wgpu::MapMode::Read, |_| {});
+        r.device
+            .poll(wgpu::PollType::wait_indefinitely())
+            .expect("poll");
+        let data = buf.slice(..).get_mapped_range().expect("map").to_vec();
+        data
+    }
+
+    fn px(data: &[u8], w: u32, x: u32, y_top: u32) -> [u8; 3] {
+        let i = ((y_top * w + x) * 4) as usize;
+        [data[i + 2], data[i + 1], data[i]] // r, g, b
+    }
+
+    #[test]
+    fn scissored_clear_respects_gl_origin_and_masks() {
+        let Ok(mut r) = block_on(WgpuRenderer::new_headless(64, 64)) else {
+            eprintln!("no wgpu adapter available; skipping");
+            return;
+        };
+        let red = [1.0, 0.0, 0.0, 1.0];
+        let green = [0.0, 1.0, 0.0, 1.0];
+
+        // Full red clear, then a green clear limited to the GL bottom-left
+        // 32x16 rect (which is the bottom-left in the image as well).
+        r.clear_color = red;
+        r.clear(true, true, false, ClearState::default());
+        r.clear_color = green;
+        r.clear(
+            true,
+            false,
+            false,
+            ClearState {
+                scissor: Some((0, 0, 32, 16)),
+                ..Default::default()
+            },
+        );
+        r.flush();
+        let d = read_back(&r);
+        assert_eq!(px(&d, 64, 10, 64 - 8), [0, 255, 0], "inside rect (bottom-left)");
+        assert_eq!(px(&d, 64, 10, 8), [255, 0, 0], "top-left must stay red");
+        assert_eq!(px(&d, 64, 48, 64 - 8), [255, 0, 0], "right of rect must stay red");
+
+        // Channel-masked full clear: only blue written -> red stays, green
+        // stays, blue becomes the clear colour's blue (0 here => pick blue).
+        r.clear_color = [0.0, 0.0, 1.0, 1.0];
+        r.clear(
+            true,
+            false,
+            false,
+            ClearState {
+                color_mask: 0b0100,
+                ..Default::default()
+            },
+        );
+        r.flush();
+        let d = read_back(&r);
+        assert_eq!(px(&d, 64, 48, 8), [255, 0, 255], "red kept, blue written");
+        assert_eq!(px(&d, 64, 10, 64 - 8), [0, 255, 255], "green kept, blue written");
     }
 }

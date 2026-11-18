@@ -465,7 +465,7 @@ mod tests {
     use ruffle_core::backend::navigator::NullExecutor;
     use ruffle_render::backend::null::NullRenderer;
     use ruffle_core::display_object::{TDisplayObject, TDisplayObjectContainer, BoundsMode};
-    use ruffle_core::tag_utils::SwfMovie;
+    use ruffle_core::tag_utils::SwfMovieData;
     use ruffle_core::{FloatDuration, PlayerBuilder, ViewportDimensions};
     use std::path::PathBuf;
 
@@ -473,7 +473,7 @@ mod tests {
     fn test_pause_menu_buttons() {
         let swf_path = "Minecraft.Client/Common/Media/PauseMenu720.swf";
         let swf_bytes = std::fs::read(swf_path).expect("failed to read PauseMenu720.swf");
-        let movie = SwfMovie::from_data(&swf_bytes, "file:///PauseMenu720.swf".to_string(), None, None).expect("failed to parse swf");
+        let movie = SwfMovieData::from_data(&swf_bytes, "file:///PauseMenu720.swf".to_string(), None, None).expect("failed to parse swf");
 
         let mut executor = NullExecutor::new();
         let search_dirs = vec![

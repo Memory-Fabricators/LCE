@@ -5,7 +5,7 @@ use crate::navigator::SearchPathNavigatorBackend;
 use crate::opengl_renderer::OpenGlRenderer;
 use ruffle_core::backend::navigator::NullExecutor;
 use ruffle_core::events::MouseButton as RuffleMouseButton;
-use ruffle_core::tag_utils::SwfMovie;
+use ruffle_core::tag_utils::SwfMovieData;
 use ruffle_core::{FloatDuration, Player, PlayerBuilder, PlayerEvent, ViewportDimensions};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
@@ -28,7 +28,7 @@ impl BridgePlayer {
         search_dirs: Vec<PathBuf>,
     ) -> Result<Self, ()> {
         let renderer = OpenGlRenderer::new(width, height)?;
-        let movie = SwfMovie::from_data(swf_data, url, None, None).map_err(|_| ())?;
+        let movie = SwfMovieData::from_data(swf_data, url, None, None).map_err(|_| ())?;
         let executor = NullExecutor::new();
         let navigator = SearchPathNavigatorBackend::new(search_dirs, &executor);
         let player = PlayerBuilder::new()

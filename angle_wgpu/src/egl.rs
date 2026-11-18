@@ -8,10 +8,10 @@ use crate::types::*;
 use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::ffi::{CStr, c_void};
+use std::ffi::{c_void, CStr};
 use std::future::Future;
-use std::sync::Arc;
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::Arc;
 
 pub fn block_on<F: Future>(mut future: F) -> F::Output {
     use std::pin::Pin;
@@ -53,6 +53,7 @@ pub struct EglContextState {
 pub struct EglDisplayState {
     pub initialized: bool,
     pub native_display: NativeDisplayType,
+    pub native_platform: NativePlatform,
     pub surfaces: HashMap<u32, Arc<Mutex<EglSurfaceState>>>,
     pub contexts: HashMap<u32, Arc<Mutex<EglContextState>>>,
     pub shared_textures: Arc<Mutex<TextureManager>>,
@@ -66,6 +67,7 @@ impl Default for EglDisplayState {
         Self {
             initialized: false,
             native_display: std::ptr::null_mut(),
+            native_platform: NativePlatform::X11,
             surfaces: HashMap::new(),
             contexts: HashMap::new(),
             shared_textures: Arc::new(Mutex::new(TextureManager::new())),
@@ -136,10 +138,53 @@ pub fn get_or_create_display() -> Arc<Mutex<EglDisplayState>> {
 // EGL C API
 // ============================================================================
 
+/// Default platform selection for the legacy `eglGetDisplay` entry point.
+///
+/// This matches winit's backend preference (Wayland when a Wayland socket is
+/// present, otherwise X11). Hosts that know which native window system they
+/// created a window on should call `eglGetPlatformDisplayEXT` instead.
+fn default_native_platform() -> NativePlatform {
+    let non_empty = |name: &str| {
+        std::env::var_os(name).is_some_and(|value| !value.is_empty())
+    };
+    if non_empty("WAYLAND_DISPLAY") || non_empty("WAYLAND_SOCKET") {
+        NativePlatform::Wayland
+    } else {
+        NativePlatform::X11
+    }
+}
+
 pub unsafe fn egl_get_display(display_id: NativeDisplayType) -> EGLDisplay {
     crate::init_logging();
     let dpy = get_or_create_display();
-    dpy.lock().native_display = display_id;
+    {
+        let mut d = dpy.lock();
+        d.native_display = display_id;
+        d.native_platform = default_native_platform();
+    }
+    Arc::into_raw(dpy) as EGLDisplay
+}
+
+pub unsafe fn egl_get_platform_display(
+    platform: EGLenum,
+    display_id: NativeDisplayType,
+    _attrib_list: *const EGLint,
+) -> EGLDisplay {
+    crate::init_logging();
+    let native_platform = match platform {
+        EGL_PLATFORM_X11_EXT => NativePlatform::X11,
+        EGL_PLATFORM_WAYLAND_EXT => NativePlatform::Wayland,
+        _ => {
+            set_egl_error(EGL_BAD_PARAMETER);
+            return EGL_NO_DISPLAY;
+        }
+    };
+    let dpy = get_or_create_display();
+    {
+        let mut d = dpy.lock();
+        d.native_display = display_id;
+        d.native_platform = native_platform;
+    }
     Arc::into_raw(dpy) as EGLDisplay
 }
 
@@ -271,12 +316,20 @@ pub unsafe fn egl_create_window_surface(
         get_or_create_display()
     };
     if !win.is_null() {
-        let native_display = dpy_arc.lock().native_display;
+        let (native_display, native_platform) = {
+            let d = dpy_arc.lock();
+            (d.native_display, d.native_platform)
+        };
         if !dpy.is_null() {
             std::mem::forget(dpy_arc);
         }
         return crate::native_surface::create_native_egl_surface(
-            dpy, native_display, win, width, height,
+            dpy,
+            native_platform,
+            native_display,
+            win,
+            width,
+            height,
         );
     }
 

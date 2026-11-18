@@ -107,6 +107,9 @@ fn vs_main(in: VertexInput) -> VertexOutput {
 
     let eye_pos = uniforms.model_view * vec4<f32>(in.position, 1.0);
     out.clip_position = uniforms.projection * eye_pos;
+    // GL clip space has z in [-w, w]; wgpu expects [0, w]. Without this the
+    // near half of the depth range is clipped (visible with glOrtho UIs).
+    out.clip_position.z = (out.clip_position.z + out.clip_position.w) * 0.5;
 
     // TexCoord or TexGen
     if (uniforms.alpha_ref.y != 0.0) {

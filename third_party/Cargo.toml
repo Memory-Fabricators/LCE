@@ -12,19 +12,16 @@ cbindgen = { version = "0.29.4", artifact = ["bin"] }
 ruffle_core = { path = "ruffle/src/core", features = ["default_font"] }
 ruffle_render = { path = "ruffle/src/render", default-features = false, features = ["tessellator"] }
 swf = { path = "ruffle/src/swf" }
-wgpu = { git = "https://github.com/gfx-rs/wgpu", default-features = false, features = ["wgsl", "vulkan", "gles", "metal"] }
+wgpu = { version = "30.0.2", default-features = false, features = ["wgsl", "vulkan", "gles", "metal"] }
 raw-window-handle = { version = "0.6.2", default-features = false }
 url = "2"
 glam = "0.33.7"
 async-channel = "2"
 indexmap = "2"
-winit = { version = "0.31.0-beta.3", default-features = false, features = ["x11"] }
+winit = { version = "0.31.0-beta.3", default-features = false, features = ["x11", "wayland"] }
 bytemuck = { version = "1.25.2", features = ["derive"] }
 parking_lot = "0.12.5"
 log = "0.4.34"
 x11-dl = "2.21.0"
 zune-png = { git = "https://github.com/etemesi254/zune-image", default-features = false, features = ["sse", "std"] }
 zune-core = { git = "https://github.com/etemesi254/zune-image", default-features = false, features = [] }
-
-[patch.crates-io]
-swf = { path = "ruffle/src/swf" }

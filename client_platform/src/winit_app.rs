@@ -12,7 +12,7 @@ use winit::dpi::PhysicalSize;
 use winit::event::{
     ButtonSource, DeviceEvent, DeviceId, ElementState, MouseButton, MouseScrollDelta, WindowEvent,
 };
-use winit::event_loop::{ActiveEventLoop, ControlFlow, EventLoop};
+use winit::event_loop::{ActiveEventLoop, ControlFlow, DeviceEvents, EventLoop};
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window, WindowAttributes, WindowId};
 
@@ -26,6 +26,13 @@ pub struct WinitAppState {
     pub mouse_buttons_down: HashSet<u32>,
     pub mouse_pos: (f64, f64),
     pub accumulated_mouse_delta: (f64, f64),
+    /// Whether the backend has delivered at least one raw `PointerMotion`
+    /// device event. When it has, look deltas come exclusively from raw
+    /// motion; absolute `PointerMoved` positions are then only used to keep
+    /// the (hidden) cursor near the window centre. If the backend never
+    /// produces raw motion, `PointerMoved` position deltas remain the
+    /// fallback.
+    pub raw_motion_seen: bool,
     pub scroll_delta: f32,
     pub grabbed: bool,
     /// Set by an Escape keypress to force-release the cursor even while
@@ -34,13 +41,14 @@ pub struct WinitAppState {
     /// otherwise re-request the grab every tick with no way out).
     /// Cleared by clicking back into the window.
     pub escape_ungrab: bool,
-    /// Last raw `PointerMoved` position seen while grabbed, used to
-    /// compute camera-look deltas (position-vs-previous), since raw
-    /// `DeviceEvent::PointerMotion` isn't available on relayed displays.
+    /// Last `PointerMoved` position seen while grabbed. Used to keep the
+    /// hidden cursor near the window centre and as the fallback delta source
+    /// on backends that never emit raw `DeviceEvent::PointerMotion`.
     pub last_pointer_pos: Option<(f64, f64)>,
-    /// Last effective grab state actually applied to the platform, so
-    /// `winit_app_set_mouse_grab` (called every game tick) doesn't redo a
-    /// real `XGrabPointer` syscall each frame when nothing changed.
+    /// Last grab state the platform accepted, so `winit_app_set_mouse_grab`
+    /// (called every game tick) doesn't redo a real `XGrabPointer` syscall
+    /// each frame. `None` means the last attempt failed or a re-apply is
+    /// pending; `about_to_wait` retries it.
     pub grab_applied: Option<bool>,
     pub title: String,
     pub resizable: bool,
@@ -105,12 +113,54 @@ fn keycode_to_game_key(code: KeyCode) -> Option<u32> {
     }
 }
 
+fn center_cursor(state: &mut WinitAppState, win: &Arc<dyn Window>) {
+    let (cx, cy) = ((state.width / 2) as f64, (state.height / 2) as f64);
+    let _ = win.set_cursor_position(winit::dpi::PhysicalPosition::new(cx, cy).into());
+    state.last_pointer_pos = Some((cx, cy));
+}
+
+/// Apply the currently requested grab state to the platform window.
+///
+/// `Locked` is the correct mode (it leaves the hidden cursor alone and, on
+/// Wayland, activates the relative-pointer source look deltas come from);
+/// X11 only supports `Confined`, so fall back to it. Failures are *not*
+/// cached as success: a grab attempted before the window is viewable must be
+/// retried, otherwise the game loses mouse look until some unrelated event
+/// re-applies it.
+fn apply_cursor_grab(state: &mut WinitAppState) {
+    let effective = state.grabbed && !state.escape_ungrab;
+    let Some(win) = state.window.clone() else {
+        state.grab_applied = None;
+        return;
+    };
+    let grabbed = if effective {
+        match win.set_cursor_grab(CursorGrabMode::Locked) {
+            Ok(()) => true,
+            Err(_) => win.set_cursor_grab(CursorGrabMode::Confined).is_ok(),
+        }
+    } else {
+        win.set_cursor_grab(CursorGrabMode::None).is_ok()
+    };
+    win.set_cursor_visible(!effective);
+    if effective {
+        center_cursor(state, &win);
+    }
+    state.grab_applied = if grabbed { Some(effective) } else { None };
+}
+
 impl ApplicationHandler for AppHandler {
     fn can_create_surfaces(&mut self, event_loop: &dyn ActiveEventLoop) {
         self.resumed(event_loop);
     }
 
     fn resumed(&mut self, event_loop: &dyn ActiveEventLoop) {
+        // Raw pointer motion is the only reliable unbounded source of look
+        // deltas while the cursor is grabbed (Wayland delivers it through
+        // the relative-pointer protocol, X11 through XI2 raw events). X11
+        // only subscribes to those events while the window has focus by
+        // default, which made look dead until the first focus change;
+        // `Always` keeps them flowing regardless of focus.
+        event_loop.listen_device_events(DeviceEvents::Always);
         let mut state = self.state.lock();
         if state.window.is_none() {
             let mut attrs = WindowAttributes::default()
@@ -152,34 +202,27 @@ impl ApplicationHandler for AppHandler {
                 state.focused = f;
             }
             WindowEvent::PointerMoved { position, .. } => {
-                // `Confined` (the X11 fallback for `Locked`, which X11
-                // doesn't support) clamps the OS cursor at the window
-                // edge: without recentering, a real physical mouse
-                // sweep can only cover one window-width before further
-                // motion produces zero delta (cursor stuck at the
-                // border). Recenter once the cursor has drifted
-                // meaningfully from center so range stays unbounded.
-                // Recentering on *every* event instead of only when
-                // needed made per-tick deltas jerky (extra warp
-                // syscalls interleaving with real motion events in the
-                // relay's event stream).
-                //
-                // No echo-swallowing flag needed: since deltas are
-                // computed as position-vs-last-known-position, and we
-                // set `last_pointer_pos` to the recenter target
-                // immediately (not waiting for the warp's own event to
-                // arrive), any echo event reporting position == center
-                // naturally yields delta == 0 on its own.
+                state.mouse_pos = (position.x, position.y);
                 if state.grabbed && !state.escape_ungrab {
-                    if let Some((lx, ly)) = state.last_pointer_pos {
-                        let (dx, dy) = (position.x - lx, position.y - ly);
-                        state.accumulated_mouse_delta.0 += dx;
-                        state.accumulated_mouse_delta.1 += dy;
+                    // With raw motion available, absolute positions are
+                    // only used to keep the cursor near the centre: on a
+                    // `Confined` X11 grab it would otherwise get clamped
+                    // at the window edge, and under a Wayland locked
+                    // pointer it never moves at all. Adding position
+                    // deltas on top of raw deltas would also double-count
+                    // every movement.
+                    if !state.raw_motion_seen {
+                        if let Some((lx, ly)) = state.last_pointer_pos {
+                            state.accumulated_mouse_delta.0 += position.x - lx;
+                            state.accumulated_mouse_delta.1 += position.y - ly;
+                        }
                     }
-                    state.mouse_pos = (position.x, position.y);
+                    // Recenter well before the cursor can reach the edge.
+                    // Warps are harmless now: their echo events carry no
+                    // delta because deltas come from raw motion.
                     let (cx, cy) = ((state.width / 2) as f64, (state.height / 2) as f64);
                     let drift = (position.x - cx).abs().max((position.y - cy).abs());
-                    let threshold = (state.width.min(state.height) as f64) * 0.25;
+                    let threshold = ((state.width.min(state.height) as f64) * 0.1).max(1.0);
                     if drift > threshold {
                         if let Some(win) = state.window.clone() {
                             let _ = win.set_cursor_position(
@@ -193,7 +236,6 @@ impl ApplicationHandler for AppHandler {
                         state.last_pointer_pos = Some((position.x, position.y));
                     }
                 } else {
-                    state.mouse_pos = (position.x, position.y);
                     state.last_pointer_pos = Some((position.x, position.y));
                 }
             }
@@ -212,26 +254,13 @@ impl ApplicationHandler for AppHandler {
                 };
                 if btn_state == ElementState::Pressed {
                     state.mouse_buttons_down.insert(btn_id);
-                    // Clicking back into the window re-arms grabbing immediately
-                    // if the application is currently in grabbed state.
+                    // Clicking back into the window re-arms grabbing
+                    // immediately if the application is currently in
+                    // grabbed state.
                     if state.escape_ungrab {
                         state.escape_ungrab = false;
-                        if state.grabbed {
-                            if let Some(win) = state.window.clone() {
-                                let _ = win.set_cursor_grab(CursorGrabMode::Locked);
-                                let _ = win.set_cursor_grab(CursorGrabMode::Confined);
-                                win.set_cursor_visible(false);
-                                let (cx, cy) =
-                                    ((state.width / 2) as f64, (state.height / 2) as f64);
-                                let _ = win.set_cursor_position(
-                                    winit::dpi::PhysicalPosition::new(cx, cy).into(),
-                                );
-                                state.last_pointer_pos = Some((cx, cy));
-                            }
-                            state.grab_applied = Some(true);
-                        } else {
-                            state.grab_applied = None;
-                        }
+                        state.grab_applied = None;
+                        apply_cursor_grab(&mut state);
                     }
                 } else {
                     state.mouse_buttons_down.remove(&btn_id);
@@ -264,9 +293,7 @@ impl ApplicationHandler for AppHandler {
                         if code == KeyCode::Escape && state.grabbed {
                             state.escape_ungrab = true;
                             state.grab_applied = None;
-                            if let Some(win) = &state.window {
-                                win.set_cursor_visible(true);
-                            }
+                            apply_cursor_grab(&mut state);
                         }
                     } else if let Some(gc) = game_code {
                         state.keys_down.remove(&gc);
@@ -281,18 +308,33 @@ impl ApplicationHandler for AppHandler {
         &mut self,
         _event_loop: &dyn ActiveEventLoop,
         _device_id: Option<DeviceId>,
-        _event: DeviceEvent,
+        event: DeviceEvent,
     ) {
-        // Raw XInput2 motion isn't available on this relayed display (real
-        // hardware motion never arrives here - only synthetic/local XTest
-        // events do); `WindowEvent::PointerMoved` is the reliable source,
-        // handled in `window_event` instead.
+        let mut state = self.state.lock();
+        if let DeviceEvent::PointerMotion { delta } = event {
+            // Raw, unfiltered physical motion: unbounded even while the
+            // cursor is locked/confined, and the only motion source a
+            // Wayland locked pointer produces. Ignore it outside a grab so
+            // UI cursor movement stays absolute.
+            state.raw_motion_seen = true;
+            if state.grabbed && !state.escape_ungrab {
+                state.accumulated_mouse_delta.0 += delta.0;
+                state.accumulated_mouse_delta.1 += delta.1;
+            }
+        }
     }
 
     fn about_to_wait(&mut self, event_loop: &dyn ActiveEventLoop) {
-        let state = self.state.lock();
+        let mut state = self.state.lock();
         if state.should_exit {
             event_loop.exit();
+            return;
+        }
+        // The game only notifies us when its grab *wish* changes. If the
+        // platform grab failed (e.g. requested before the window was
+        // viewable), retry here until it sticks.
+        if state.grabbed && !state.escape_ungrab && state.grab_applied != Some(true) {
+            apply_cursor_grab(&mut state);
         }
     }
 }
@@ -324,6 +366,7 @@ pub unsafe extern "C" fn winit_app_create(
         mouse_buttons_down: HashSet::new(),
         mouse_pos: (0.0, 0.0),
         accumulated_mouse_delta: (0.0, 0.0),
+        raw_motion_seen: false,
         scroll_delta: 0.0,
         grabbed: false,
         escape_ungrab: false,
@@ -351,11 +394,23 @@ pub unsafe extern "C" fn winit_app_create(
             let mut builder = EventLoop::builder();
             #[cfg(all(unix, not(target_os = "android")))]
             {
+                // Don't force a backend: winit's default picks Wayland when
+                // WAYLAND_DISPLAY/WAYLAND_SOCKET is set, otherwise X11. The
+                // old `with_x11()` made Wayland-only sessions fail to even
+                // build the event loop (no X server to connect to), which
+                // silently left the game with no window.
+                use winit::platform::wayland::EventLoopBuilderExtWayland;
                 use winit::platform::x11::EventLoopBuilderExtX11;
-                EventLoopBuilderExtX11::with_x11(&mut builder);
+                EventLoopBuilderExtWayland::with_any_thread(&mut builder, true);
                 EventLoopBuilderExtX11::with_any_thread(&mut builder, true);
             }
-            let Ok(event_loop) = builder.build() else { return; };
+            let event_loop = match builder.build() {
+                Ok(event_loop) => event_loop,
+                Err(error) => {
+                    eprintln!("[angle_wgpu] event loop build failed: {error}");
+                    return;
+                }
+            };
             let handler = AppHandler { state: state_clone };
             event_loop.set_control_flow(ControlFlow::Poll);
             let _ = event_loop.run_app(handler);
@@ -457,27 +512,7 @@ pub unsafe extern "C" fn winit_app_set_mouse_grab(app: *mut WinitApp, grab: bool
         // Game calls this every tick; nothing changed, skip the syscalls.
         return;
     }
-    if let Some(win) = s.window.clone() {
-        // `Locked` always errors on X11; `Confined` still keeps the
-        // (hidden) cursor from wandering onto other windows, but camera
-        // look itself comes from raw `PointerMoved` position deltas in
-        // `window_event`, which recenters every event (see there).
-        let mode = if effective_grab {
-            CursorGrabMode::Locked
-        } else {
-            CursorGrabMode::None
-        };
-        if win.set_cursor_grab(mode).is_err() && effective_grab {
-            let _ = win.set_cursor_grab(CursorGrabMode::Confined);
-        }
-        win.set_cursor_visible(!effective_grab);
-        if effective_grab {
-            let (cx, cy) = ((s.width / 2) as f64, (s.height / 2) as f64);
-            let _ = win.set_cursor_position(winit::dpi::PhysicalPosition::new(cx, cy).into());
-            s.last_pointer_pos = Some((cx, cy));
-        }
-    }
-    s.grab_applied = Some(effective_grab);
+    apply_cursor_grab(&mut s);
 }
 
 #[no_mangle]
@@ -557,8 +592,26 @@ pub unsafe extern "C" fn winit_app_get_native_display(app: *mut WinitApp) -> *mu
     match display.as_raw() {
         #[cfg(all(unix, not(target_os = "macos")))]
         RawDisplayHandle::Xlib(handle) => handle.display.map_or(std::ptr::null_mut(), |display| display.as_ptr()),
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawDisplayHandle::Wayland(handle) => handle.display.as_ptr(),
         // EGL_DEFAULT_DISPLAY is the correct display argument on Win32 and AppKit.
         _ => std::ptr::null_mut(),
+    }
+}
+
+/// EGL platform selector for the window's native handle, or 0 when the
+/// platform should be left to `eglGetDisplay` (Windows, macOS).
+#[no_mangle]
+pub unsafe extern "C" fn winit_app_get_egl_platform(app: *mut WinitApp) -> u32 {
+    if app.is_null() { return 0; }
+    let window = match (*app).state.lock().window.clone() { Some(window) => window, None => return 0 };
+    let Ok(handle) = window.window_handle() else { return 0; };
+    match handle.as_raw() {
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawWindowHandle::Xlib(_) => 0x31D5,    // EGL_PLATFORM_X11_EXT
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawWindowHandle::Wayland(_) => 0x31D8, // EGL_PLATFORM_WAYLAND_EXT
+        _ => 0,
     }
 }
 
@@ -570,6 +623,8 @@ pub unsafe extern "C" fn winit_app_get_native_window(app: *mut WinitApp) -> *mut
     match handle.as_raw() {
         #[cfg(all(unix, not(target_os = "macos")))]
         RawWindowHandle::Xlib(handle) => handle.window as usize as *mut c_void,
+        #[cfg(all(unix, not(target_os = "macos")))]
+        RawWindowHandle::Wayland(handle) => handle.surface.as_ptr(),
         #[cfg(target_os = "windows")]
         RawWindowHandle::Win32(handle) => handle.hwnd.get() as *mut c_void,
         #[cfg(target_os = "macos")]

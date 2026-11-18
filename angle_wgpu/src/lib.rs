@@ -4,8 +4,8 @@
 pub mod display_list;
 pub mod egl;
 pub mod gl_context;
-pub mod native_surface;
 pub mod matrix;
+pub mod native_surface;
 pub mod renderer;
 pub mod shader;
 pub mod texture;
@@ -336,9 +336,130 @@ pub unsafe extern "C" fn glClientActiveTexture(texture: GLenum) {
 // Draw Calls
 // ============================================================================
 
+/// Byte size of one component of a GL client-array element type.
+fn gl_type_size(ty: GLenum) -> usize {
+    match ty {
+        GL_BYTE | GL_UNSIGNED_BYTE => 1,
+        GL_SHORT | GL_UNSIGNED_SHORT => 2,
+        _ => 4,
+    }
+}
+
+/// Reads one component of a client array, converting from its GL type.
+/// `normalize` maps integer types to [0, 1] / [-1, 1] (colors, normals).
+unsafe fn read_component(p: *const u8, ty: GLenum, normalize: bool) -> f32 {
+    use std::ptr::read_unaligned;
+    match ty {
+        GL_UNSIGNED_BYTE => {
+            let v = *p as f32;
+            if normalize { v / 255.0 } else { v }
+        }
+        GL_BYTE => {
+            let v = *(p as *const i8) as f32;
+            if normalize { ((2.0 * v + 1.0) / 255.0).max(-1.0) } else { v }
+        }
+        GL_UNSIGNED_SHORT => {
+            let v = read_unaligned(p as *const u16) as f32;
+            if normalize { v / 65535.0 } else { v }
+        }
+        GL_SHORT => {
+            let v = read_unaligned(p as *const i16) as f32;
+            if normalize { ((2.0 * v + 1.0) / 65535.0).max(-1.0) } else { v }
+        }
+        GL_UNSIGNED_INT => {
+            let v = read_unaligned(p as *const u32) as f32;
+            if normalize { v / 4294967295.0 } else { v }
+        }
+        GL_INT => {
+            let v = read_unaligned(p as *const i32) as f32;
+            if normalize { ((2.0 * v + 1.0) / 4294967295.0).max(-1.0) } else { v }
+        }
+        _ => read_unaligned(p as *const f32),
+    }
+}
+
+/// Reads `size` components (up to 4) of element `idx` of a client array.
+unsafe fn read_attrib(
+    ptr: *const c_void,
+    size: GLint,
+    ty: GLenum,
+    stride: GLsizei,
+    idx: usize,
+    normalize: bool,
+) -> [f32; 4] {
+    let comps = (size.clamp(0, 4)) as usize;
+    let elem = gl_type_size(ty);
+    let stride = if stride > 0 {
+        stride as usize
+    } else {
+        comps * elem
+    };
+    let base = (ptr as *const u8).add(idx * stride);
+    let mut out = [0.0f32; 4];
+    for (c, slot) in out.iter_mut().enumerate().take(comps) {
+        *slot = read_component(base.add(c * elem), ty, normalize);
+    }
+    out
+}
+
+/// Builds one `VertexData` from the enabled client arrays, falling back to
+/// the current immediate-mode attributes for disabled ones.
+unsafe fn fetch_client_vertex(ctx: &GlContext, idx: usize) -> VertexData {
+    let p = read_attrib(
+        ctx.vertex_pointer,
+        ctx.vertex_pointer_size,
+        ctx.vertex_pointer_type,
+        ctx.vertex_pointer_stride,
+        idx,
+        false,
+    );
+    let mut tex = ctx.current_texcoord;
+    if ctx.texcoord_array_enabled && !ctx.texcoord_pointer.is_null() {
+        let t = read_attrib(
+            ctx.texcoord_pointer,
+            ctx.texcoord_pointer_size,
+            ctx.texcoord_pointer_type,
+            ctx.texcoord_pointer_stride,
+            idx,
+            false,
+        );
+        tex = [t[0], t[1]];
+    }
+    let mut col = ctx.current_color;
+    if ctx.color_array_enabled && !ctx.color_pointer.is_null() {
+        let c = read_attrib(
+            ctx.color_pointer,
+            ctx.color_pointer_size,
+            ctx.color_pointer_type,
+            ctx.color_pointer_stride,
+            idx,
+            true,
+        );
+        col = [c[0], c[1], c[2], if ctx.color_pointer_size >= 4 { c[3] } else { 1.0 }];
+    }
+    let mut norm = ctx.current_normal;
+    if ctx.normal_array_enabled && !ctx.normal_pointer.is_null() {
+        let n = read_attrib(
+            ctx.normal_pointer,
+            3,
+            ctx.normal_pointer_type,
+            ctx.normal_pointer_stride,
+            idx,
+            true,
+        );
+        norm = [n[0], n[1], n[2]];
+    }
+    VertexData {
+        position: [p[0], p[1], p[2]],
+        tex_coord: tex,
+        color: col,
+        normal: norm,
+    }
+}
+
 #[no_mangle]
 pub unsafe extern "C" fn glDrawArrays(mode: GLenum, first: GLint, count: GLsizei) {
-    if count <= 0 {
+    if count <= 0 || first < 0 {
         return;
     }
 
@@ -347,103 +468,17 @@ pub unsafe extern "C" fn glDrawArrays(mode: GLenum, first: GLint, count: GLsizei
             return;
         }
 
-        let total = count as usize;
-        let mut vertices = Vec::with_capacity(total);
-
-        let v_stride = if ctx.vertex_pointer_stride > 0 {
-            ctx.vertex_pointer_stride as usize
-        } else {
-            (ctx.vertex_pointer_size * 4) as usize
-        };
-        let t_stride = if ctx.texcoord_pointer_stride > 0 {
-            ctx.texcoord_pointer_stride as usize
-        } else {
-            (ctx.texcoord_pointer_size * 4) as usize
-        };
-        let c_stride = if ctx.color_pointer_stride > 0 {
-            ctx.color_pointer_stride as usize
-        } else {
-            (ctx.color_pointer_size * 4) as usize
-        };
-        let n_stride = if ctx.normal_pointer_stride > 0 {
-            ctx.normal_pointer_stride as usize
-        } else {
-            12
-        };
-
-        for i in 0..total {
-            let idx = (first as usize) + i;
-
-            // Position
-            let mut pos = [0.0f32; 3];
-            if !ctx.vertex_pointer.is_null() {
-                let p = (ctx.vertex_pointer as *const u8).add(idx * v_stride) as *const f32;
-                if ctx.vertex_pointer_size >= 2 {
-                    pos[0] = *p.add(0);
-                    pos[1] = *p.add(1);
-                }
-                if ctx.vertex_pointer_size >= 3 {
-                    pos[2] = *p.add(2);
-                }
-            }
-
-            // TexCoord
-            let mut tex = ctx.current_texcoord;
-            if ctx.texcoord_array_enabled && !ctx.texcoord_pointer.is_null() {
-                let p = (ctx.texcoord_pointer as *const u8).add(idx * t_stride) as *const f32;
-                if ctx.texcoord_pointer_size >= 2 {
-                    tex[0] = *p.add(0);
-                    tex[1] = *p.add(1);
-                }
-            }
-
-            // Color
-            let mut col = ctx.current_color;
-            if ctx.color_array_enabled && !ctx.color_pointer.is_null() {
-                let p = (ctx.color_pointer as *const u8).add(idx * c_stride);
-                if ctx.color_pointer_type == GL_UNSIGNED_BYTE {
-                    let pb = p as *const u8;
-                    col[0] = (*pb.add(0) as f32) / 255.0;
-                    col[1] = (*pb.add(1) as f32) / 255.0;
-                    col[2] = (*pb.add(2) as f32) / 255.0;
-                    if ctx.color_pointer_size >= 4 {
-                        col[3] = (*pb.add(3) as f32) / 255.0;
-                    } else {
-                        col[3] = 1.0;
-                    }
-                } else {
-                    let pf = p as *const f32;
-                    col[0] = *pf.add(0);
-                    col[1] = *pf.add(1);
-                    col[2] = *pf.add(2);
-                    if ctx.color_pointer_size >= 4 {
-                        col[3] = *pf.add(3);
-                    } else {
-                        col[3] = 1.0;
-                    }
-                }
-            }
-
-            // Normal
-            let mut norm = ctx.current_normal;
-            if ctx.normal_array_enabled && !ctx.normal_pointer.is_null() {
-                let p = (ctx.normal_pointer as *const u8).add(idx * n_stride) as *const f32;
-                norm[0] = *p.add(0);
-                norm[1] = *p.add(1);
-                norm[2] = *p.add(2);
-            }
-
-            vertices.push(VertexData {
-                position: pos,
-                tex_coord: tex,
-                color: col,
-                normal: norm,
-            });
-        }
-
+        let first = first as usize;
+        let vertices: Vec<VertexData> = (0..count as usize)
+            .map(|i| fetch_client_vertex(ctx, first + i))
+            .collect();
         ctx.draw_vertex_data(mode, &vertices, None);
     });
 }
+
+/// Largest vertex index `glDrawElements` will dereference. The client array
+/// length is unknown, so a corrupt index would otherwise read arbitrary memory.
+const MAX_DRAW_ELEMENTS_INDEX: u32 = 1 << 24;
 
 #[no_mangle]
 pub unsafe extern "C" fn glDrawElements(
@@ -461,71 +496,29 @@ pub unsafe extern "C" fn glDrawElements(
             return;
         }
 
+        // Fetch only the vertices that are actually referenced, remapping the
+        // caller's indices onto a compact vertex list.
         let num_indices = count as usize;
-        let mut idx_vec = Vec::with_capacity(num_indices);
+        let mut remap: std::collections::HashMap<u32, u32> =
+            std::collections::HashMap::with_capacity(num_indices.min(4096));
+        let mut vertices: Vec<VertexData> = Vec::new();
+        let mut idx_vec: Vec<u32> = Vec::with_capacity(num_indices);
 
-        let mut max_index = 0usize;
         for i in 0..num_indices {
             let idx = match type_ {
                 GL_UNSIGNED_BYTE => *(indices as *const u8).add(i) as u32,
-                GL_UNSIGNED_SHORT => *(indices as *const u16).add(i) as u32,
-                GL_UNSIGNED_INT => *(indices as *const u32).add(i),
-                _ => *(indices as *const u16).add(i) as u32,
+                GL_UNSIGNED_INT => std::ptr::read_unaligned((indices as *const u32).add(i)),
+                _ => std::ptr::read_unaligned((indices as *const u16).add(i)) as u32,
             };
-            max_index = max_index.max(idx as usize);
-            idx_vec.push(idx);
-        }
-
-        let vertex_count = max_index + 1;
-        let mut vertices = Vec::with_capacity(vertex_count);
-
-        let v_stride = if ctx.vertex_pointer_stride > 0 {
-            ctx.vertex_pointer_stride as usize
-        } else {
-            (ctx.vertex_pointer_size * 4) as usize
-        };
-        let t_stride = if ctx.texcoord_pointer_stride > 0 {
-            ctx.texcoord_pointer_stride as usize
-        } else {
-            (ctx.texcoord_pointer_size * 4) as usize
-        };
-        let c_stride = if ctx.color_pointer_stride > 0 {
-            ctx.color_pointer_stride as usize
-        } else {
-            (ctx.color_pointer_size * 4) as usize
-        };
-
-        for i in 0..vertex_count {
-            let mut pos = [0.0f32; 3];
-            let p = (ctx.vertex_pointer as *const u8).add(i * v_stride) as *const f32;
-            pos[0] = *p.add(0);
-            pos[1] = *p.add(1);
-            if ctx.vertex_pointer_size >= 3 {
-                pos[2] = *p.add(2);
+            if idx > MAX_DRAW_ELEMENTS_INDEX {
+                log::warn!("glDrawElements: index {idx} out of range, draw skipped");
+                return;
             }
-
-            let mut tex = ctx.current_texcoord;
-            if ctx.texcoord_array_enabled && !ctx.texcoord_pointer.is_null() {
-                let tp = (ctx.texcoord_pointer as *const u8).add(i * t_stride) as *const f32;
-                tex[0] = *tp.add(0);
-                tex[1] = *tp.add(1);
-            }
-
-            let mut col = ctx.current_color;
-            if ctx.color_array_enabled && !ctx.color_pointer.is_null() {
-                let cp = (ctx.color_pointer as *const u8).add(i * c_stride) as *const f32;
-                col[0] = *cp.add(0);
-                col[1] = *cp.add(1);
-                col[2] = *cp.add(2);
-                col[3] = *cp.add(3);
-            }
-
-            vertices.push(VertexData {
-                position: pos,
-                tex_coord: tex,
-                color: col,
-                normal: ctx.current_normal,
+            let mapped = *remap.entry(idx).or_insert_with(|| {
+                vertices.push(fetch_client_vertex(ctx, idx as usize));
+                (vertices.len() - 1) as u32
             });
+            idx_vec.push(mapped);
         }
 
         ctx.draw_vertex_data(mode, &vertices, Some(&idx_vec));
@@ -751,6 +744,9 @@ pub unsafe extern "C" fn glDeleteTextures(n: GLsizei, textures: *const GLuint) {
     }
     with_context(|ctx| {
         let slice = std::slice::from_raw_parts(textures, n as usize);
+        for &id in slice {
+            ctx.flush_batch_if_uses_texture(id);
+        }
         ctx.texture_manager.lock().delete_textures(slice);
     });
 }
@@ -781,6 +777,7 @@ pub unsafe extern "C" fn glTexImage2D(
         return;
     }
     with_context(|ctx| {
+        ctx.flush_batch_if_uses_bound_texture();
         let mut tm = ctx.texture_manager.lock();
         if let Some(tex) = tm.get_current_texture_mut() {
             let data_slice = if !pixels.is_null() {
@@ -828,6 +825,7 @@ pub unsafe extern "C" fn glTexSubImage2D(
         return;
     }
     with_context(|ctx| {
+        ctx.flush_batch_if_uses_bound_texture();
         let mut tm = ctx.texture_manager.lock();
         if let Some(tex) = tm.get_current_texture_mut() {
             let num_pixels = (width * height) as usize;
@@ -855,16 +853,10 @@ pub unsafe extern "C" fn glTexSubImage2D(
 #[no_mangle]
 pub unsafe extern "C" fn glTexParameteri(_target: GLenum, pname: GLenum, param: GLint) {
     with_context(|ctx| {
+        ctx.flush_batch_if_uses_bound_texture();
         let mut tm = ctx.texture_manager.lock();
         if let Some(tex) = tm.get_current_texture_mut() {
-            match pname {
-                GL_TEXTURE_MIN_FILTER => tex.min_filter = param as GLenum,
-                GL_TEXTURE_MAG_FILTER => tex.mag_filter = param as GLenum,
-                GL_TEXTURE_WRAP_S => tex.wrap_s = param as GLenum,
-                GL_TEXTURE_WRAP_T => tex.wrap_t = param as GLenum,
-                _ => {}
-            }
-            tex.dirty = true;
+            tex.set_parameter(pname, param as GLenum);
         }
     });
 }
@@ -1018,7 +1010,11 @@ pub unsafe extern "C" fn glIsEnabled(cap: GLenum) -> GLboolean {
             GL_POLYGON_OFFSET_FILL => ctx.polygon_offset_fill_enabled,
             _ => false,
         };
-        if is_on { GL_TRUE } else { GL_FALSE }
+        if is_on {
+            GL_TRUE
+        } else {
+            GL_FALSE
+        }
     })
 }
 
@@ -1369,8 +1365,9 @@ pub unsafe extern "C" fn glClear(mask: GLbitfield) {
         let clear_stencil = (mask & GL_STENCIL_BUFFER_BIT) != 0;
 
         ctx.flush_pending_batch();
+        let state = ctx.clear_state();
         if let Some(r) = &ctx.renderer {
-            r.lock().clear(clear_color, clear_depth, clear_stencil);
+            r.lock().clear(clear_color, clear_depth, clear_stencil, state);
         }
     });
 }
@@ -1860,6 +1857,15 @@ pub unsafe extern "C" fn eglGetDisplay(display_id: NativeDisplayType) -> EGLDisp
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn eglGetPlatformDisplayEXT(
+    platform: EGLenum,
+    display_id: NativeDisplayType,
+    attrib_list: *const EGLint,
+) -> EGLDisplay {
+    egl_get_platform_display(platform, display_id, attrib_list)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn eglInitialize(
     dpy: EGLDisplay,
     major: *mut EGLint,
@@ -2104,6 +2110,7 @@ pub fn get_gl_proc_address(name: &str) -> __eglMustCastToProperFunctionPointerTy
         "glFramebufferTexture2D" => glFramebufferTexture2D as *const (),
         "glDeleteFramebuffers" => glDeleteFramebuffers as *const (),
         "eglGetDisplay" => eglGetDisplay as *const (),
+        "eglGetPlatformDisplayEXT" => eglGetPlatformDisplayEXT as *const (),
         "eglInitialize" => eglInitialize as *const (),
         "eglTerminate" => eglTerminate as *const (),
         "eglChooseConfig" => eglChooseConfig as *const (),

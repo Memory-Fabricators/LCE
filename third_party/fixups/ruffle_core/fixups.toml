@@ -36,6 +36,8 @@ extra_srcs = [
     "assets/texts/vi-VN/context_menu.ftl",
     "assets/texts/zh-CN/context_menu.ftl",
     "assets/texts/zh-TW/context_menu.ftl",
+    # "src/avm1/globals.as",
+    # "src/avm2/globals.as",
 ]
 
 [env]
